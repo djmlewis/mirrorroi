@@ -9,13 +9,22 @@
 
 @implementation MirrorROIPluginFilterOC
 
+
+-(IBAction)mirrorActiveROI:(id)sender
+{
+    [self mirrorActiveROIUsingLengthROI];
+}
+
 - (void) initPlugin
 {
 }
 
 - (long) filterImage:(NSString*) menuName
 {
-    BOOL completedOK = [self mirrorActiveROIUsingLengthROI];
+    NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
+    [windowController showWindow:self];
+    
+    BOOL completedOK = YES;//[self mirrorActiveROIUsingLengthROI];
     
     if(completedOK) return 0; // No Errors
     else return -1;
@@ -40,9 +49,9 @@
 }
 
 
--(BOOL)mirrorActiveROIUsingLengthROI
+-(void)mirrorActiveROIUsingLengthROI
 {
-    BOOL completedOK = YES;
+    //BOOL completedOK = YES;
     
     ViewerController	*active2Dwindow = self->viewerController;
     NSMutableArray  *DCMPixList;
@@ -76,7 +85,7 @@
         [roiInThisDCMPix addObject:createdROI];
         [active2Dwindow needsDisplayUpdate];
     }
-    return completedOK;
+    //return completedOK;
 }
 
 
