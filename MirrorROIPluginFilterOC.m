@@ -87,9 +87,24 @@
     if (roi2Clone && lengthROI) {
         NSPoint ipsi = [(MyPoint *)[lengthROI.points objectAtIndex:0] point];
         NSPoint contra = [(MyPoint *)[lengthROI.points objectAtIndex:1] point];
+        /*
+         X must be mirrored, so left edge [ must move thus (mirroring is along X axis and within the edges, so left edge stays where it is.
+          roi         ipsi            contra    mirrored
+         [ABCD]--------I---------------C-------[DCBA]
+         width  offset   translation    offset
+         |<--------------- delta ------------->|
+         
+         delta = width+translation+ 2*offset
+         offset = (ipsi - ROI leftX)-width
+         
+                           width                 translation                offset      */
+        deltaPoint.x = roi2Clone.textureWidth+(contra.x-ipsi.x)+(2.0*(ipsi.x-roi2Clone.textureUpLeftCornerX-roi2Clone.textureWidth));
         
-        deltaPoint.x = roi2Clone.textureWidth+(2.0*(ipsi.x-roi2Clone.textureUpLeftCornerX-roi2Clone.textureWidth))+(contra.x-ipsi.x);
-        deltaPoint.y = roi2Clone.textureHeight+(2.0*(ipsi.y-roi2Clone.textureUpLeftCornerY-roi2Clone.textureHeight))+(contra.y-ipsi.y);
+        
+        /*
+         Y is not mirrored and must only move by the translation to keep the floor of the texture aligned with the anchor
+                         translation             */
+        deltaPoint.y = (contra.y-ipsi.y);
     }
     return deltaPoint;
 }
