@@ -1,0 +1,48 @@
+
++(unsigned char*)ClonedBufferFromROI:(ROI *)roi2Clone
+{
+int textureBuffer_Length = roi2Clone.textureHeight * roi2Clone.textureWidth;
+int textureBuffer_Width = roi2Clone.textureWidth;
+
+unsigned char   *tempBuffer = (unsigned char*)malloc(textureBuffer_Length*sizeof(unsigned char));
+
+for (int pixelIndex = 0; pixelIndex<textureBuffer_Length; pixelIndex+=textureBuffer_Width) {
+//copy the row mask
+for (int col=0; col<textureBuffer_Width; col++) {
+tempBuffer[pixelIndex+col] = roi2Clone.textureBuffer[pixelIndex+col];
+}
+}
+return tempBuffer;
+}
+
+
+
+
+
++(NSPoint)deltaXYFromROI:(ROI*)roi2Clone ipsiROI:(ROI*)ipsiROI contraROI:(ROI*)contraROI
+{
+NSPoint deltaPoint = NSMakePoint(CGFLOAT_MAX, CGFLOAT_MAX);
+
+if (roi2Clone && ipsiROI && contraROI) {
+deltaPoint.x =
+([contraROI centroid].x - [ipsiROI centroid].x) + roi2Clone.textureWidth;
+//+ (1.0*([ipsiROI centroid].x - [roi2Clone centroid].x));
+deltaPoint.y =
+[contraROI centroid].y - [ipsiROI centroid].y +
+(1.0*([ipsiROI centroid].y - [roi2Clone centroid].y));
+//2* becaumse we mirror around the contra anchor
+
+}
+return deltaPoint;
+}
+
+
++(ROI*) roiFromList:(NSMutableArray *)roiList WithName:(NSString*)name2Find
+{
+for (ROI *roi in roiList) {
+if ([roi.name isEqualToString:name2Find]){return roi;}
+}
+return nil;
+}
+
+

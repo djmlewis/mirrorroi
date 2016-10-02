@@ -10,6 +10,8 @@
 		8420023212E829A200E1E9CE /* OsiriXAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8420023112E829A200E1E9CE /* OsiriXAPI.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
+		8EE9097A1DA15C6F00AFAA00 /* unusedCode in Resources */ = {isa = PBXBuildFile; fileRef = 8EE909791DA15C6F00AFAA00 /* unusedCode */; };
+		8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */; };
 		ABA48A650680BB600089EB4F /* MirrorROIPluginFilterOC.h in Headers */ = {isa = PBXBuildFile; fileRef = ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */; };
 		ABA48A670680BB690089EB4F /* MirrorROIPluginFilterOC.m in Sources */ = {isa = PBXBuildFile; fileRef = ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */; };
 /* End PBXBuildFile section */
@@ -21,7 +23,8 @@
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		8420023112E829A200E1E9CE /* OsiriXAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OsiriXAPI.framework; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8EE909781DA15B3300AFAA00 /* MirrorROIPlugin_Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MirrorROIPlugin_Prefix.pch; sourceTree = "<group>"; };
+		8EE909791DA15C6F00AFAA00 /* unusedCode */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = unusedCode; sourceTree = "<group>"; };
+		8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MirrorROIPlugin_Prefix.pch; sourceTree = "<group>"; };
 		AB5D36050680E57E00F4007A /* MirrorROIPlugin.osirixplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MirrorROIPlugin.osirixplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MirrorROIPluginFilterOC.h; sourceTree = "<group>"; };
 		ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = MirrorROIPluginFilterOC.m; sourceTree = "<group>"; };
@@ -43,6 +46,7 @@
 		089C166AFE841209C02AAC07 /* MyNewPlugin */ = {
 			isa = PBXGroup;
 			children = (
+				8EE909791DA15C6F00AFAA00 /* unusedCode */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
 				32C88E010371C26100C91783 /* Other Sources */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -107,7 +111,7 @@
 		32C88E010371C26100C91783 /* Other Sources */ = {
 			isa = PBXGroup;
 			children = (
-				8EE909781DA15B3300AFAA00 /* MirrorROIPlugin_Prefix.pch */,
+				8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */,
 			);
 			name = "Other Sources";
 			sourceTree = "<group>";
@@ -128,6 +132,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */,
 				ABA48A650680BB600089EB4F /* MirrorROIPluginFilterOC.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -135,9 +140,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		8D5B49AC048680CD000E48DA /* MyNewPlugin */ = {
+		8D5B49AC048680CD000E48DA /* MirrorROIPlugin */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = CE6A9A9008AC841300D0C1EE /* Build configuration list for PBXNativeTarget "MyNewPlugin" */;
+			buildConfigurationList = CE6A9A9008AC841300D0C1EE /* Build configuration list for PBXNativeTarget "MirrorROIPlugin" */;
 			buildPhases = (
 				8D5B49AD048680CD000E48DA /* Headers */,
 				8D5B49AF048680CD000E48DA /* Resources */,
@@ -149,7 +154,7 @@
 			);
 			dependencies = (
 			);
-			name = MyNewPlugin;
+			name = MirrorROIPlugin;
 			productInstallPath = "$(HOME)/Library/Bundles";
 			productName = Invert;
 			productReference = AB5D36050680E57E00F4007A /* MirrorROIPlugin.osirixplugin */;
@@ -177,7 +182,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8D5B49AC048680CD000E48DA /* MyNewPlugin */,
+				8D5B49AC048680CD000E48DA /* MirrorROIPlugin */,
 			);
 		};
 /* End PBXProject section */
@@ -188,6 +193,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
+				8EE9097A1DA15C6F00AFAA00 /* unusedCode in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -366,7 +372,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		CE6A9A9008AC841300D0C1EE /* Build configuration list for PBXNativeTarget "MyNewPlugin" */ = {
+		CE6A9A9008AC841300D0C1EE /* Build configuration list for PBXNativeTarget "MirrorROIPlugin" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				CE6A9A9108AC841300D0C1EE /* Development */,

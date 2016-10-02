@@ -16,7 +16,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
                BuildableName = "MirrorROIPlugin.osirixplugin"
-               BlueprintName = "MyNewPlugin"
+               BlueprintName = "MirrorROIPlugin"
                ReferencedContainer = "container:MirrorROIPlugin.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -51,7 +51,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
             BuildableName = "MirrorROIPlugin.osirixplugin"
-            BlueprintName = "MyNewPlugin"
+            BlueprintName = "MirrorROIPlugin"
             ReferencedContainer = "container:MirrorROIPlugin.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
@@ -69,7 +69,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "8D5B49AC048680CD000E48DA"
             BuildableName = "MirrorROIPlugin.osirixplugin"
-            BlueprintName = "MyNewPlugin"
+            BlueprintName = "MirrorROIPlugin"
             ReferencedContainer = "container:MirrorROIPlugin.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
