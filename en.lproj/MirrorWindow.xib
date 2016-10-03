@@ -9,7 +9,7 @@
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
         <customObject id="-3" userLabel="Application" customClass="NSObject"/>
         <window title="Window" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" frameAutosaveName="" animationBehavior="default" id="m39-qo-KDg">
-            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="283" y="348" width="480" height="270"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1577"/>
@@ -17,10 +17,9 @@
                 <rect key="frame" x="0.0" y="0.0" width="480" height="270"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="IWk-gD-CYG">
-                        <rect key="frame" x="385" y="222" width="81" height="32"/>
-                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="push" title="Button" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="PSY-bw-kU1">
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="IWk-gD-CYG">
+                        <rect key="frame" x="368" y="222" width="98" height="32"/>
+                        <buttonCell key="cell" type="push" title="Mirror 2D" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="PSY-bw-kU1">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
@@ -28,9 +27,25 @@
                             <action selector="mirrorActiveROI:" target="-2" id="Dy2-uX-7mK"/>
                         </connections>
                     </button>
+                    <button verticalHuggingPriority="750" translatesAutoresizingMaskIntoConstraints="NO" id="don-ha-7eV">
+                        <rect key="frame" x="342" y="189" width="124" height="32"/>
+                        <buttonCell key="cell" type="push" title="Extend Series" bezelStyle="rounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="r8S-2n-Tu8">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="callExtendLengthSeries:" target="-2" id="Sfa-Do-e6n"/>
+                        </connections>
+                    </button>
                 </subviews>
+                <constraints>
+                    <constraint firstItem="IWk-gD-CYG" firstAttribute="trailing" secondItem="don-ha-7eV" secondAttribute="trailing" id="4ZE-tw-H9M"/>
+                    <constraint firstAttribute="trailing" secondItem="IWk-gD-CYG" secondAttribute="trailing" constant="20" symbolic="YES" id="pA4-A8-uGp"/>
+                    <constraint firstItem="IWk-gD-CYG" firstAttribute="top" secondItem="ooo-fW-PBG" secondAttribute="top" constant="20" symbolic="YES" id="rJ7-1T-aUz"/>
+                    <constraint firstItem="don-ha-7eV" firstAttribute="top" secondItem="IWk-gD-CYG" secondAttribute="bottom" constant="12" symbolic="YES" id="sbT-A0-bsL"/>
+                </constraints>
             </view>
-            <point key="canvasLocation" x="-417" y="97"/>
+            <point key="canvasLocation" x="-298" y="98"/>
         </window>
     </objects>
 </document>

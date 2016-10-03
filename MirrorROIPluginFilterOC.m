@@ -14,6 +14,9 @@
 {
     [self mirrorActiveROIUsingLengthROI];
 }
+- (IBAction)callExtendLengthSeries:(id)sender {
+    [self completeLengthROIseries];
+}
 
 - (void) initPlugin
 {
@@ -21,6 +24,7 @@
 
 - (long) filterImage:(NSString*) menuName
 {
+    //essential use this with OWNER specified so it looks in OUR bundle for resource.
     NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
     [windowController showWindow:self];
     
@@ -30,7 +34,7 @@
     else return -1;
 }
 
-+(unsigned char*)FlippedBufferHorizontalFromROI:(ROI *)roi2Clone
++(unsigned char*)flippedBufferHorizontalFromROI:(ROI *)roi2Clone
 {
     int textureBuffer_Length = roi2Clone.textureHeight * roi2Clone.textureWidth;
     int textureBuffer_Width = roi2Clone.textureWidth;
@@ -48,6 +52,63 @@
     return tempBuffer;
 }
 
+-(void)completeLengthROIseries
+{
+    ViewerController	*active2Dwindow = self->viewerController;
+    NSMutableArray  *allROIsList = [active2Dwindow roiList];
+    NSMutableArray *indicesOfDCMPixWithMeasureROI = [NSMutableArray arrayWithCapacity:allROIsList.count];
+    NSMutableArray *measureROIs = [NSMutableArray arrayWithCapacity:allROIsList.count];
+    
+    for (int index = 0;index<allROIsList.count; index++) {
+        ROI *measureROI = [MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure];
+        if (measureROI != nil) {
+            [measureROIs addObject:measureROI];
+            [indicesOfDCMPixWithMeasureROI addObject:[NSNumber numberWithInt:index]];
+        }
+    }
+    switch (indicesOfDCMPixWithMeasureROI.count) {
+        case 1:
+            for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<allROIsList.count; nextIndex++) {
+                [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
+            }
+            break;
+        case 2:
+        {
+            ROI * roi1 = [measureROIs firstObject];
+            ROI * roi2 = [measureROIs lastObject];
+            MyPoint *roi1_Point1 = [roi1.points objectAtIndex:0];
+            MyPoint *roi1_Point2 = [roi1.points objectAtIndex:1];
+            MyPoint *roi2_Point1 = [roi2.points objectAtIndex:0];
+            MyPoint *roi2_Point2 = [roi2.points objectAtIndex:1];
+            float numberOfSlices = [[indicesOfDCMPixWithMeasureROI lastObject] floatValue] - [[indicesOfDCMPixWithMeasureROI firstObject] floatValue] - 1.0;
+            float Xincrement1 = (roi2_Point1.point.x - roi1_Point1.point.x)/numberOfSlices;
+            float Xincrement2 = (roi2_Point2.point.x - roi1_Point2.point.x)/numberOfSlices;
+            float XincrementCurrent1 = Xincrement1;
+            float XincrementCurrent2 = Xincrement2;
+            float Yincrement1 = (roi2_Point1.point.y - roi1_Point1.point.y)/numberOfSlices;
+            float Yincrement2 = (roi2_Point2.point.y - roi1_Point2.point.y)/numberOfSlices;
+            float YincrementCurrent1 = Yincrement1;
+            float YincrementCurrent2 = Yincrement2;
+            //skip first and last index
+            for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<[[indicesOfDCMPixWithMeasureROI lastObject] intValue]; nextIndex++) {
+                ROI *newROI = [roi1 copy];
+                [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
+                [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
+                [[allROIsList objectAtIndex:nextIndex] addObject:newROI];
+                XincrementCurrent1 += Xincrement1;
+                XincrementCurrent2 += Xincrement2;
+                YincrementCurrent1 += Yincrement1;
+                YincrementCurrent2 += Yincrement2;
+            }
+        }
+            break;
+        
+        default:
+            break;
+    }
+
+    [active2Dwindow needsDisplayUpdate];
+}
 
 -(void)mirrorActiveROIUsingLengthROI
 {
@@ -73,7 +134,7 @@
     
     if ([MirrorROIPluginFilterOC validDeltaPoint:deltaXY]) {
         ROI *createdROI = [[ROI alloc]
-                           initWithTexture:[MirrorROIPluginFilterOC FlippedBufferHorizontalFromROI:roi2Clone]
+                           initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
                            textWidth:roi2Clone.textureWidth
                            textHeight:roi2Clone.textureHeight
                            textName:@"Created"
