@@ -52,6 +52,15 @@
     return tempBuffer;
 }
 
+-(void)addROI:(ROI *)roi toSeriesFromStart:(NSUInteger)start toEnd:(NSUInteger)end
+{
+    NSMutableArray  *allROIsList = [self->viewerController roiList];
+    for (NSUInteger nextIndex = start; nextIndex<end; nextIndex++) {
+        ROI *roi2copy = roi;
+        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
+    }
+}
+
 -(void)completeLengthROIseries
 {
     ViewerController	*active2Dwindow = self->viewerController;
@@ -72,57 +81,32 @@
         }
     }
     
-    switch (indicesOfDCMPixWithMeasureROI.count) {
+    switch (indicesOfDCMPixWithMeasureROI.count)
+    {
         case 1:
+            switch (self.segmentExtendSingleLengthHow.selectedSegment)
         {
-            switch (self.segmentExtendSingleLengthHow.selectedSegment) {
-                case ExtendSingleLengthUp:
-                    for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<allROIsList.count; nextIndex++) {
-                        ROI *roi2copy = [[measureROIs firstObject] copy];
-                        roi2copy.name = measureROIname;
-                        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
-                    }
-                    break;
-                case ExtendSingleLengthDown:
-                    for (int nextIndex = 0; nextIndex<[[indicesOfDCMPixWithMeasureROI firstObject] intValue]; nextIndex++) {
-                        ROI *roi2copy = [[measureROIs firstObject] copy];
-                        roi2copy.name = measureROIname;
-                        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
-                    }
-                    break;
-                case ExtendSingleLengthBoth:
-                    for (int nextIndex = 0; nextIndex<[[indicesOfDCMPixWithMeasureROI firstObject] intValue]; nextIndex++) {
-                        ROI *roi2copy = [[measureROIs firstObject] copy];
-                        roi2copy.name = measureROIname;
-                        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
-                    }
-                    for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<allROIsList.count; nextIndex++) {
-                        ROI *roi2copy = [[measureROIs firstObject] copy];
-                        roi2copy.name = measureROIname;
-                        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
-                    }
-                    break;
-                    
-                default:
-                    break;
+            case ExtendSingleLengthUp:
+                [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count];
+                break;
+            case ExtendSingleLengthDown:
+                [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]];
+                break;
+            case ExtendSingleLengthBoth:
+                [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count];
+                [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]];
+                break;
             }
-            
-            
-        }
-            break;
-        
         default:
             //-1 as we go in pairs and so skip the last one
             for (int roiNumber=0; roiNumber<indicesOfDCMPixWithMeasureROI.count-1; roiNumber++)
             {
-        [self completeLengthROIseriesBetweenROI1:[measureROIs objectAtIndex:roiNumber]
-        andROI2:[measureROIs objectAtIndex:roiNumber+1]
-        inThisRange:NSMakeRange(
+                [self completeLengthROIseriesBetweenROI1:[measureROIs objectAtIndex:roiNumber] andROI2:[measureROIs objectAtIndex:roiNumber+1] inThisRange:NSMakeRange(
                 //skip the start index it already has aROI
-        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]+1,
-        //length = difference between end and start minus 1 to skip last one
-        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber+1] unsignedIntegerValue]-
-        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]-1)];
+                 [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]+1,
+                 //length = difference between end and start minus 1 to skip last one
+                 [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber+1] unsignedIntegerValue]-
+                 [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]-1)];
             }
             break;
     }
