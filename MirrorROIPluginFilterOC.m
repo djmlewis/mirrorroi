@@ -58,35 +58,48 @@
     NSMutableArray  *allROIsList = [active2Dwindow roiList];
     NSMutableArray *indicesOfDCMPixWithMeasureROI = [NSMutableArray arrayWithCapacity:allROIsList.count];
     NSMutableArray *measureROIs = [NSMutableArray arrayWithCapacity:allROIsList.count];
+    NSString *measureROIname;
+    measureROIname = self.textLengthROIname.stringValue;
     
     //collect up the ROIs
     for (int index = 0;index<allROIsList.count; index++) {
         ROI *measureROI = [MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure];
         if (measureROI != nil) {
+            //rename the ROIS
+            measureROI.name = measureROIname;
             [measureROIs addObject:measureROI];
             [indicesOfDCMPixWithMeasureROI addObject:[NSNumber numberWithInt:index]];
         }
     }
+    
     switch (indicesOfDCMPixWithMeasureROI.count) {
         case 1:
         {
             switch (self.segmentExtendSingleLengthHow.selectedSegment) {
                 case ExtendSingleLengthUp:
                     for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<allROIsList.count; nextIndex++) {
-                        [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
+                        ROI *roi2copy = [[measureROIs firstObject] copy];
+                        roi2copy.name = measureROIname;
+                        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
                     }
                     break;
                 case ExtendSingleLengthDown:
                     for (int nextIndex = 0; nextIndex<[[indicesOfDCMPixWithMeasureROI firstObject] intValue]; nextIndex++) {
-                        [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
+                        ROI *roi2copy = [[measureROIs firstObject] copy];
+                        roi2copy.name = measureROIname;
+                        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
                     }
                     break;
                 case ExtendSingleLengthBoth:
                     for (int nextIndex = 0; nextIndex<[[indicesOfDCMPixWithMeasureROI firstObject] intValue]; nextIndex++) {
-                        [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
+                        ROI *roi2copy = [[measureROIs firstObject] copy];
+                        roi2copy.name = measureROIname;
+                        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
                     }
                     for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<allROIsList.count; nextIndex++) {
-                        [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
+                        ROI *roi2copy = [[measureROIs firstObject] copy];
+                        roi2copy.name = measureROIname;
+                        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
                     }
                     break;
                     
