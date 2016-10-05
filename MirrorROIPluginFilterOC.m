@@ -9,6 +9,7 @@
 
 @implementation MirrorROIPluginFilterOC
 
+#pragma mark - IBActions
 
 -(IBAction)mirrorActiveROI:(id)sender
 {
@@ -17,9 +18,19 @@
 - (IBAction)callExtendLengthSeries:(id)sender {
     [self completeLengthROIseries];
 }
+- (IBAction)copyLengthROI:(id)sender {
+    [self doCopyLengthROIs];
+    
+}
+- (IBAction)pasteLengthROI:(id)sender {
+    [self doPasteLengthROIs];
+}
+
+#pragma mark - Plugin
 
 - (void) initPlugin
 {
+    self.lengthROICopied = [NSMutableArray array];
 }
 
 - (long) filterImage:(NSString*) menuName
@@ -33,6 +44,8 @@
     if(completedOK) return 0; // No Errors
     else return -1;
 }
+
+#pragma mark - MirrorROIPluginFilterOC
 
 +(unsigned char*)flippedBufferHorizontalFromROI:(ROI *)roi2Clone
 {
@@ -58,6 +71,38 @@
     for (NSUInteger nextIndex = start; nextIndex<end; nextIndex++) {
         ROI *roi2copy = roi;
         [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
+    }
+}
+
+-(void)doCopyLengthROIs
+{
+    ViewerController	*active2Dwindow = self->viewerController;
+    NSMutableArray  *allROIsList = [active2Dwindow roiList];
+    self.lengthROICopied = [NSMutableArray arrayWithCapacity:allROIsList.count];
+    
+    //collect up the ROIs
+    for (int index = 0;index<allROIsList.count; index++) {
+        ROI *measureROI = [MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure];
+        if (measureROI != nil) {
+            [self.lengthROICopied addObject:measureROI];
+        }
+        else {
+            [self.lengthROICopied addObject:[NSNull null]];
+        }
+    }
+}
+
+-(void)doPasteLengthROIs
+{
+    //if the array size is unequal weve strayed from our windows fused
+    NSMutableArray *allROIs = [self->viewerController roiList];
+    if (self.lengthROICopied.count == allROIs.count) {
+        for (int index = 0;index<self.lengthROICopied.count; index++) {
+            if (![[self.lengthROICopied objectAtIndex:index] isEqual:[NSNull null]]) {
+                [[self->viewerController roiList] addObject:[self.lengthROICopied objectAtIndex:index]];
+            }
+        }
+        [self->viewerController needsDisplayUpdate];
     }
 }
 
@@ -110,7 +155,6 @@
             }
             break;
     }
-
     [active2Dwindow needsDisplayUpdate];
 }
 

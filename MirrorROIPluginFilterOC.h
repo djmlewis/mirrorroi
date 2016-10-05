@@ -15,13 +15,15 @@ typedef enum : NSInteger {
 } ExtendSingleLengthHow;
 
 @interface MirrorROIPluginFilterOC : PluginFilter {
-
+    
+    
 }
 @property (assign) IBOutlet NSTextField *textLengthROIname;
 @property (assign) IBOutlet NSBox *textMirrorROIname;
 @property (assign) IBOutlet NSTextField *activeMirrorROIname;
-
 @property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
+
+@property (nonatomic, retain) NSMutableArray *lengthROICopied;
 
 - (long) filterImage:(NSString*) menuName;
 
