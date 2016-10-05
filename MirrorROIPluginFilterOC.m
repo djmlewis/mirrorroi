@@ -59,6 +59,7 @@
     NSMutableArray *indicesOfDCMPixWithMeasureROI = [NSMutableArray arrayWithCapacity:allROIsList.count];
     NSMutableArray *measureROIs = [NSMutableArray arrayWithCapacity:allROIsList.count];
     
+    //collect up the ROIs
     for (int index = 0;index<allROIsList.count; index++) {
         ROI *measureROI = [MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure];
         if (measureROI != nil) {
@@ -68,46 +69,85 @@
     }
     switch (indicesOfDCMPixWithMeasureROI.count) {
         case 1:
-            for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<allROIsList.count; nextIndex++) {
-                [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
-            }
-            break;
-        case 2:
         {
-            ROI * roi1 = [measureROIs firstObject];
-            ROI * roi2 = [measureROIs lastObject];
-            MyPoint *roi1_Point1 = [roi1.points objectAtIndex:0];
-            MyPoint *roi1_Point2 = [roi1.points objectAtIndex:1];
-            MyPoint *roi2_Point1 = [roi2.points objectAtIndex:0];
-            MyPoint *roi2_Point2 = [roi2.points objectAtIndex:1];
-            float numberOfSlices = [[indicesOfDCMPixWithMeasureROI lastObject] floatValue] - [[indicesOfDCMPixWithMeasureROI firstObject] floatValue] - 1.0;
-            float Xincrement1 = (roi2_Point1.point.x - roi1_Point1.point.x)/numberOfSlices;
-            float Xincrement2 = (roi2_Point2.point.x - roi1_Point2.point.x)/numberOfSlices;
-            float XincrementCurrent1 = Xincrement1;
-            float XincrementCurrent2 = Xincrement2;
-            float Yincrement1 = (roi2_Point1.point.y - roi1_Point1.point.y)/numberOfSlices;
-            float Yincrement2 = (roi2_Point2.point.y - roi1_Point2.point.y)/numberOfSlices;
-            float YincrementCurrent1 = Yincrement1;
-            float YincrementCurrent2 = Yincrement2;
-            //skip first and last index
-            for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<[[indicesOfDCMPixWithMeasureROI lastObject] intValue]; nextIndex++) {
-                ROI *newROI = [roi1 copy];
-                [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
-                [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
-                [[allROIsList objectAtIndex:nextIndex] addObject:newROI];
-                XincrementCurrent1 += Xincrement1;
-                XincrementCurrent2 += Xincrement2;
-                YincrementCurrent1 += Yincrement1;
-                YincrementCurrent2 += Yincrement2;
+            switch (self.segmentExtendSingleLengthHow.selectedSegment) {
+                case ExtendSingleLengthUp:
+                    for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<allROIsList.count; nextIndex++) {
+                        [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
+                    }
+                    break;
+                case ExtendSingleLengthDown:
+                    for (int nextIndex = 0; nextIndex<[[indicesOfDCMPixWithMeasureROI firstObject] intValue]; nextIndex++) {
+                        [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
+                    }
+                    break;
+                case ExtendSingleLengthBoth:
+                    for (int nextIndex = 0; nextIndex<[[indicesOfDCMPixWithMeasureROI firstObject] intValue]; nextIndex++) {
+                        [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
+                    }
+                    for (int nextIndex = [[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1; nextIndex<allROIsList.count; nextIndex++) {
+                        [[allROIsList objectAtIndex:nextIndex] addObject:[[measureROIs firstObject] copy]];
+                    }
+                    break;
+                    
+                default:
+                    break;
             }
+            
+            
         }
             break;
         
         default:
+            //-1 as we go in pairs and so skip the last one
+            for (int roiNumber=0; roiNumber<indicesOfDCMPixWithMeasureROI.count-1; roiNumber++)
+            {
+        [self completeLengthROIseriesBetweenROI1:[measureROIs objectAtIndex:roiNumber]
+        andROI2:[measureROIs objectAtIndex:roiNumber+1]
+        inThisRange:NSMakeRange(
+                //skip the start index it already has aROI
+        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]+1,
+        //length = difference between end and start minus 1 to skip last one
+        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber+1] unsignedIntegerValue]-
+        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]-1)];
+            }
             break;
     }
 
     [active2Dwindow needsDisplayUpdate];
+}
+
+
+-(void)completeLengthROIseriesBetweenROI1:(ROI *)roi1 andROI2:(ROI *)roi2 inThisRange:(NSRange)rangeOfIndices// inROISArray:(NSMutableArray *)indicesOfDCMPixWithMeasureROI
+{
+    NSMutableArray  *allROIsList = [self->viewerController roiList];
+    MyPoint *roi1_Point1 = [roi1.points objectAtIndex:0];
+    MyPoint *roi1_Point2 = [roi1.points objectAtIndex:1];
+    MyPoint *roi2_Point1 = [roi2.points objectAtIndex:0];
+    MyPoint *roi2_Point2 = [roi2.points objectAtIndex:1];
+    float numberOfSlices = rangeOfIndices.length;//-rangeOfIndices.location;
+    //[[indicesOfDCMPixWithMeasureROI lastObject] floatValue] - [[indicesOfDCMPixWithMeasureROI firstObject] floatValue] - 1.0;
+    float Xincrement1 = (roi2_Point1.point.x - roi1_Point1.point.x)/numberOfSlices;
+    float Xincrement2 = (roi2_Point2.point.x - roi1_Point2.point.x)/numberOfSlices;
+    float XincrementCurrent1 = Xincrement1;
+    float XincrementCurrent2 = Xincrement2;
+    float Yincrement1 = (roi2_Point1.point.y - roi1_Point1.point.y)/numberOfSlices;
+    float Yincrement2 = (roi2_Point2.point.y - roi1_Point2.point.y)/numberOfSlices;
+    float YincrementCurrent1 = Yincrement1;
+    float YincrementCurrent2 = Yincrement2;
+    //skip first and last index
+    for (NSUInteger nextIndex = rangeOfIndices.location; nextIndex<rangeOfIndices.location+rangeOfIndices.length; nextIndex++)
+    {
+        ROI *newROI = [roi1 copy];
+        [newROI setNSColor:[NSColor redColor]];
+        [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
+        [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
+        [[allROIsList objectAtIndex:nextIndex] addObject:newROI];
+        XincrementCurrent1 += Xincrement1;
+        XincrementCurrent2 += Xincrement2;
+        YincrementCurrent1 += Yincrement1;
+        YincrementCurrent2 += Yincrement2;
+    }
 }
 
 -(void)mirrorActiveROIUsingLengthROI
