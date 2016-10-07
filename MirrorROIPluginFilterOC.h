@@ -8,22 +8,27 @@
 #import <Foundation/Foundation.h>
 #import <OsiriXAPI/PluginFilter.h>
 
+@class LengthROIclipboard;
+
+
 typedef enum : NSInteger {
     ExtendSingleLengthUp,
     ExtendSingleLengthDown,
     ExtendSingleLengthBoth,
 } ExtendSingleLengthHow;
 
+
+
 @interface MirrorROIPluginFilterOC : PluginFilter {
     
-    
+
 }
 @property (assign) IBOutlet NSTextField *textLengthROIname;
 @property (assign) IBOutlet NSBox *textMirrorROIname;
 @property (assign) IBOutlet NSTextField *activeMirrorROIname;
 @property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
 
-@property (nonatomic, retain) NSMutableArray *lengthROICopied;
+@property (nonatomic, retain) LengthROIclipboard *lengthROIclipboard;
 
 - (long) filterImage:(NSString*) menuName;
 

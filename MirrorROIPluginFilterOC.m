@@ -6,6 +6,8 @@
 //
 
 #import "MirrorROIPluginFilterOC.h"
+#import "LengthROIclipboard.h"
+
 
 @implementation MirrorROIPluginFilterOC
 
@@ -30,7 +32,7 @@
 
 - (void) initPlugin
 {
-    self.lengthROICopied = [NSMutableArray array];
+    self.lengthROIclipboard = [[LengthROIclipboard alloc] init];
 }
 
 - (long) filterImage:(NSString*) menuName
@@ -78,32 +80,19 @@
 {
     ViewerController	*active2Dwindow = self->viewerController;
     NSMutableArray  *allROIsList = [active2Dwindow roiList];
-    self.lengthROICopied = [NSMutableArray arrayWithCapacity:allROIsList.count];
-    
+    self.lengthROIclipboard = [[LengthROIclipboard alloc] init];
+    [self.lengthROIclipboard setupForNumberOfSlices:allROIsList.count];
     //collect up the ROIs
-    for (int index = 0;index<allROIsList.count; index++) {
-        ROI *measureROI = [MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure];
-        if (measureROI != nil) {
-            [self.lengthROICopied addObject:measureROI];
-        }
-        else {
-            [self.lengthROICopied addObject:[NSNull null]];
-        }
+    for (NSUInteger index = 0;index<allROIsList.count; index++) {
+        [self.lengthROIclipboard addLengthROI:[MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure] atIndex:index];
     }
 }
 
 -(void)doPasteLengthROIs
-{
-    //if the array size is unequal weve strayed from our windows fused
-    NSMutableArray *allROIs = [self->viewerController roiList];
-    if (self.lengthROICopied.count == allROIs.count) {
-        for (int index = 0;index<self.lengthROICopied.count; index++) {
-            if (![[self.lengthROICopied objectAtIndex:index] isEqual:[NSNull null]]) {
-                [[self->viewerController roiList] addObject:[self.lengthROICopied objectAtIndex:index]];
-            }
-        }
-        [self->viewerController needsDisplayUpdate];
-    }
+{    
+    [self.lengthROIclipboard addROIstoViewerController:self->viewerController ];
+    [self->viewerController needsDisplayUpdate];
+    
 }
 
 -(void)completeLengthROIseries
