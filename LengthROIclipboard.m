@@ -43,6 +43,7 @@
             ROI *newRoi = [active2Dview newROI:tMesure];
             newRoi.points = [self.roiPoints objectAtIndex:index];
             newRoi.name = [self.roiNames objectAtIndex:index];
+            [newRoi recompute ];
             NSUInteger viewerSliceIndex = [[self.roiSliceIndices objectAtIndex:index] unsignedIntegerValue];
             [[[active2Dview roiList] objectAtIndex:viewerSliceIndex] addObject:newRoi];
         }
