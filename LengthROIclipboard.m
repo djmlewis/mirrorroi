@@ -13,7 +13,7 @@
     self = [super init];
     if (self != nil) {
         self.numberOfSlices = 0;
-        self.roiPoints = [NSMutableArray array];
+        //self.roiPoints = [NSMutableArray array];
         self.roiSliceIndices = [NSMutableArray array];
         self.roiNames = [NSMutableArray array];
     }
@@ -30,9 +30,79 @@
 -(void)setupForNumberOfSlices:(NSUInteger)numberOfSlices {
     self.numberOfSlices = numberOfSlices;
     self.roiSliceIndices = [NSMutableArray arrayWithCapacity:numberOfSlices];
-    self.roiPoints = [NSMutableArray arrayWithCapacity:numberOfSlices];
+    //self.roiPoints = [NSMutableArray arrayWithCapacity:numberOfSlices];
     self.roiNames = [NSMutableArray arrayWithCapacity:numberOfSlices];
 }
+
+
+- (void) roiLoadFromSeries: (NSString*) filename
+{
+    // Unselect all ROIs
+//    [self roiSelectDeselectAll: nil];
+//    
+//    NSArray *roisMovies = [NSUnarchiver unarchiveObjectWithFile: filename];
+//    
+//    for( int y = 0; y < maxMovieIndex; y++)
+//    {
+//        if( [roisMovies count] > y)
+//        {
+//            NSArray *roisSeries = [roisMovies objectAtIndex: y];
+//            
+//            for( int x = 0; x < [pixList[y] count]; x++)
+//            {
+//                DCMPix *curDCM = [pixList[ y] objectAtIndex: x];
+//                
+//                if( [roisSeries count] > x)
+//                {
+//                    NSArray *roisImages = [roisSeries objectAtIndex: x];
+//                    
+//                    for( ROI *r in roisImages)
+//                    {
+//                        //Correct the origin only if the orientation is the same
+//                        r.pix = curDCM;
+//                        
+//                        [r setOriginAndSpacing: curDCM.pixelSpacingX :curDCM.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: curDCM]];
+//                        
+//                        [[roiList[ y] objectAtIndex: x] addObject: r];
+//                        r.curView = imageView;
+//                    }
+//                }
+//            }
+//        }
+//    }
+//    
+//    [imageView setIndex: imageView.curImage];
+}
+
+
+- (void)roiSaveSeriesFromViewerController:(ViewerController *)activeViewerController
+{
+    BOOL rois = NO;
+    
+    NSMutableArray *roisArray = [NSMutableArray  array];
+    
+    for( int pixIndex = 0; pixIndex < [[activeViewerController pixList] count]; pixIndex++)
+    {
+        NSMutableArray  *roisPerImages = [NSMutableArray  array];
+        NSMutableArray *roiListInVC = [activeViewerController roiList];
+        for( int roiIndex = 0; roiIndex < [[roiListInVC objectAtIndex: pixIndex] count]; roiIndex++)
+        {
+            ROI	*curROI = [[roiListInVC objectAtIndex: pixIndex] objectAtIndex: roiIndex];
+            [roisPerImages addObject: curROI];
+            rois = YES;
+        }
+        
+        [roisArray addObject: roisPerImages];
+    }
+    
+    if(rois == NO)
+    {
+        NSRunCriticalAlertPanel(NSLocalizedString(@"ROIs Save Error",nil), NSLocalizedString(@"No ROIs in this series!",nil) , NSLocalizedString(@"OK",nil), nil, nil);
+    }
+}
+
+
+
 
 -(void)addLengthROI:(ROI *)roi atIndex:(NSUInteger)index forOrigin:(NSPoint)origin{
     if (roi != nil) {

@@ -11,8 +11,6 @@
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */; };
-		8EA864041DA6A31C000D7B09 /* LengthROIclipboard.h in Headers */ = {isa = PBXBuildFile; fileRef = 8EA864021DA6A31C000D7B09 /* LengthROIclipboard.h */; };
-		8EA864051DA6A31C000D7B09 /* LengthROIclipboard.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EA864031DA6A31C000D7B09 /* LengthROIclipboard.m */; };
 		8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */; };
 		ABA48A650680BB600089EB4F /* MirrorROIPluginFilterOC.h in Headers */ = {isa = PBXBuildFile; fileRef = ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */; };
 		ABA48A670680BB690089EB4F /* MirrorROIPluginFilterOC.m in Sources */ = {isa = PBXBuildFile; fileRef = ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */; };
@@ -26,8 +24,6 @@
 		8420023112E829A200E1E9CE /* OsiriXAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OsiriXAPI.framework; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E27A7BD1DA1AECD00BDC497 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MirrorWindow.xib; sourceTree = "<group>"; };
-		8EA864021DA6A31C000D7B09 /* LengthROIclipboard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LengthROIclipboard.h; sourceTree = "<group>"; };
-		8EA864031DA6A31C000D7B09 /* LengthROIclipboard.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LengthROIclipboard.m; sourceTree = "<group>"; };
 		8EE909791DA15C6F00AFAA00 /* unusedCode */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = unusedCode; sourceTree = "<group>"; };
 		8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MirrorROIPlugin_Prefix.pch; sourceTree = "<group>"; };
 		AB5D36050680E57E00F4007A /* MirrorROIPlugin.osirixplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MirrorROIPlugin.osirixplugin; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -125,8 +121,6 @@
 		AB2C26750677B0C400A08910 /* MirrorROIPlugin */ = {
 			isa = PBXGroup;
 			children = (
-				8EA864021DA6A31C000D7B09 /* LengthROIclipboard.h */,
-				8EA864031DA6A31C000D7B09 /* LengthROIclipboard.m */,
 				ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */,
 				ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */,
 			);
@@ -141,7 +135,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */,
-				8EA864041DA6A31C000D7B09 /* LengthROIclipboard.h in Headers */,
 				ABA48A650680BB600089EB4F /* MirrorROIPluginFilterOC.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -224,7 +217,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABA48A670680BB690089EB4F /* MirrorROIPluginFilterOC.m in Sources */,
-				8EA864051DA6A31C000D7B09 /* LengthROIclipboard.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

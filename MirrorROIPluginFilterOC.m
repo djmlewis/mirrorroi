@@ -6,14 +6,35 @@
 //
 
 #import "MirrorROIPluginFilterOC.h"
-#import "LengthROIclipboard.h"
 
 @implementation MirrorROIPluginFilterOC
 
 #pragma mark - IBActions
-- (IBAction)setViewerTransform:(id)sender {
+- (IBAction)pasteTransformROIs:(id)sender {
+    [self pasteROIsForActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
 }
-- (IBAction)setViewerMirror:(id)sender {
+- (IBAction)copyTransformROIs:(id)sender {
+    [self copyROIsFromActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
+}
+- (IBAction)deleteTransformROIs:(id)sender {
+    [self deleteROIsFromActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue];
+
+}
+
+- (IBAction)deleteMirrorROIs:(id)sender {
+    // this does both, could use a switch
+    [self deleteROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textActiveROIname.stringValue];
+    [self deleteROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textMirrorROIname.stringValue];
+}
+- (IBAction)pasteMirrorROIs:(id)sender {
+    // this does both, could use a switch
+    [self pasteROIsForActiveViewerControllerOfType:tPlain withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
+    [self pasteROIsForActiveViewerControllerOfType:tPlain withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
+}
+- (IBAction)copyMirrorROIs:(id)sender {
+    // this does both, could use a switch
+    [self copyROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
+    [self copyROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
 }
 
 -(IBAction)mirrorActiveROI2D:(id)sender
@@ -29,14 +50,8 @@
     [self completeLengthROIseries];
 }
 
-- (IBAction)copyLengthROIs:(id)sender {
-    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
-    [active2Dwindow saveROI];
-}
-
-- (IBAction)pasteLengthROIs:(id)sender {
-    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
-    [active2Dwindow loadROI:0];
+- (IBAction)showHideTransformMarkers:(id)sender {
+    [self doShowHideTransformMarkers:self.segmentShowHideTransformMarkers.selectedSegment];
 }
 
 
@@ -45,7 +60,7 @@
 
 - (void) initPlugin
 {
-    //self.lengthROIclipboard = [[LengthROIclipboard alloc] init];
+    self.arrayTransformROIsCopied = [NSMutableArray array];
 }
 
 - (long) filterImage:(NSString*) menuName
@@ -61,6 +76,112 @@
 }
 
 #pragma mark - MirrorROIPluginFilterOC
+
+
+- (void)deleteROIsFromActiveViewerControllerOfType:(int)type withOptionalName:(NSString *)name
+{
+    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer];
+    for (NSUInteger pixIndex = 0; pixIndex < [[active2Dwindow pixList] count]; pixIndex++)
+    {
+        for( int roiIndex = 0; roiIndex < [[[active2Dwindow roiList] objectAtIndex: pixIndex] count]; roiIndex++)
+        {
+            ROI	*curROI = [[[active2Dwindow roiList] objectAtIndex: pixIndex] objectAtIndex: roiIndex];
+            if ((curROI.type == type) && (name == nil || name == curROI.name))
+            {
+                [[[active2Dwindow roiList] objectAtIndex: pixIndex] removeObjectAtIndex:roiIndex];
+            }
+        }
+    }
+    [active2Dwindow needsDisplayUpdate];
+}
+
+- (void)copyROIsFromActiveViewerControllerOfType:(int)type withOptionalName:(NSString *)name ofROIMirrorType:(ROI_Mirror_Type)roiMirrorType
+{
+    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
+    NSMutableArray *scratchArray = [NSMutableArray  arrayWithCapacity:[[active2Dwindow pixList] count]];
+    
+    for (NSUInteger pixIndex = 0; pixIndex < [[active2Dwindow pixList] count]; pixIndex++)
+    {
+        NSMutableArray  *roisPerImages = [NSMutableArray  array];
+        NSMutableArray *roiListInVC = [active2Dwindow roiList];
+        for( int roiIndex = 0; roiIndex < [[roiListInVC objectAtIndex: pixIndex] count]; roiIndex++)
+        {
+            ROI	*curROI = [[[roiListInVC objectAtIndex: pixIndex] objectAtIndex: roiIndex] copy];
+            if ((curROI.type == type) && (name == nil || name == curROI.name))
+            {
+                [roisPerImages addObject: curROI];
+            }
+        }
+        
+        [scratchArray addObject: roisPerImages];
+    }
+    
+    switch (roiMirrorType) {
+        case Mirrored_ROI:
+            self.arrayMirrorROIsCopied  = [NSMutableArray arrayWithArray:scratchArray];
+            break;
+        case Transform_ROI:
+            self.arrayTransformROIsCopied  = [NSMutableArray arrayWithArray:scratchArray];
+            break;
+        case Active_ROI:
+            self.arrayActiveROIsCopied  = [NSMutableArray arrayWithArray:scratchArray];
+            break;
+        default:
+            break;
+    }
+
+    if(scratchArray.count == 0)
+    {
+        NSRunCriticalAlertPanel(NSLocalizedString(@"ROIs Save Error",nil), NSLocalizedString(@"No ROIs in this series!",nil) , NSLocalizedString(@"OK",nil), nil, nil);
+    }
+}
+
+- (void) pasteROIsForActiveViewerControllerOfType:(int)type withOptionalName:(NSString *)name ofROIMirrorType:(ROI_Mirror_Type)roiMirrorType
+{
+     //Unselect all ROIs
+    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
+    //[active2Dwindow roiSelectDeselectAll: nil];
+    NSMutableArray *pixListInActiveVC = [active2Dwindow pixList];
+    NSMutableArray *scratchArray = nil;
+    switch (roiMirrorType) {
+        case Mirrored_ROI:
+            scratchArray = [NSMutableArray arrayWithArray:self.arrayMirrorROIsCopied];
+            break;
+        case Transform_ROI:
+            scratchArray = [NSMutableArray arrayWithArray:self.arrayTransformROIsCopied];
+            break;
+        case Active_ROI:
+            scratchArray = [NSMutableArray arrayWithArray:self.arrayActiveROIsCopied];
+            break;
+        default:
+            scratchArray = [NSMutableArray array];
+            break;
+    }
+    for(NSUInteger pixIndex = 0; pixIndex < [pixListInActiveVC count]; pixIndex++)
+    {
+        DCMPix *curDCM = [pixListInActiveVC objectAtIndex: pixIndex];
+        
+        if( [scratchArray count] > pixIndex)
+        {
+            NSArray *roisImages = [scratchArray objectAtIndex: pixIndex];
+            for( ROI *unpackedROI in roisImages)
+            {
+                if ((unpackedROI.type == type) && (name == nil || name == unpackedROI.name))
+                {
+                    //Correct the origin only if the orientation is the same
+                    unpackedROI.pix = curDCM;
+                    [unpackedROI setOriginAndSpacing: curDCM.pixelSpacingX :curDCM.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: curDCM]];
+                    [[active2Dwindow.roiList objectAtIndex: pixIndex] addObject: unpackedROI];
+                    unpackedROI.curView = active2Dwindow.imageView;
+                    [unpackedROI recompute];
+                }
+            }
+        }
+    }
+    [active2Dwindow.imageView setIndex: active2Dwindow.imageView.curImage];
+    [active2Dwindow needsDisplayUpdate];
+}
+
 
 +(unsigned char*)flippedBufferHorizontalFromROI:(ROI *)roi2Clone
 {
@@ -104,6 +225,8 @@
     for (int index = 0;index<allROIsList.count; index++) {
         ROI *measureROI = [MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure];
         if (measureROI != nil) {
+            //measureROI.hidden = true;//self.segmentShowHideTransformMarkers.selectedSegment;
+            measureROI.offsetTextBox_x = 10000.0;
             //rename the ROIS
             measureROI.name = measureROIname;
             [measureROIs addObject:measureROI];
@@ -143,6 +266,19 @@
     [active2Dwindow needsDisplayUpdate];
 }
 
+-(void)doShowHideTransformMarkers:(BOOL)show
+{
+    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
+    NSMutableArray  *roisInAllSlices  = [active2Dwindow roiList];
+    for (NSUInteger slice=0; slice<roisInAllSlices.count; slice++) {
+        NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];//[MirrorROIPluginFilterOC allROIinFrontDCMPixFromViewerController:active2Dwindow];
+        ROI *ROI2showHide = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure];
+        if (ROI2showHide != nil) {
+            ROI2showHide.hidden = show;
+        }
+    }
+}
+
 
 -(void)completeLengthROIseriesBetweenROI1:(ROI *)roi1 andROI2:(ROI *)roi2 inThisRange:(NSRange)rangeOfIndices// inROISArray:(NSMutableArray *)indicesOfDCMPixWithMeasureROI
 {
@@ -153,7 +289,6 @@
     MyPoint *roi2_Point1 = [roi2.points objectAtIndex:0];
     MyPoint *roi2_Point2 = [roi2.points objectAtIndex:1];
     float numberOfSlices = rangeOfIndices.length;//-rangeOfIndices.location;
-    //[[indicesOfDCMPixWithMeasureROI lastObject] floatValue] - [[indicesOfDCMPixWithMeasureROI firstObject] floatValue] - 1.0;
     float Xincrement1 = (roi2_Point1.point.x - roi1_Point1.point.x)/numberOfSlices;
     float Xincrement2 = (roi2_Point2.point.x - roi1_Point2.point.x)/numberOfSlices;
     float XincrementCurrent1 = Xincrement1;
@@ -166,10 +301,12 @@
     for (NSUInteger nextIndex = rangeOfIndices.location; nextIndex<rangeOfIndices.location+rangeOfIndices.length; nextIndex++)
     {
         ROI *newROI = [roi1 copy];
-        [newROI setNSColor:[NSColor redColor]];
+        //[newROI setNSColor:[NSColor redColor]];
         [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
         [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
         [[allROIsList objectAtIndex:nextIndex] addObject:newROI];
+        //newROI.hidden = true;//self.segmentShowHideTransformMarkers.selectedSegment;
+        newROI.offsetTextBox_x = 10000.0;
         XincrementCurrent1 += Xincrement1;
         XincrementCurrent2 += Xincrement2;
         YincrementCurrent1 += Yincrement1;
@@ -181,10 +318,24 @@
 {
     ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
     NSMutableArray  *roisInAllSlices  = [active2Dwindow roiList];
-    for (NSUInteger slice=0; slice<roisInAllSlices.count; slice++) {
+    NSUInteger startSlice = 0;
+    NSUInteger endSlice = 0;
+    if (in3D) {
+        startSlice = 0;
+        endSlice = roisInAllSlices.count;
+    }
+    else
+    {
+        startSlice = [[active2Dwindow imageView] curImage];
+        endSlice = startSlice+1;
+
+    }
+    
+    for (NSUInteger slice=startSlice; slice<endSlice; slice++) {
         NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];//[MirrorROIPluginFilterOC allROIinFrontDCMPixFromViewerController:active2Dwindow];
-        ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithName:@"Active"];
-        
+        ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tPlain];
+        //rename to keep in sync
+        roi2Clone.name = self.textActiveROIname.stringValue;
         NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
         
         if ([MirrorROIPluginFilterOC validDeltaPoint:deltaXY]) {
@@ -192,7 +343,7 @@
                                initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
                                textWidth:roi2Clone.textureWidth
                                textHeight:roi2Clone.textureHeight
-                               textName:@"Created"
+                               textName:self.textMirrorROIname.stringValue
                                positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
                                positionY:roi2Clone.textureUpLeftCornerY+deltaXY.y
                                spacingX:roi2Clone.pixelSpacingX

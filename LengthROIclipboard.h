@@ -11,7 +11,8 @@
 
 @interface LengthROIclipboard : NSObject
 @property NSUInteger numberOfSlices;
-@property (nonatomic, retain) NSMutableArray *roiPoints;
+//rois array is an array of rois per image arrays forA series in a VeiwerController. 4D movies are ignored
+@property (nonatomic, retain) NSMutableArray *roisArray;
 @property (nonatomic, retain) NSMutableArray *roiSliceIndices;
 @property (nonatomic, retain) NSMutableArray *roiNames;
 

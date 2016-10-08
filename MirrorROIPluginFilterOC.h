@@ -8,7 +8,6 @@
 #import <Foundation/Foundation.h>
 #import <OsiriXAPI/PluginFilter.h>
 
-@class LengthROIclipboard;
 
 
 typedef enum : NSInteger {
@@ -17,18 +16,27 @@ typedef enum : NSInteger {
     ExtendSingleLengthBoth,
 } ExtendSingleLengthHow;
 
-
+typedef enum : NSUInteger {
+    Mirrored_ROI,
+    Active_ROI,
+    MirroredAndActive_ROI,
+    Transform_ROI
+} ROI_Mirror_Type;
 
 @interface MirrorROIPluginFilterOC : PluginFilter {
     
 
 }
 @property (assign) IBOutlet NSTextField *textLengthROIname;
-@property (assign) IBOutlet NSBox *textMirrorROIname;
-@property (assign) IBOutlet NSTextField *activeMirrorROIname;
+@property (assign) IBOutlet NSTextField *textMirrorROIname;
+@property (assign) IBOutlet NSTextField *textActiveROIname;
 @property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
+@property (assign) IBOutlet NSSegmentedControl *segmentShowHideTransformMarkers;
+@property (assign) IBOutlet NSSegmentedControl *segmentTransformMarkersPasteCopySliceOrSeries;
 
-@property (nonatomic, retain) LengthROIclipboard *lengthROIclipboard;
+@property (nonatomic, retain) NSMutableArray *arrayTransformROIsCopied;
+@property (nonatomic, retain) NSMutableArray *arrayMirrorROIsCopied;
+@property (nonatomic, retain) NSMutableArray *arrayActiveROIsCopied;
 
 - (long) filterImage:(NSString*) menuName;
 
