@@ -16,9 +16,11 @@
 @property (nonatomic, retain) NSMutableArray *roiNames;
 
 
++(LengthROIclipboard *)lengthROIclipboardForSlices:(NSUInteger)numberOfSlices;
 -(void)setupForNumberOfSlices:(NSUInteger)numberOfSlices;
 -(void)addLengthROI:(ROI *)roi atIndex:(NSUInteger)index;
--(void)addROIstoViewerController:(ViewerController *)active2Dview;
+-(void)pasteROIsInViewerController:(ViewerController *)active2Dview;
+-(void)copyLengthROIsForViewerController:(ViewerController *)active2DView;
 
 
 @end

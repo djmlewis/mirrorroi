@@ -6,11 +6,15 @@
 //
 
 #import "MirrorROIPluginFilterOC.h"
-
+#import "LengthROIclipboard.h"
 
 @implementation MirrorROIPluginFilterOC
 
 #pragma mark - IBActions
+- (IBAction)setViewerTransform:(id)sender {
+}
+- (IBAction)setViewerMirror:(id)sender {
+}
 
 -(IBAction)mirrorActiveROI2D:(id)sender
 {
@@ -24,6 +28,18 @@
 - (IBAction)callExtendLengthSeries:(id)sender {
     [self completeLengthROIseries];
 }
+
+- (IBAction)copyLengthROIs:(id)sender {
+    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
+    [active2Dwindow saveROI];
+}
+
+- (IBAction)pasteLengthROIs:(id)sender {
+    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
+    [active2Dwindow loadROI:0];
+}
+
+
 
 #pragma mark - Plugin
 
@@ -164,16 +180,6 @@
 -(void)mirrorActiveROIUsingLengthROIIn3D:(BOOL)in3D
 {
     ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
-    // DCMPix of active window
-    //NSMutableArray  *DCMPixList = [active2Dwindow pixList];
-    //NSMutableArray  *roiSeriesList;
-    //NSMutableArray  *roiImageList;
-    //DCMPix *curPix = [DCMPixList objectAtIndex: curImageIndex];
-    //short curImageIndex = [theDCMView curImage];
-    /**  Return the image pane object - (DCMView*) imageView; */
-    //DCMView *theDCMView = [active2Dwindow imageView];
-    
-    
     NSMutableArray  *roisInAllSlices  = [active2Dwindow roiList];
     for (NSUInteger slice=0; slice<roisInAllSlices.count; slice++) {
         NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];//[MirrorROIPluginFilterOC allROIinFrontDCMPixFromViewerController:active2Dwindow];

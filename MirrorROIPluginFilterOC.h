@@ -32,4 +32,7 @@ typedef enum : NSInteger {
 
 - (long) filterImage:(NSString*) menuName;
 
+
++(ROI*) roiFromList:(NSMutableArray *)roiList WithType:(int)type2Find;
+
 @end
