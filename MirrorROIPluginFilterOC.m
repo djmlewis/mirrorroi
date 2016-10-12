@@ -105,9 +105,15 @@
 }
 - (IBAction)deleteTransformROIs:(id)sender {
     [self deleteROIsFromActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue];
+}
+
+-(IBAction)pasteTransformFromPET2CT:(id)sender {
     
 }
 
+-(IBAction)pasteTransformFromCT2PET:(id)sender {
+    
+}
 
 #pragma mark - Plugin
 
