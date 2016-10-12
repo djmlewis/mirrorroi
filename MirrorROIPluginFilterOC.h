@@ -23,10 +23,26 @@ typedef enum : NSUInteger {
     Transform_ROI
 } ROI_Mirror_Type;
 
+typedef enum : NSUInteger {
+    CT_Window,
+    PET_Window,
+    CTandPET_Windows
+} ViewerWindow_Type;
+
 @interface MirrorROIPluginFilterOC : PluginFilter {
     
 
 }
+
+
+@property (nonatomic, retain) ViewerController *viewerCT;
+@property (nonatomic, retain) ViewerController *viewerPET;
+
+@property (assign) IBOutlet NSBox *boxQuickCopyButtons;
+
+@property (assign) IBOutlet NSTextField *labelCTviewerName;
+@property (assign) IBOutlet NSTextField *labelPETviewerName;
+
 @property (assign) IBOutlet NSTextField *textLengthROIname;
 @property (assign) IBOutlet NSTextField *textMirrorROIname;
 @property (assign) IBOutlet NSTextField *textActiveROIname;

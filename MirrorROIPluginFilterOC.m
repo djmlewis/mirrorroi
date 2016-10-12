@@ -9,33 +9,62 @@
 
 @implementation MirrorROIPluginFilterOC
 
-#pragma mark - IBActions
-- (IBAction)pasteTransformROIs:(id)sender {
-    [self pasteROIsForActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
-}
-- (IBAction)copyTransformROIs:(id)sender {
-    [self copyROIsFromActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
-}
-- (IBAction)deleteTransformROIs:(id)sender {
-    [self deleteROIsFromActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue];
 
+#pragma mark Windows
+
+- (IBAction)assignCTwindowClicked:(id)sender {
+    [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:CT_Window];
+}
+- (IBAction)assignPETwindowClicked:(id)sender {
+    [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:PET_Window];
+}
+- (IBAction)unassignCTwindowClicked:(id)sender {
+    [self assignViewerWindow:nil forType:CT_Window];
+}
+- (IBAction)unassignPETwindowClicked:(id)sender {
+    [self assignViewerWindow:nil forType:PET_Window];
 }
 
-- (IBAction)deleteMirrorROIs:(id)sender {
-    // this does both, could use a switch
-    [self deleteROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textActiveROIname.stringValue];
-    [self deleteROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textMirrorROIname.stringValue];
+
+#pragma mark Mirrored
+
+- (IBAction)deleteMirrorROIs:(NSButton *)sender {
+    if (sender.tag == Mirrored_ROI) {
+        [self deleteROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textMirrorROIname.stringValue];
+    }
+    else
+    {
+        [self deleteROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textActiveROIname.stringValue];
+    }
 }
-- (IBAction)pasteMirrorROIs:(id)sender {
-    // this does both, could use a switch
-    [self pasteROIsForActiveViewerControllerOfType:tPlain withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
-    [self pasteROIsForActiveViewerControllerOfType:tPlain withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
+- (IBAction)pasteMirrorROIs:(NSButton *)sender {
+    if (sender.tag == Mirrored_ROI) {
+        [self pasteROIsForActiveViewerControllerOfType:tPlain withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
+    }
+    else
+    {
+        [self pasteROIsForActiveViewerControllerOfType:tPlain withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
+    }
 }
-- (IBAction)copyMirrorROIs:(id)sender {
-    // this does both, could use a switch
-    [self copyROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
-    [self copyROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
+- (IBAction)copyMirrorROIs:(NSButton *)sender {
+    if (sender.tag == Mirrored_ROI) {
+        [self copyROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
+   }
+    else
+    {
+        [self copyROIsFromActiveViewerControllerOfType:tPlain withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
+    }
 }
+
+- (IBAction)pasteMirroredAsPolygonsFromPET2CTclicked:(id)sender {
+    [self doPasteBrushROIsAsPolygonsFromPET2CT:Mirrored_ROI];
+}
+
+- (IBAction)pasteMirroredPolygonsFromCT2PETclicked:(id)sender {
+    [self doPasteBrushROIsAsPolygonsFromCT2PET:Mirrored_ROI];
+}
+
+#pragma mark Active ROI
 
 -(IBAction)mirrorActiveROI2D:(id)sender
 {
@@ -43,8 +72,22 @@
 }
 - (IBAction)mirrorActiveROI3D:(id)sender {
     [self mirrorActiveROIUsingLengthROIIn3D:YES];
-    
 }
+
+- (IBAction)pasteActiveAsPolygonsFromPET2CTclicked:(id)sender {
+    [self doPasteBrushROIsAsPolygonsFromPET2CT:Active_ROI];
+}
+
+- (IBAction)pasteActivePolygonsFromCT2PETclicked:(id)sender {
+    [self doPasteBrushROIsAsPolygonsFromCT2PET:Active_ROI];
+}
+
+- (IBAction)growRegionClicked:(id)sender {
+    [[NSApplication sharedApplication] sendAction:@selector(segmentationTest:) to:nil from:nil];
+}
+
+
+#pragma mark Transform markers
 
 - (IBAction)callExtendLengthSeries:(id)sender {
     [self completeLengthROIseries];
@@ -54,6 +97,16 @@
     [self doShowHideTransformMarkers:self.segmentShowHideTransformMarkers.selectedSegment];
 }
 
+- (IBAction)pasteTransformROIs:(id)sender {
+    [self pasteROIsForActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
+}
+- (IBAction)copyTransformROIs:(id)sender {
+    [self copyROIsFromActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
+}
+- (IBAction)deleteTransformROIs:(id)sender {
+    [self deleteROIsFromActiveViewerControllerOfType:tMesure withOptionalName:self.textLengthROIname.stringValue];
+    
+}
 
 
 #pragma mark - Plugin
@@ -68,7 +121,8 @@
     //essential use this with OWNER specified so it looks in OUR bundle for resource.
     NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
     [windowController showWindow:self];
-    
+    [self assignViewerWindow:nil forType:CTandPET_Windows];
+
     BOOL completedOK = YES;//[self mirrorActiveROIUsingLengthROI];
     
     if(completedOK) return 0; // No Errors
@@ -76,7 +130,32 @@
 }
 
 #pragma mark - MirrorROIPluginFilterOC
-
+-(void)assignViewerWindow:(ViewerController *)viewController forType:(ViewerWindow_Type)type
+{
+    if (type == CT_Window || type == CTandPET_Windows)
+    {
+        self.viewerCT = viewController;
+        if (viewController != nil) {
+            self.labelCTviewerName.stringValue = viewController.window.title;
+        }
+        else
+        {
+            self.labelCTviewerName.stringValue = @"Not Assigned";
+        }
+    }
+    if (type == PET_Window || type == CTandPET_Windows)
+    {
+        self.viewerPET = viewController;
+        if (viewController != nil) {
+            self.labelPETviewerName.stringValue = viewController.window.title;
+        }
+        else
+        {
+            self.labelPETviewerName.stringValue = @"Not Assigned";
+        }
+    }
+    self.boxQuickCopyButtons.hidden = self.viewerCT == nil || self.viewerPET == nil;
+}
 
 - (void)deleteROIsFromActiveViewerControllerOfType:(int)type withOptionalName:(NSString *)name
 {
@@ -97,24 +176,7 @@
 
 - (void)copyROIsFromActiveViewerControllerOfType:(int)type withOptionalName:(NSString *)name ofROIMirrorType:(ROI_Mirror_Type)roiMirrorType
 {
-    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
-    NSMutableArray *scratchArray = [NSMutableArray  arrayWithCapacity:[[active2Dwindow pixList] count]];
-    
-    for (NSUInteger pixIndex = 0; pixIndex < [[active2Dwindow pixList] count]; pixIndex++)
-    {
-        NSMutableArray  *roisPerImages = [NSMutableArray  array];
-        NSMutableArray *roiListInVC = [active2Dwindow roiList];
-        for( int roiIndex = 0; roiIndex < [[roiListInVC objectAtIndex: pixIndex] count]; roiIndex++)
-        {
-            ROI	*curROI = [[[roiListInVC objectAtIndex: pixIndex] objectAtIndex: roiIndex] copy];
-            if ((curROI.type == type) && (name == nil || name == curROI.name))
-            {
-                [roisPerImages addObject: curROI];
-            }
-        }
-        
-        [scratchArray addObject: roisPerImages];
-    }
+    NSMutableArray *scratchArray = [self arrayOfROIsFromActiveViewerControllerOfType:type withOptionalName:name ofROIMirrorType:roiMirrorType];
     
     switch (roiMirrorType) {
         case Mirrored_ROI:
@@ -136,27 +198,101 @@
     }
 }
 
-- (void) pasteROIsForActiveViewerControllerOfType:(int)type withOptionalName:(NSString *)name ofROIMirrorType:(ROI_Mirror_Type)roiMirrorType
+-(NSMutableArray *)arrayOfROIsFromViewerController:(ViewerController *)active2Dwindow ofType:(int)type withOptionalName:(NSString *)name ofROIMirrorType:(ROI_Mirror_Type)roiMirrorType
 {
-     //Unselect all ROIs
-    ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
-    //[active2Dwindow roiSelectDeselectAll: nil];
-    NSMutableArray *pixListInActiveVC = [active2Dwindow pixList];
-    NSMutableArray *scratchArray = nil;
+    NSMutableArray *scratchArray = [NSMutableArray  arrayWithCapacity:[[active2Dwindow pixList] count]];
+    
+    for (NSUInteger pixIndex = 0; pixIndex < [[active2Dwindow pixList] count]; pixIndex++)
+    {
+        NSMutableArray  *roisPerImages = [NSMutableArray  array];
+        NSMutableArray *roiListInVC = [active2Dwindow roiList];
+        for( int roiIndex = 0; roiIndex < [[roiListInVC objectAtIndex: pixIndex] count]; roiIndex++)
+        {
+            ROI	*curROI = [[[roiListInVC objectAtIndex: pixIndex] objectAtIndex: roiIndex] copy];
+            if ((curROI.type == type) && (name == nil || name == curROI.name))
+            {
+                [roisPerImages addObject: curROI];
+            }
+        }
+        
+        [scratchArray addObject: roisPerImages];
+    }
+    return scratchArray;
+}
+
+-(NSMutableArray *)arrayOfROIsFromActiveViewerControllerOfType:(int)type withOptionalName:(NSString *)name ofROIMirrorType:(ROI_Mirror_Type)roiMirrorType
+{
+    return [self arrayOfROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:type withOptionalName:name ofROIMirrorType:roiMirrorType];
+}
+
+-(void)doPasteBrushROIsAsPolygonsFromCT2PET:(ROI_Mirror_Type)roiMirrorType {
+    NSString *ROIname = nil;
     switch (roiMirrorType) {
         case Mirrored_ROI:
-            scratchArray = [NSMutableArray arrayWithArray:self.arrayMirrorROIsCopied];
-            break;
-        case Transform_ROI:
-            scratchArray = [NSMutableArray arrayWithArray:self.arrayTransformROIsCopied];
+            ROIname = self.textMirrorROIname.stringValue;
             break;
         case Active_ROI:
-            scratchArray = [NSMutableArray arrayWithArray:self.arrayActiveROIsCopied];
+            ROIname = self.textActiveROIname.stringValue;
             break;
         default:
-            scratchArray = [NSMutableArray array];
             break;
     }
+    NSMutableArray *scratchArray = [self arrayOfROIsFromViewerController:self.viewerCT ofType:tCPolygon withOptionalName:ROIname ofROIMirrorType:roiMirrorType];
+    if (scratchArray.count > 0) {
+        [self pasteROIsFromArray:scratchArray ofType:tCPolygon withOptionalName:ROIname ofROIMirrorType:roiMirrorType intoViewerController:self.viewerPET];
+    }
+}
+
+-(void)doPasteBrushROIsAsPolygonsFromPET2CT:(ROI_Mirror_Type)roiMirrorType {
+    NSString *ROIname = nil;
+    switch (roiMirrorType) {
+        case Mirrored_ROI:
+            ROIname = self.textMirrorROIname.stringValue;
+            break;
+        case Active_ROI:
+            ROIname = self.textActiveROIname.stringValue;
+            break;
+        default:
+            break;
+    }
+    NSMutableArray *scratchArray = [self arrayOfROIsFromViewerController:self.viewerPET ofType:tPlain withOptionalName:ROIname ofROIMirrorType:roiMirrorType];
+    if (scratchArray.count > 0) {
+        for(NSUInteger pixIndex = 0; pixIndex < [scratchArray count]; pixIndex++)
+        {
+            NSMutableArray *roisImages = [scratchArray objectAtIndex: pixIndex];
+            for(NSUInteger imIndex = 0; imIndex<roisImages.count; imIndex++)
+            {
+                ROI *poly = [self.viewerPET convertBrushROItoPolygon:[roisImages objectAtIndex:imIndex] numPoints:200];
+                poly.name = ROIname;
+                [roisImages replaceObjectAtIndex:imIndex withObject:poly];
+                
+            }
+        }
+        [self pasteROIsFromArray:scratchArray ofType:tCPolygon withOptionalName:ROIname ofROIMirrorType:roiMirrorType intoViewerController:self.viewerCT];
+    }
+    
+}
+
+- (void)pasteROIsForActiveViewerControllerOfType:(int)type withOptionalName:(NSString *)name ofROIMirrorType:(ROI_Mirror_Type)roiMirrorType
+{
+    switch (roiMirrorType) {
+        case Mirrored_ROI:
+            [self pasteROIsFromArray:[NSMutableArray arrayWithArray:self.arrayMirrorROIsCopied] ofType:type withOptionalName:name ofROIMirrorType:roiMirrorType intoViewerController:[ViewerController frontMostDisplayed2DViewer]];
+            break;
+        case Transform_ROI:
+            [self pasteROIsFromArray:[NSMutableArray arrayWithArray:self.arrayTransformROIsCopied] ofType:type withOptionalName:name ofROIMirrorType:roiMirrorType intoViewerController:[ViewerController frontMostDisplayed2DViewer]];
+            break;
+        case Active_ROI:
+            [self pasteROIsFromArray:[NSMutableArray arrayWithArray:self.arrayActiveROIsCopied] ofType:type withOptionalName:name ofROIMirrorType:roiMirrorType intoViewerController:[ViewerController frontMostDisplayed2DViewer]];
+            break;
+        default:
+            break;
+    }
+}
+
+-(void)pasteROIsFromArray:(NSMutableArray *)scratchArray ofType:(int)type withOptionalName:(NSString *)name ofROIMirrorType:(ROI_Mirror_Type)roiMirrorType intoViewerController:(ViewerController *)active2Dwindow
+{
+    NSMutableArray *pixListInActiveVC = [active2Dwindow pixList];
     for(NSUInteger pixIndex = 0; pixIndex < [pixListInActiveVC count]; pixIndex++)
     {
         DCMPix *curDCM = [pixListInActiveVC objectAtIndex: pixIndex];
@@ -180,8 +316,8 @@
     }
     [active2Dwindow.imageView setIndex: active2Dwindow.imageView.curImage];
     [active2Dwindow needsDisplayUpdate];
-}
 
+}
 
 +(unsigned char*)flippedBufferHorizontalFromROI:(ROI *)roi2Clone
 {
