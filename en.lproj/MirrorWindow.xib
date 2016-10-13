@@ -23,14 +23,14 @@
         <window title="Mirror ROI" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" frameAutosaveName="" animationBehavior="default" id="GiC-Tf-amF" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="75" y="87" width="312" height="681"/>
+            <rect key="contentRect" x="75" y="87" width="312" height="696"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1577"/>
             <view key="contentView" id="EMO-X6-lMp">
-                <rect key="frame" x="0.0" y="0.0" width="312" height="681"/>
+                <rect key="frame" x="0.0" y="0.0" width="312" height="696"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
                     <box fixedFrame="YES" title="Assigned Windows" translatesAutoresizingMaskIntoConstraints="NO" id="aPo-HU-TQk">
-                        <rect key="frame" x="17" y="484" width="278" height="177"/>
+                        <rect key="frame" x="17" y="499" width="278" height="177"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <view key="contentView" id="cbb-Bi-cyy">
                             <rect key="frame" x="2" y="2" width="274" height="157"/>
@@ -90,36 +90,36 @@
                                     </connections>
                                 </button>
                                 <box fixedFrame="YES" boxType="custom" cornerRadius="4" title="Box" translatesAutoresizingMaskIntoConstraints="NO" id="jx0-7U-cue">
-                                    <rect key="frame" x="53" y="48" width="181" height="61"/>
+                                    <rect key="frame" x="9" y="48" width="233" height="61"/>
                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                     <view key="contentView" ambiguous="YES" id="eg3-cc-RV9">
-                                        <rect key="frame" x="1" y="1" width="179" height="59"/>
+                                        <rect key="frame" x="1" y="1" width="231" height="59"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
-                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OB8-TF-MYC">
-                                                <rect key="frame" x="131" y="37" width="33" height="19"/>
+                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="OB8-TF-MYC">
+                                                <rect key="frame" x="177" y="37" width="33" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="roundRect" title="⬆︎" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bnb-Zs-MZf">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" size="12" name="HiraMinProN-W3"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="pasteMirroredAsPolygonsFromPET2CTclicked:" target="-2" id="O9p-bf-brC"/>
+                                                    <action selector="quickPasteCTPET:" target="-2" id="q46-os-b9h"/>
                                                 </connections>
                                             </button>
-                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tYe-LB-i0q">
-                                                <rect key="frame" x="131" y="3" width="33" height="19"/>
+                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="-1" translatesAutoresizingMaskIntoConstraints="NO" id="tYe-LB-i0q">
+                                                <rect key="frame" x="177" y="3" width="33" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="roundRect" title="⬇︎" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="pW7-ip-QUc">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" size="12" name="HiraMinProN-W3"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="pasteMirroredPolygonsFromCT2PETclicked:" target="-2" id="Ov4-hj-POP"/>
+                                                    <action selector="quickPasteCTPET:" target="-2" id="yqa-Mt-aQk"/>
                                                 </connections>
                                             </button>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2JH-7t-Lqw">
-                                                <rect key="frame" x="119" y="23" width="56" height="17"/>
+                                                <rect key="frame" x="165" y="23" width="56" height="17"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Mirrored" id="l3w-Yi-kkd">
                                                     <font key="font" metaFont="system"/>
@@ -127,29 +127,40 @@
                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
-                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ik0-oE-Xal">
-                                                <rect key="frame" x="76" y="37" width="33" height="19"/>
+                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="ik0-oE-Xal">
+                                                <rect key="frame" x="84" y="37" width="33" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="roundRect" title="⬆︎" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="udl-nY-0IZ">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" size="12" name="HiraMinProN-W3"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="pasteActiveAsPolygonsFromPET2CTclicked:" target="-2" id="5Ct-fZ-I2G"/>
+                                                    <action selector="quickPasteCTPET:" target="-2" id="ZKw-yR-wRE"/>
                                                 </connections>
                                             </button>
-                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lMi-9e-G0j">
-                                                <rect key="frame" x="75" y="3" width="33" height="19"/>
+                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="-2" translatesAutoresizingMaskIntoConstraints="NO" id="lMi-9e-G0j">
+                                                <rect key="frame" x="83" y="3" width="33" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="roundRect" title="⬇︎" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="HYH-gO-f8w">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                     <font key="font" size="12" name="HiraMinProN-W3"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="pasteActivePolygonsFromCT2PETclicked:" target="-2" id="p4d-n2-szw"/>
+                                                    <action selector="quickPasteCTPET:" target="-2" id="QCP-Hf-6jm"/>
                                                 </connections>
                                             </button>
-                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Kdc-6T-4TC">
+                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="Oy4-d7-ZVC">
+                                                <rect key="frame" x="128" y="32" width="33" height="19"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                <buttonCell key="cell" type="roundRect" title="⬆︎" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="m5w-y1-OmD">
+                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                    <font key="font" size="12" name="HiraMinProN-W3"/>
+                                                </buttonCell>
+                                                <connections>
+                                                    <action selector="quickPasteCTPET:" target="-2" id="wSI-xY-4MC"/>
+                                                </connections>
+                                            </button>
+                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="4" translatesAutoresizingMaskIntoConstraints="NO" id="Kdc-6T-4TC">
                                                 <rect key="frame" x="20" y="37" width="33" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="roundRect" title="⬆︎" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="CUs-Pk-XJl">
@@ -157,10 +168,10 @@
                                                     <font key="font" size="12" name="HiraMinProN-W3"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="pasteTransformFromPET2CT:" target="-2" id="qGi-74-wpw"/>
+                                                    <action selector="quickPasteCTPET:" target="-2" id="RUp-cO-zfC"/>
                                                 </connections>
                                             </button>
-                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="O6a-72-sOx">
+                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="-4" translatesAutoresizingMaskIntoConstraints="NO" id="O6a-72-sOx">
                                                 <rect key="frame" x="20" y="3" width="33" height="19"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="roundRect" title="⬇︎" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="cTJ-Ta-UBt">
@@ -168,11 +179,11 @@
                                                     <font key="font" size="12" name="HiraMinProN-W3"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="pasteTransformFromCT2PET:" target="-2" id="LMM-A7-JJf"/>
+                                                    <action selector="quickPasteCTPET:" target="-2" id="oXV-ba-Nmg"/>
                                                 </connections>
                                             </button>
                                             <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dMl-7c-OVz">
-                                                <rect key="frame" x="71" y="23" width="42" height="17"/>
+                                                <rect key="frame" x="79" y="23" width="42" height="17"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Active" id="maR-RZ-1Dx">
                                                     <font key="font" metaFont="system"/>
@@ -189,6 +200,17 @@
                                                     <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                 </textFieldCell>
                                             </textField>
+                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="-3" translatesAutoresizingMaskIntoConstraints="NO" id="ygF-If-DHo">
+                                                <rect key="frame" x="128" y="7" width="33" height="19"/>
+                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                <buttonCell key="cell" type="roundRect" title="⬇︎" bezelStyle="roundedRect" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="zhV-6m-zje">
+                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                    <font key="font" size="12" name="HiraMinProN-W3"/>
+                                                </buttonCell>
+                                                <connections>
+                                                    <action selector="quickPasteCTPET:" target="-2" id="rTm-YK-2bi"/>
+                                                </connections>
+                                            </button>
                                         </subviews>
                                     </view>
                                 </box>
@@ -206,7 +228,7 @@
                         <font key="titleFont" metaFont="titleBar"/>
                     </box>
                     <box fixedFrame="YES" borderType="bezel" title="Transform Markers" translatesAutoresizingMaskIntoConstraints="NO" id="jYu-fS-YcM">
-                        <rect key="frame" x="17" y="313" width="278" height="167"/>
+                        <rect key="frame" x="17" y="328" width="278" height="167"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <view key="contentView" id="iZS-rZ-acI">
                             <rect key="frame" x="3" y="3" width="272" height="146"/>
@@ -325,7 +347,7 @@
                         <font key="titleFont" metaFont="titleBar"/>
                     </box>
                     <box fixedFrame="YES" title="Active ROI" translatesAutoresizingMaskIntoConstraints="NO" id="mEb-Sn-xPK">
-                        <rect key="frame" x="17" y="57" width="138" height="252"/>
+                        <rect key="frame" x="17" y="72" width="138" height="252"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <view key="contentView" id="4U0-AD-qEh">
                             <rect key="frame" x="2" y="2" width="134" height="232"/>
@@ -367,7 +389,7 @@
                                         <rect key="frame" x="2" y="2" width="112" height="78"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
-                                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="s2I-4U-DC0">
+                                            <button fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="s2I-4U-DC0">
                                                 <rect key="frame" x="11" y="6" width="24" height="24"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="Upload-50" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyUpOrDown" inset="2" id="2bq-R9-hWO">
@@ -375,10 +397,10 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="copyMirrorROIs:" target="-2" id="wa9-dk-mEm"/>
+                                                    <action selector="copyActiveViewerROIsOfType:" target="-2" id="wa9-dk-mEm"/>
                                                 </connections>
                                             </button>
-                                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="78D-0m-6BH">
+                                            <button fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="78D-0m-6BH">
                                                 <rect key="frame" x="43" y="6" width="24" height="24"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="Download-50" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyUpOrDown" inset="2" id="5Tj-sf-m1V">
@@ -386,10 +408,10 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="pasteMirrorROIs:" target="-2" id="AiQ-2E-i8X"/>
+                                                    <action selector="pasteActiveViewerROIsOfType:" target="-2" id="AiQ-2E-i8X"/>
                                                 </connections>
                                             </button>
-                                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="amf-ck-7Tg">
+                                            <button fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="amf-ck-7Tg">
                                                 <rect key="frame" x="77" y="6" width="24" height="24"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSTrashFull" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyUpOrDown" inset="2" id="4xR-nv-9bh">
@@ -397,7 +419,7 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="deleteMirrorROIs:" target="-2" id="tSx-zm-fbK"/>
+                                                    <action selector="deleteActiveViewerROIsOfType:" target="-2" id="tSx-zm-fbK"/>
                                                 </connections>
                                             </button>
                                             <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Czm-1v-9Bf">
@@ -430,7 +452,7 @@
                         <font key="titleFont" metaFont="titleBar"/>
                     </box>
                     <box fixedFrame="YES" title="Mirrored ROI" translatesAutoresizingMaskIntoConstraints="NO" id="KuV-PF-nwj">
-                        <rect key="frame" x="157" y="57" width="138" height="252"/>
+                        <rect key="frame" x="157" y="72" width="138" height="252"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <view key="contentView" id="zLn-ue-AND">
                             <rect key="frame" x="2" y="2" width="134" height="232"/>
@@ -461,7 +483,7 @@
                                         <rect key="frame" x="2" y="2" width="112" height="46"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <subviews>
-                                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4pe-tQ-TE7">
+                                            <button fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="4pe-tQ-TE7">
                                                 <rect key="frame" x="11" y="11" width="24" height="24"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="Upload-50" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyUpOrDown" inset="2" id="XwB-aN-xhW">
@@ -469,10 +491,10 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="copyMirrorROIs:" target="-2" id="HzI-or-z4q"/>
+                                                    <action selector="copyActiveViewerROIsOfType:" target="-2" id="HzI-or-z4q"/>
                                                 </connections>
                                             </button>
-                                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="COs-el-G9t">
+                                            <button fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="COs-el-G9t">
                                                 <rect key="frame" x="43" y="11" width="24" height="24"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="Download-50" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyUpOrDown" inset="2" id="SDU-qW-hBJ">
@@ -480,10 +502,10 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="pasteMirrorROIs:" target="-2" id="KsW-ay-lQ9"/>
+                                                    <action selector="pasteActiveViewerROIsOfType:" target="-2" id="KsW-ay-lQ9"/>
                                                 </connections>
                                             </button>
-                                            <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ubw-l0-gTU">
+                                            <button fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="Ubw-l0-gTU">
                                                 <rect key="frame" x="77" y="11" width="24" height="24"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                 <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSTrashFull" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyUpOrDown" inset="2" id="GRO-qY-IeC">
@@ -491,7 +513,7 @@
                                                     <font key="font" metaFont="system"/>
                                                 </buttonCell>
                                                 <connections>
-                                                    <action selector="deleteMirrorROIs:" target="-2" id="48D-mg-T24"/>
+                                                    <action selector="deleteActiveViewerROIsOfType:" target="-2" id="48D-mg-T24"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -501,20 +523,20 @@
                         </view>
                         <font key="titleFont" metaFont="titleBar"/>
                     </box>
-                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HGj-vG-jAx">
-                        <rect key="frame" x="39" y="13" width="234" height="32"/>
+                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8Ob-I4-3cr">
+                        <rect key="frame" x="132" y="20" width="48" height="48"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="push" title="Delete All ROIs In This Series" bezelStyle="rounded" image="NSTrashFull" imagePosition="left" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="mgi-W8-PQn">
+                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSTrashFull" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="0TJ-lP-AXD">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="roiDeleteAll:" target="-1" id="WgY-id-PqM"/>
+                            <action selector="roiDeleteAll:" target="-1" id="4gb-e6-0mW"/>
                         </connections>
                     </button>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="-2856" y="-383.5"/>
+            <point key="canvasLocation" x="-2856" y="-376"/>
         </window>
     </objects>
     <resources>

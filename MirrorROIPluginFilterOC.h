@@ -17,10 +17,10 @@ typedef enum : NSInteger {
 } ExtendSingleLengthHow;
 
 typedef enum : NSUInteger {
-    Mirrored_ROI,
-    Active_ROI,
-    MirroredAndActive_ROI,
-    Transform_ROI
+    Mirrored_ROI = 1,
+    Active_ROI = 2,
+    MirroredAndActive_ROI = 3,
+    Transform_ROI = 4
 } ROI_Mirror_Type;
 
 typedef enum : NSUInteger {
@@ -28,6 +28,10 @@ typedef enum : NSUInteger {
     PET_Window,
     CTandPET_Windows
 } ViewerWindow_Type;
+
+typedef enum : NSInteger {
+    tAnyROItype = -999
+} ROItypeAdditional;
 
 @interface MirrorROIPluginFilterOC : PluginFilter {
     
