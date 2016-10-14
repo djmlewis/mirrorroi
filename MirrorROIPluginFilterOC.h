@@ -26,7 +26,8 @@ typedef enum : NSUInteger {
 typedef enum : NSUInteger {
     CT_Window,
     PET_Window,
-    CTandPET_Windows
+    CTandPET_Windows,
+    NoTypeDefined
 } ViewerWindow_Type;
 
 typedef enum : NSInteger {

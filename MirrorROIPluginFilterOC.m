@@ -11,6 +11,18 @@
 
 
 #pragma mark Windows
+- (IBAction)smartAssignCTPETwindowsClicked:(id)sender {
+    for (ViewerController *vc in self.viewerControllersList) {
+        ViewerWindow_Type type = NoTypeDefined;
+        if ([vc.modality isEqualToString:@"CT"]) {
+            type = CT_Window;
+        }
+        else if([vc.modality isEqualToString:@"PT"]) {
+            type = PET_Window;
+        }
+        [self assignViewerWindow:vc forType:type];
+    }
+}
 
 - (IBAction)assignCTwindowClicked:(id)sender {
     [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:CT_Window];
