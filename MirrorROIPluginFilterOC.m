@@ -12,16 +12,7 @@
 
 #pragma mark Windows
 - (IBAction)smartAssignCTPETwindowsClicked:(id)sender {
-    for (ViewerController *vc in self.viewerControllersList) {
-        ViewerWindow_Type type = NoTypeDefined;
-        if ([vc.modality isEqualToString:@"CT"]) {
-            type = CT_Window;
-        }
-        else if([vc.modality isEqualToString:@"PT"]) {
-            type = PET_Window;
-        }
-        [self assignViewerWindow:vc forType:type];
-    }
+    [self smartAssignCTPETwindows];
 }
 
 - (IBAction)assignCTwindowClicked:(id)sender {
@@ -77,15 +68,47 @@
         }
     }
 }
-#pragma mark Mirrored
+-(void)smartAssignCTPETwindows {
+    BOOL notfoundCT = YES;
+    BOOL notfoundPET = YES;
+    NSUInteger i = 0;
+    while (i<self.viewerControllersList.count && (notfoundCT || notfoundPET)) {
+        ViewerController *vc = [self.viewerControllersList objectAtIndex:i];
+        if ([vc.modality isEqualToString:@"CT"]) {
+            [self assignViewerWindow:vc forType:CT_Window];
+            notfoundCT = NO;
+        }
+        else if([vc.modality isEqualToString:@"PT"]) {
+            [self assignViewerWindow:vc forType:PET_Window];
+            notfoundPET = NO;
+        }
+        i++;
+    }
+}
+
+
+#pragma mark coy paste delete
 
 - (IBAction)deleteActiveViewerROIsOfType:(NSButton *)sender {
     switch (sender.tag) {
         case Mirrored_ROI:
-            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tAnyROItype withOptionalName:self.textMirrorROIname.stringValue];
+            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:self.textMirrorROIname.stringValue];
             break;
         case Active_ROI:
-            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tAnyROItype withOptionalName:self.textActiveROIname.stringValue];
+            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:self.textActiveROIname.stringValue];
+            break;
+            
+        default:
+            break;
+    }
+}
+- (IBAction)deleteActiveViewerPolygonROIsOfType:(NSButton *)sender {
+    switch (sender.tag) {
+        case Mirrored_ROI:
+            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tCPolygon withOptionalName:self.textMirrorROIname.stringValue];
+            break;
+        case Active_ROI:
+            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tCPolygon withOptionalName:self.textActiveROIname.stringValue];
             break;
             
         default:
@@ -95,10 +118,10 @@
 - (IBAction)pasteActiveViewerROIsOfType:(NSButton *)sender {
     switch (sender.tag) {
         case Mirrored_ROI:
-            [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tAnyROItype withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
+            [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
             break;
         case Active_ROI:
-            [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tAnyROItype withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
+            [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
             break;
             
         default:
@@ -108,10 +131,10 @@
 - (IBAction)copyActiveViewerROIsOfType:(NSButton *)sender {
     switch (sender.tag) {
         case Mirrored_ROI:
-            [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tAnyROItype withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
+            [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:self.textMirrorROIname.stringValue ofROIMirrorType:Mirrored_ROI];
             break;
         case Active_ROI:
-            [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tAnyROItype withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
+            [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:self.textActiveROIname.stringValue ofROIMirrorType:Active_ROI];
             break;
             
         default:
@@ -143,7 +166,7 @@
 }
 
 - (IBAction)showHideTransformMarkers:(id)sender {
-    [self doShowHideTransformMarkers:self.segmentShowHideTransformMarkers.selectedSegment];
+    [self doShowHideTransformMarkers];
 }
 
 - (IBAction)pasteTransformROIs:(id)sender {
@@ -170,7 +193,7 @@
     NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
     [windowController showWindow:self];
     [self assignViewerWindow:nil forType:CTandPET_Windows];
-
+    [self smartAssignCTPETwindows];
     BOOL completedOK = YES;//[self mirrorActiveROIUsingLengthROI];
     
     if(completedOK) return 0; // No Errors
@@ -445,15 +468,15 @@
     [active2Dwindow needsDisplayUpdate];
 }
 
--(void)doShowHideTransformMarkers:(BOOL)show
+-(void)doShowHideTransformMarkers
 {
     ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
     NSMutableArray  *roisInAllSlices  = [active2Dwindow roiList];
     for (NSUInteger slice=0; slice<roisInAllSlices.count; slice++) {
-        NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];//[MirrorROIPluginFilterOC allROIinFrontDCMPixFromViewerController:active2Dwindow];
+        NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];
         ROI *ROI2showHide = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure];
         if (ROI2showHide != nil) {
-            ROI2showHide.hidden = show;
+            ROI2showHide.hidden = !ROI2showHide.hidden;
         }
     }
 }
