@@ -11,7 +11,7 @@
 
 
 typedef enum : NSInteger {
-    ExtendSingleLengthUp,
+    ExtendSingleLengthUp = 0,
     ExtendSingleLengthDown,
     ExtendSingleLengthBoth,
 } ExtendSingleLengthHow;
@@ -24,10 +24,11 @@ typedef enum : NSUInteger {
 } ROI_Mirror_Type;
 
 typedef enum : NSUInteger {
-    CT_Window,
-    PET_Window,
-    CTandPET_Windows,
-    NoTypeDefined
+    CT_Window = 1,
+    PET_Window = 2,
+    CTandPET_Windows = 3,
+    NoType_Defined = 4,
+    Front_Window = 5
 } ViewerWindow_Type;
 
 typedef enum : NSInteger {

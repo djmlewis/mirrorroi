@@ -11,10 +11,10 @@
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */; };
-		8E9D96331DB3E04600259579 /* Hide Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E9D96321DB3E04600259579 /* Hide Filled-50.png */; };
+		8E8EA0B31DB5329D00940C46 /* Flip Vertical Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */; };
+		8E8EA0B41DB5329D00940C46 /* Flip Vertical Filled-50 multi.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDC1DAE5EE9007C14A9 /* Flip Vertical Filled-50 multi.png */; };
+		8E8EA0B51DB5329D00940C46 /* Hide Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E8EA0B11DB531ED00940C46 /* Hide Filled-50.png */; };
 		8E9D96351DB3E35A00259579 /* Link-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E9D96341DB3E35A00259579 /* Link-50.png */; };
-		8EDB8BE01DAE5EE9007C14A9 /* Flip Vertical Filled-50 multi.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDC1DAE5EE9007C14A9 /* Flip Vertical Filled-50 multi.png */; };
-		8EDB8BE11DAE5EE9007C14A9 /* Flip Vertical Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */; };
 		8EDB8BE21DAE5EE9007C14A9 /* Upload-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDE1DAE5EE9007C14A9 /* Upload-50.png */; };
 		8EDB8BE31DAE5EE9007C14A9 /* Download-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDF1DAE5EE9007C14A9 /* Download-50.png */; };
 		8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE41DAE6039007C14A9 /* CT.png */; };
@@ -32,7 +32,7 @@
 		8420023112E829A200E1E9CE /* OsiriXAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OsiriXAPI.framework; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E27A7BD1DA1AECD00BDC497 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MirrorWindow.xib; sourceTree = "<group>"; };
-		8E9D96321DB3E04600259579 /* Hide Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Hide Filled-50.png"; path = "PNGs/Hide Filled-50.png"; sourceTree = "<group>"; };
+		8E8EA0B11DB531ED00940C46 /* Hide Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Hide Filled-50.png"; path = "PNGs/Hide Filled-50.png"; sourceTree = "<group>"; };
 		8E9D96341DB3E35A00259579 /* Link-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Link-50.png"; path = "PNGs/Link-50.png"; sourceTree = "<group>"; };
 		8EDB8BDC1DAE5EE9007C14A9 /* Flip Vertical Filled-50 multi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled-50 multi.png"; path = "PNGs/Flip Vertical Filled-50 multi.png"; sourceTree = "<group>"; };
 		8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled-50.png"; path = "PNGs/Flip Vertical Filled-50.png"; sourceTree = "<group>"; };
@@ -139,13 +139,13 @@
 			isa = PBXGroup;
 			children = (
 				8E9D96341DB3E35A00259579 /* Link-50.png */,
-				8E9D96321DB3E04600259579 /* Hide Filled-50.png */,
 				8EDB8BE41DAE6039007C14A9 /* CT.png */,
 				8EDB8BE51DAE6039007C14A9 /* PET.png */,
 				8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */,
 				8EDB8BDC1DAE5EE9007C14A9 /* Flip Vertical Filled-50 multi.png */,
 				8EDB8BDE1DAE5EE9007C14A9 /* Upload-50.png */,
 				8EDB8BDF1DAE5EE9007C14A9 /* Download-50.png */,
+				8E8EA0B11DB531ED00940C46 /* Hide Filled-50.png */,
 			);
 			name = PNGs;
 			sourceTree = "<group>";
@@ -226,16 +226,16 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E8EA0B31DB5329D00940C46 /* Flip Vertical Filled-50.png in Resources */,
+				8E8EA0B41DB5329D00940C46 /* Flip Vertical Filled-50 multi.png in Resources */,
+				8E8EA0B51DB5329D00940C46 /* Hide Filled-50.png in Resources */,
 				8EDB8BE21DAE5EE9007C14A9 /* Upload-50.png in Resources */,
 				8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */,
-				8EDB8BE11DAE5EE9007C14A9 /* Flip Vertical Filled-50.png in Resources */,
 				8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */,
 				8E9D96351DB3E35A00259579 /* Link-50.png in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
 				8EDB8BE31DAE5EE9007C14A9 /* Download-50.png in Resources */,
 				8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */,
-				8E9D96331DB3E04600259579 /* Hide Filled-50.png in Resources */,
-				8EDB8BE01DAE5EE9007C14A9 /* Flip Vertical Filled-50 multi.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
