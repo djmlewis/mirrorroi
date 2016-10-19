@@ -9,6 +9,7 @@
 
 @implementation MirrorROIPluginFilterOC
 
+#pragma mark Analyse
 
 #pragma mark Windows
 - (IBAction)smartAssignCTPETwindowsClicked:(id)sender {
@@ -88,8 +89,74 @@
 
 
 #pragma mark copy paste delete
+-(IBAction)setROIToolType:(NSButton *)sender
+{
+    [self setROIToolType:(ToolMode)sender.tag forViewerController:self.viewerCT];
+}
+
+-(void)setROIToolType:(ToolMode)type forViewerController:(ViewerController *)active2Dwindow {
+    [active2Dwindow setROIToolTag:type];
+    [active2Dwindow deleteSeriesROIwithName:self.textLengthROIname.stringValue];
+    
+    NSMutableIndexSet *indexesWithROI= [[NSMutableIndexSet alloc]init];
+    NSString *activeROIname = self.textActiveROIname.stringValue;
+    for (NSUInteger pixIndex = 0; pixIndex < [[self.viewerPET pixList] count]; pixIndex++)
+    {
+        for(ROI	*curROI in [[self.viewerPET roiList] objectAtIndex: pixIndex])
+        {
+            if ([curROI.name isEqualToString:activeROIname])
+            {
+                [indexesWithROI addIndex:pixIndex];
+                break;
+            }
+        }
+    }
+    if (indexesWithROI.count==1) {
+        [self addLengthROIWithStart:NSMakePoint(50.0, 50.0) andEnd:NSMakePoint(150.0, 150.0) toViewerController:active2Dwindow atIndex:indexesWithROI.firstIndex];
+        [self.viewerPET.imageView setIndexWithReset:indexesWithROI.firstIndex :YES];
+
+    }
+    else if(indexesWithROI.count>1) {
+        [self addLengthROIWithStart:NSMakePoint(50.0, 50.0) andEnd:NSMakePoint(150.0, 150.0) toViewerController:active2Dwindow atIndex:indexesWithROI.firstIndex];
+        [self addLengthROIWithStart:NSMakePoint(50.0, 50.0) andEnd:NSMakePoint(150.0, 150.0) toViewerController:active2Dwindow atIndex:indexesWithROI.lastIndex];
+        [self.viewerPET.imageView setIndexWithReset:indexesWithROI.firstIndex :YES];
+        [active2Dwindow.imageView setIndexWithReset:indexesWithROI.firstIndex :YES];
+    }
+    [self.viewerPET needsDisplayUpdate];
+    [active2Dwindow needsDisplayUpdate];
+}
+-(void)addLengthROIWithStart:(NSPoint)startPoint andEnd:(NSPoint)endPoint toViewerController:(ViewerController *)active2Dwindow atIndex:(NSUInteger)index {
+    ROI *newR = [active2Dwindow newROI:tMesure];
+    [newR.points addObject:[active2Dwindow newPoint:startPoint.x :startPoint.y]];
+    [newR.points addObject:[active2Dwindow newPoint:endPoint.x :endPoint.y]];
+    [[[active2Dwindow roiList] objectAtIndex:index] addObject:newR];
+}
+-(IBAction)buttonAction:(NSButton *)sender
+{
+    //Transform Front
+    if ([sender.identifier isEqualToString:@"pasteTransformFront"]) {
+        [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
+    }
+    else  if ([sender.identifier isEqualToString:@"copyTransformFront"]) {
+        [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
+    }
+    else  if ([sender.identifier isEqualToString:@"deleteTransformFront"]) {
+        [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:self.textLengthROIname.stringValue];
+    }
+    else  if ([sender.identifier isEqualToString:@"hideTransformFront"]) {
+        [self doShowHideTransformMarkersForViewerController:[ViewerController frontMostDisplayed2DViewer]];
+    }
+    // Transform CT window
+    else  if ([sender.identifier isEqualToString:@"deleteTransformCT"]) {
+        [self deleteROIsFromViewerController:self.viewerCT ofType:tMesure withOptionalName:self.textLengthROIname.stringValue];
+    }
+    else  if ([sender.identifier isEqualToString:@"hideTransformCT"]) {
+        [self doShowHideTransformMarkersForViewerController:self.viewerCT];
+    }
+}
 
 - (IBAction)deleteActiveViewerROIsOfType:(NSButton *)sender {
+   
     switch (sender.tag) {
         case Mirrored_ROI:
             [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:self.textMirrorROIname.stringValue];
@@ -176,7 +243,8 @@
 
 
 - (IBAction)growRegionClicked:(id)sender {
-    [[NSApplication sharedApplication] sendAction:@selector(segmentationTest:) to:nil from:nil];
+    [self.viewerPET.window makeKeyAndOrderFront:nil];
+    [[NSApplication sharedApplication] sendAction:@selector(segmentationTest:) to:self.viewerPET from:self.viewerPET];
 }
 
 
@@ -194,62 +262,6 @@
         default:
             break;
     }
-}
-
-- (IBAction)showHideTransformMarkers:(NSButton *)sender {
-    switch (sender.tag) {
-        case Front_Window:
-            [self doShowHideTransformMarkersForViewerController:[ViewerController frontMostDisplayed2DViewer]];
-           break;
-        case CT_Window:
-            [self doShowHideTransformMarkersForViewerController:self.viewerCT];
-            break;
-            
-        default:
-            break;
-    }
-}
-
-- (IBAction)pasteTransformROIs:(NSButton *)sender {
-    switch (sender.tag) {
-        case Front_Window:
-            [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
-            break;
-        case CT_Window:
-            [self pasteROIsForViewerController:self.viewerCT ofType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
-            break;
-            
-        default:
-            break;
-    }
-
-}
-- (IBAction)copyTransformROIs:(NSButton *)sender {
-    switch (sender.tag) {
-        case Front_Window:
-            [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
-            break;
-        case CT_Window:
-            [self copyROIsFromViewerController:self.viewerCT ofType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
-            break;
-            
-        default:
-            break;
-    }
-}
-- (IBAction)deleteTransformROIs:(NSButton *)sender {
-    switch (sender.tag) {
-        case Front_Window:
-            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:self.textLengthROIname.stringValue];
-            break;
-        case CT_Window:
-            [self deleteROIsFromViewerController:self.viewerCT ofType:tMesure withOptionalName:self.textLengthROIname.stringValue];
-            break;
-            
-        default:
-            break;
-    }
-    [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:self.textLengthROIname.stringValue];
 }
 
 

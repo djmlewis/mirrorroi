@@ -9,7 +9,6 @@
 #import <OsiriXAPI/PluginFilter.h>
 
 
-
 typedef enum : NSInteger {
     ExtendSingleLengthUp = 0,
     ExtendSingleLengthDown,
