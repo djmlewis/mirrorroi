@@ -34,6 +34,12 @@ typedef enum : NSInteger {
     tAnyROItype = -999
 } ROItypeAdditional;
 
+typedef enum : NSInteger {
+    SetPixels_SameName = 0,
+    SetPixels_AllROIs = 1,
+    SetPixels_AllPixels = 2
+} SetROIpixel_Options;
+
 @interface MirrorROIPluginFilterOC : PluginFilter {
     
 

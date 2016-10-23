@@ -89,15 +89,16 @@
 
 
 #pragma mark copy paste delete
--(IBAction)setROIToolType:(NSButton *)sender
+-(IBAction)addTransformROIs:(NSButton *)sender
 {
-    [self setROIToolType:(ToolMode)sender.tag forViewerController:self.viewerCT];
+    [self addBoundingTransformROIS:(ToolMode)sender.tag forViewerController:self.viewerCT];
 }
 
--(void)setROIToolType:(ToolMode)type forViewerController:(ViewerController *)active2Dwindow {
+-(void)addBoundingTransformROIS:(ToolMode)type forViewerController:(ViewerController *)active2Dwindow {
     [active2Dwindow setROIToolTag:type];
     [active2Dwindow deleteSeriesROIwithName:self.textLengthROIname.stringValue];
     
+    //find the first and last pixIndex with an ACTIVE ROI
     NSMutableIndexSet *indexesWithROI= [[NSMutableIndexSet alloc]init];
     NSString *activeROIname = self.textActiveROIname.stringValue;
     for (NSUInteger pixIndex = 0; pixIndex < [[self.viewerPET pixList] count]; pixIndex++)
@@ -112,18 +113,53 @@
         }
     }
     if (indexesWithROI.count==1) {
-        [self addLengthROIWithStart:NSMakePoint(50.0, 50.0) andEnd:NSMakePoint(150.0, 150.0) toViewerController:active2Dwindow atIndex:indexesWithROI.firstIndex];
-        [self.viewerPET.imageView setIndexWithReset:indexesWithROI.firstIndex :YES];
+        [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:active2Dwindow start:YES]
+                                      andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:active2Dwindow start:NO]
+                 toViewerController:active2Dwindow
+                            atIndex:indexesWithROI.firstIndex];
+        [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
 
     }
     else if(indexesWithROI.count>1) {
-        [self addLengthROIWithStart:NSMakePoint(50.0, 50.0) andEnd:NSMakePoint(150.0, 150.0) toViewerController:active2Dwindow atIndex:indexesWithROI.firstIndex];
-        [self addLengthROIWithStart:NSMakePoint(50.0, 50.0) andEnd:NSMakePoint(150.0, 150.0) toViewerController:active2Dwindow atIndex:indexesWithROI.lastIndex];
-        [self.viewerPET.imageView setIndexWithReset:indexesWithROI.firstIndex :YES];
-        [active2Dwindow.imageView setIndexWithReset:indexesWithROI.firstIndex :YES];
+        [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:active2Dwindow start:YES]
+                             andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:active2Dwindow start:NO]
+                 toViewerController:active2Dwindow
+                            atIndex:indexesWithROI.firstIndex];
+        
+        [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:active2Dwindow start:YES]
+                             andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:active2Dwindow start:NO]
+                 toViewerController:active2Dwindow
+                            atIndex:indexesWithROI.lastIndex];
+        
+        [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
     }
+}
+-(void)copyTransformROIsFromCT2PET {
+    NSMutableArray *roisArray = [self arrayOfROIsFromViewerController:self.viewerCT ofType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
+    [self.viewerPET deleteSeriesROIwithName:self.textLengthROIname.stringValue];
+    [self pasteAllROIsFromArray:roisArray intoViewerController:self.viewerPET hidden:YES];
+
+
+}
+-(NSPoint)pointForImageIndex:(short)index inWindow:(ViewerController *)vc start:(BOOL)start {
+    NSPoint point = NSMakePoint(100.0, 100.0);
+    CGFloat divisor = 0.3;//end
+    if (start) { divisor = 0.6;}//start
+    if (index < vc.pixList.count) {
+        long h = [[vc.pixList objectAtIndex:index] pheight];
+        long w = [[vc.pixList objectAtIndex:index] pwidth];
+        point.y = h / 2.0;
+        point.x = w * divisor;
+    }
+    return point;
+}
+-(void)displayImageInCTandPETviewersWithIndex:(short)index {
+    //do it in ImageView for correct order
+    [self.viewerPET.imageView setIndexWithReset:index :YES];
+    [self.viewerCT.imageView setIndexWithReset:index :YES];
     [self.viewerPET needsDisplayUpdate];
-    [active2Dwindow needsDisplayUpdate];
+    [self.viewerCT needsDisplayUpdate];
+    
 }
 -(void)addLengthROIWithStart:(NSPoint)startPoint andEnd:(NSPoint)endPoint toViewerController:(ViewerController *)active2Dwindow atIndex:(NSUInteger)index {
     ROI *newR = [active2Dwindow newROI:tMesure];
@@ -228,17 +264,18 @@
 
 }
 - (IBAction)mirrorActiveROI3D:(NSButton *)sender {
-    switch (sender.tag) {
-        case Front_Window:
-            [self mirrorActiveROIUsingLengthROIinViewerController:[ViewerController frontMostDisplayed2DViewer] in3D:YES];
-            break;
-        case CT_Window:
-            [self mirrorActiveROIUsingLengthROIinViewerController:self.viewerCT in3D:YES];
-            break;
-            
-        default:
-            break;
-    }
+    [self copyTransformROIsFromCT2PET];
+    [self mirrorActiveROIUsingLengthROIinViewerController:self.viewerPET in3D:YES];
+    //create a dummy roi just for the name
+    ROI *aROI = [self.viewerPET newROI:tPlain];
+    aROI.name = self.textMirrorROIname.stringValue;
+    //roiSetPixels:(ROI*)aROI :(short)allRois :(BOOL)propagateIn4D :(BOOL)outside :(float)minValue :(float)maxValue :(float)newValue;
+    [self.viewerPET roiSetPixels: aROI :SetPixels_SameName :NO :NO :-FLT_MAX :FLT_MAX :FLT_MAX :YES];
+    aROI.name = self.textActiveROIname.stringValue;
+    [self.viewerPET roiSetPixels: aROI :SetPixels_SameName :NO :NO :-FLT_MAX :FLT_MAX :FLT_MAX :YES];
+    [self.viewerPET needsDisplayUpdate];
+    [self.viewerCT needsDisplayUpdate];
+
 }
 
 
@@ -476,6 +513,34 @@
 
 }
 
+-(void)pasteAllROIsFromArray:(NSMutableArray *)scratchArray intoViewerController:(ViewerController *)active2Dwindow hidden:(BOOL)hidden
+{
+    NSMutableArray *pixListInActiveVC = [active2Dwindow pixList];
+    for(NSUInteger pixIndex = 0; pixIndex < [pixListInActiveVC count]; pixIndex++)
+    {
+        DCMPix *curDCM = [pixListInActiveVC objectAtIndex: pixIndex];
+
+        if( [scratchArray count] > pixIndex)
+        {
+            NSArray *roisImages = [scratchArray objectAtIndex: pixIndex];
+            for( ROI *unpackedROI in roisImages)
+            {
+                //Correct the origin only if the orientation is the same
+                unpackedROI.pix = curDCM;
+                unpackedROI.hidden = hidden;
+                [unpackedROI setOriginAndSpacing: curDCM.pixelSpacingX :curDCM.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: curDCM]];
+                [[active2Dwindow.roiList objectAtIndex: pixIndex] addObject: unpackedROI];
+                unpackedROI.curView = active2Dwindow.imageView;
+                [unpackedROI recompute];
+           }
+        }
+    }
+    [active2Dwindow.imageView setIndex: active2Dwindow.imageView.curImage];
+    [active2Dwindow needsDisplayUpdate];
+    
+}
+
+
 +(unsigned char*)flippedBufferHorizontalFromROI:(ROI *)roi2Clone
 {
     int textureBuffer_Length = roi2Clone.textureHeight * roi2Clone.textureWidth;
@@ -614,7 +679,8 @@
 
 -(void)mirrorActiveROIUsingLengthROIinViewerController:(ViewerController *)active2Dwindow in3D:(BOOL)in3D
 {
-    //ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
+    [active2Dwindow deleteSeriesROIwithName:self.textMirrorROIname.stringValue];
+
     NSMutableArray  *roisInAllSlices  = [active2Dwindow roiList];
     NSUInteger startSlice = 0;
     NSUInteger endSlice = 0;
@@ -630,7 +696,7 @@
     }
     
     for (NSUInteger slice=startSlice; slice<endSlice; slice++) {
-        NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];//[MirrorROIPluginFilterOC allROIinFrontDCMPixFromViewerController:active2Dwindow];
+        NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];
         ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tPlain];
         //rename to keep in sync
         roi2Clone.name = self.textActiveROIname.stringValue;
