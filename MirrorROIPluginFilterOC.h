@@ -16,11 +16,14 @@ typedef enum : NSInteger {
 } ExtendSingleLengthHow;
 
 typedef enum : NSUInteger {
+    AllROI = 0,
     Mirrored_ROI = 1,
     Active_ROI = 2,
     MirroredAndActive_ROI = 3,
-    Transform_ROI = 4
-} ROI_Mirror_Type;
+    Transform_ROI = 4,
+    AllROI_CT = 5,
+    AllROI_PET = 6,
+} ROI_Type;
 
 typedef enum : NSUInteger {
     CT_Window = 1,
@@ -49,10 +52,14 @@ typedef enum : NSInteger {
 @property (nonatomic, retain) ViewerController *viewerCT;
 @property (nonatomic, retain) ViewerController *viewerPET;
 
-@property (assign) IBOutlet NSBox *boxQuickCopyButtons;
+@property (assign) IBOutlet NSBox *boxCT;
+@property (assign) IBOutlet NSBox *boxPET;
+@property (assign) IBOutlet NSBox *boxTop;
 
+/*
 @property (assign) IBOutlet NSTextField *labelCTviewerName;
 @property (assign) IBOutlet NSTextField *labelPETviewerName;
+*/
 
 @property (assign) IBOutlet NSTextField *textLengthROIname;
 @property (assign) IBOutlet NSTextField *textMirrorROIname;
