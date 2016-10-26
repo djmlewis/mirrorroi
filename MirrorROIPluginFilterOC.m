@@ -12,13 +12,6 @@
 #pragma mark - *********************
 
 #pragma mark - IBActions
-- (IBAction)growRegionClicked:(id)sender {
-    [self.viewerPET.window makeKeyAndOrderFront:nil];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundeclared-selector"
-    [[NSApplication sharedApplication] sendAction:@selector(segmentationTest:) to:self.viewerPET from:self.viewerPET];
-#pragma clang diagnostic pop
-}
 - (IBAction)deleteActiveViewerROIsOfType:(NSButton *)sender {
     
     switch (sender.tag) {
@@ -86,8 +79,17 @@
     else return -1;
 }
 
-#pragma mark - Assign CT and PET
 
+#pragma mark - Windows
+- (IBAction)smartAssignCTPETwindowsClicked:(id)sender {
+    [self smartAssignCTPETwindows];
+}
+- (IBAction)assignCTwindowClicked:(id)sender {
+    [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:CT_Window];
+}
+- (IBAction)assignPETwindowClicked:(id)sender {
+    [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:PET_Window];
+}
 -(void)assignViewerWindow:(ViewerController *)viewController forType:(ViewerWindow_Type)type {
     
     if (type == CT_Window || type == CTandPET_Windows)
@@ -137,52 +139,24 @@
         i++;
     }
 }
-
-#pragma mark Active ROI
-
-- (IBAction)mirrorActiveROI3D:(NSButton *)sender {
-    [self copyTransformsAndMirrorActives];
-}
-
-#pragma mark - Windows
-- (IBAction)smartAssignCTPETwindowsClicked:(id)sender {
-    [self smartAssignCTPETwindows];
-}
-
-- (IBAction)assignCTwindowClicked:(id)sender {
-    [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:CT_Window];
-}
-- (IBAction)assignPETwindowClicked:(id)sender {
-    [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:PET_Window];
-}
-
--(BOOL)valid2DViewer:(ViewerController *)active2Dviewer
-{
+-(BOOL)valid2DViewer:(ViewerController *)active2Dviewer {
     if (active2Dviewer == nil || ([self.viewerControllersList indexOfObjectIdenticalTo:active2Dviewer] == NSNotFound)) return false;
     return true;
 }
-
 -(BOOL)validCTandPETwindows {
     return ([self valid2DViewer:self.viewerCT] && [self valid2DViewer:self.viewerPET]);
 }
 
-#pragma mark - Transform ROIs
-
--(void)copyTransformsAndMirrorActives {
-    [self copyTransformROIsFromCT2PET];
-    [self mirrorActiveROIUsingLengthROIinViewerController:self.viewerPET in3D:YES];
-    //create a dummy roi just for the name
-    ROI *aROI = [self.viewerPET newROI:tPlain];
-    aROI.name = self.textMirrorROIname.stringValue;
-    //roiSetPixels:(ROI*)aROI :(short)allRois :(BOOL)propagateIn4D :(BOOL)outside :(float)minValue :(float)maxValue :(float)newValue;
-    [self.viewerPET roiSetPixels: aROI :SetPixels_SameName :NO :NO :-FLT_MAX :FLT_MAX :FLT_MAX :YES];
-    aROI.name = self.textActiveROIname.stringValue;
-    [self.viewerPET roiSetPixels: aROI :SetPixels_SameName :NO :NO :-FLT_MAX :FLT_MAX :FLT_MAX :YES];
-    [self.viewerPET needsDisplayUpdate];
-    [self.viewerCT needsDisplayUpdate];
-
+#pragma mark - Create Active
+- (IBAction)growRegionClicked:(id)sender {
+    [self.viewerPET.window makeKeyAndOrderFront:nil];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+    [[NSApplication sharedApplication] sendAction:@selector(segmentationTest:) to:self.viewerPET from:self.viewerPET];
+#pragma clang diagnostic pop
 }
 
+#pragma mark - Create Transforms
 -(IBAction)addTransformROIs:(NSButton *)sender {
     [self addBoundingTransformROIS];
 }
@@ -226,6 +200,14 @@
         [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
     }
 }
+-(void)displayImageInCTandPETviewersWithIndex:(short)index {
+    //do it in ImageView for correct order
+    [self.viewerPET.imageView setIndexWithReset:index :YES];
+    [self.viewerCT.imageView setIndexWithReset:index :YES];
+    [self.viewerPET needsDisplayUpdate];
+    [self.viewerCT needsDisplayUpdate];
+    
+}
 -(void)addLengthROIWithStart:(NSPoint)startPoint andEnd:(NSPoint)endPoint toViewerController:(ViewerController *)active2Dwindow atIndex:(NSUInteger)index {
     ROI *newR = [active2Dwindow newROI:tMesure];
     [newR.points addObject:[active2Dwindow newPoint:startPoint.x :startPoint.y]];
@@ -245,14 +227,205 @@
     return point;
 }
 
--(void)displayImageInCTandPETviewersWithIndex:(short)index {
-    //do it in ImageView for correct order
-    [self.viewerPET.imageView setIndexWithReset:index :YES];
-    [self.viewerCT.imageView setIndexWithReset:index :YES];
+- (IBAction)completeTransformSeries:(NSButton *)sender {
+    [self completeLengthROIseriesInCTWindow];
+}
+-(void)completeLengthROIseriesInCTWindow {
+    if ([self valid2DViewer:self.viewerCT])
+    {
+        NSMutableArray  *allROIsList = [self.viewerCT roiList];
+        NSMutableArray *indicesOfDCMPixWithMeasureROI = [NSMutableArray arrayWithCapacity:allROIsList.count];
+        NSMutableArray *measureROIs = [NSMutableArray arrayWithCapacity:allROIsList.count];
+        NSString *measureROIname;
+        measureROIname = self.textLengthROIname.stringValue;
+        
+        //collect up the ROIs
+        for (int index = 0;index<allROIsList.count; index++) {
+            ROI *measureROI = [MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure];
+            if (measureROI != nil) {
+                //measureROI.hidden = true;//self.segmentShowHideTransformMarkers.selectedSegment;
+                measureROI.offsetTextBox_x = 10000.0;
+                //rename the ROIS
+                measureROI.name = measureROIname;
+                [measureROIs addObject:measureROI];
+                [indicesOfDCMPixWithMeasureROI addObject:[NSNumber numberWithInt:index]];
+            }
+        }
+        switch (indicesOfDCMPixWithMeasureROI.count)
+        {
+            case 1:
+                switch (self.segmentExtendSingleLengthHow.selectedSegment)
+            {
+                case ExtendSingleLengthUp:
+                    [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:self.viewerCT];
+                    break;
+                case ExtendSingleLengthDown:
+                    [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:self.viewerCT];
+                    break;
+                case ExtendSingleLengthBoth:
+                    [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:self.viewerCT];
+                    [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:self.viewerCT];
+                    break;
+            }
+            default:
+                //-1 as we go in pairs and so skip the last one
+                for (int roiNumber=0; roiNumber<indicesOfDCMPixWithMeasureROI.count-1; roiNumber++)
+                {
+                    [self completeLengthROIseriesForViewerController:self.viewerCT
+                    betweenROI1:[measureROIs objectAtIndex:roiNumber]
+                    andROI2:[measureROIs objectAtIndex:roiNumber+1]
+                    inThisRange:NSMakeRange(
+                        //skip the start index it already has aROI
+                        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]+1,
+                        //length = difference between end and start minus 1 to skip last one
+                        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber+1] unsignedIntegerValue]-
+                        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]-1)
+                     ];
+                }
+                break;
+        }
+        [self.viewerCT needsDisplayUpdate];
+    }
+}
+-(void)addROI:(ROI *)roi toSeriesFromStart:(NSUInteger)start toEnd:(NSUInteger)end inViewerController:(ViewerController *)active2Dwindow {
+    NSMutableArray  *allROIsList = [active2Dwindow roiList];
+    for (NSUInteger nextIndex = start; nextIndex<end; nextIndex++) {
+        ROI *roi2copy = [roi copy];
+        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
+    }
+}
+
+
+#pragma mark - Do Mirror
+- (IBAction)mirrorActiveROI3D:(NSButton *)sender {
+    [self copyTransformsAndMirrorActives];
+}
+-(void)copyTransformsAndMirrorActives {
+    [self copyTransformROIsFromCT2PET];
+    [self mirrorActiveROIUsingLengthROIinViewerController:self.viewerPET in3D:YES];
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
-    
+
 }
+-(void)copyTransformROIsFromCT2PET {
+    if ([self validCTandPETwindows]
+        && ([[self.viewerCT pixList] count] == [[self.viewerPET pixList] count])
+        && ([[self.viewerCT roiList] count] == [[self.viewerCT pixList] count])
+        && ([[self.viewerPET roiList] count] == [[self.viewerPET pixList] count]))
+    {
+        NSString *transformname = self.textLengthROIname.stringValue;
+        [self.viewerPET deleteSeriesROIwithName:transformname];
+        for (NSUInteger pixIndex = 0; pixIndex<[[self.viewerCT roiList] count]; pixIndex++) {
+            DCMPix *curDCM = [[self.viewerPET pixList] objectAtIndex: pixIndex];
+            for (ROI *roi in [[self.viewerCT roiList] objectAtIndex:pixIndex]) {
+                if ([roi.name isEqualToString:transformname]) {
+                    [self addROI:[roi copy] intoPix:curDCM atSlice:pixIndex inViewer:self.viewerPET hidden:YES];
+                }
+            }
+        }
+    }
+}
+-(void)addROI:(ROI *)roi2add intoPix:(DCMPix *)pix atSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
+    //Correct the origin only if the orientation is the same
+    roi2add.pix = pix;
+    roi2add.hidden = hidden;
+    [roi2add setOriginAndSpacing: pix.pixelSpacingX :pix.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: pix]];
+    [[viewer.roiList objectAtIndex: slice] addObject: roi2add];
+    roi2add.curView = viewer.imageView;
+    [roi2add recompute];
+
+}
+-(void)mirrorActiveROIUsingLengthROIinViewerController:(ViewerController *)active2Dwindow in3D:(BOOL)in3D {
+    [active2Dwindow deleteSeriesROIwithName:self.textMirrorROIname.stringValue];
+    
+    NSMutableArray  *roisInAllSlices  = [active2Dwindow roiList];
+    NSUInteger startSlice = 0;
+    NSUInteger endSlice = 0;
+    if (in3D) {
+        startSlice = 0;
+        endSlice = roisInAllSlices.count;
+    }
+    else
+    {
+        startSlice = [[active2Dwindow imageView] curImage];
+        endSlice = startSlice+1;
+        
+    }
+    
+    for (NSUInteger slice=startSlice; slice<endSlice; slice++) {
+        NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];
+        ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tPlain];
+        //rename to keep in sync
+        roi2Clone.name = self.textActiveROIname.stringValue;
+        NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
+        
+        if ([MirrorROIPluginFilterOC validDeltaPoint:deltaXY]) {
+            ROI *createdROI = [[ROI alloc]
+                               initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
+                               textWidth:roi2Clone.textureWidth
+                               textHeight:roi2Clone.textureHeight
+                               textName:self.textMirrorROIname.stringValue
+                               positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
+                               positionY:roi2Clone.textureUpLeftCornerY+deltaXY.y
+                               spacingX:roi2Clone.pixelSpacingX
+                               spacingY:roi2Clone.pixelSpacingY
+                               imageOrigin:roi2Clone.imageOrigin];
+            [roisInThisSlice addObject:createdROI];
+            [active2Dwindow needsDisplayUpdate];
+            
+        //add a polygon to the CT window
+            ROI *poly = [self.viewerPET convertBrushROItoPolygon:createdROI numPoints:200];
+            poly.name = [createdROI.name stringByAppendingString:@"poly"];
+            DCMPix *curDCM_CT = [[self.viewerCT pixList] objectAtIndex: slice];
+            [self addROI:poly intoPix:curDCM_CT atSlice:slice inViewer:self.viewerCT hidden:NO];
+
+            
+            
+        }
+    }
+    [self burnActiveAndMirrorROIsIntoCTViewer];
+}
+
+-(void)burnActiveAndMirrorROIsIntoCTViewer {
+    //create a dummy roi just for the name
+    [self.viewerPET revertSeries:nil];
+    ROI *aROI = [self.viewerPET newROI:tPlain];
+    aROI.name = self.textMirrorROIname.stringValue;
+    //roiSetPixels:(ROI*)aROI :(short)allRois :(BOOL)propagateIn4D :(BOOL)outside :(float)minValue :(float)maxValue :(float)newValue;
+    [self.viewerPET roiSetPixels: aROI :SetPixels_SameName :NO :NO :-FLT_MAX :FLT_MAX :FLT_MAX :YES];
+    aROI.name = self.textActiveROIname.stringValue;
+    [self.viewerPET roiSetPixels: aROI :SetPixels_SameName :NO :NO :-FLT_MAX :FLT_MAX :FLT_MAX :YES];
+    [self.viewerPET needsDisplayUpdate];
+    [self.viewerCT needsDisplayUpdate];
+
+}
+
+- (IBAction)roiMoveLeft:(id)sender {
+    
+    short activeSlice = [[self.viewerPET imageView] curImage];
+    NSMutableArray  *roisInAllSlices  = [self.viewerPET roiList];
+    NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:activeSlice];
+    for (int i=0; i<roisInThisSlice.count;i++) {
+        ROI *roi2Clone = [roisInThisSlice objectAtIndex:i];
+        if ([roi2Clone.name isEqualToString:self.textMirrorROIname.stringValue]) {
+            ROI *createdROI = [[ROI alloc]
+                               initWithTexture:roi2Clone.textureBuffer
+                               textWidth:roi2Clone.textureWidth
+                               textHeight:roi2Clone.textureHeight
+                               textName:roi2Clone.name
+                               positionX:roi2Clone.textureUpLeftCornerX+10
+                               positionY:roi2Clone.textureUpLeftCornerY
+                               spacingX:roi2Clone.pixelSpacingX
+                               spacingY:roi2Clone.pixelSpacingY
+                               imageOrigin:roi2Clone.imageOrigin];
+            [roisInThisSlice replaceObjectAtIndex:i withObject:createdROI];
+            [self.viewerPET needsDisplayUpdate];
+            break;
+        }
+    }
+    [self burnActiveAndMirrorROIsIntoCTViewer];
+}
+
 
 #pragma mark - *********************
 - (IBAction)unassignCTwindowClicked:(id)sender {
@@ -305,33 +478,7 @@
 
 
 
--(void)copyTransformROIsFromCT2PET {
-        if ([self validCTandPETwindows]
-            && ([[self.viewerCT pixList] count] == [[self.viewerPET pixList] count])
-            && ([[self.viewerCT roiList] count] == [[self.viewerCT pixList] count])
-            && ([[self.viewerPET roiList] count] == [[self.viewerPET pixList] count]))
-        {
-            NSString *transformname = self.textLengthROIname.stringValue;
-            [self.viewerPET deleteSeriesROIwithName:transformname];
-            for (NSUInteger pixIndex = 0; pixIndex<[[self.viewerCT roiList] count]; pixIndex++) {
-                DCMPix *curDCM = [[self.viewerPET pixList] objectAtIndex: pixIndex];
-                for (ROI *roi in [[self.viewerCT roiList] objectAtIndex:pixIndex]) {
-                    if ([roi.name isEqualToString:transformname]) {
-                        ROI *unpackedROI = [roi copy];
-                        //Correct the origin only if the orientation is the same
-                        unpackedROI.pix = curDCM;
-                        unpackedROI.hidden = YES;
-                        [unpackedROI setOriginAndSpacing: curDCM.pixelSpacingX :curDCM.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: curDCM]];
-                        [[self.viewerPET.roiList objectAtIndex: pixIndex] addObject: unpackedROI];
-                        unpackedROI.curView = self.viewerPET.imageView;
-                        [unpackedROI recompute];
-                    }
-                }
-            }
-        }
-}
--(IBAction)buttonAction:(NSButton *)sender
-{
+-(IBAction)buttonAction:(NSButton *)sender {
     //Transform Front
     if ([sender.identifier isEqualToString:@"pasteTransformFront"]) {
         [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:self.textLengthROIname.stringValue ofROIMirrorType:Transform_ROI];
@@ -399,21 +546,6 @@
 
 
 
-#pragma mark Transform markers
-
-- (IBAction)callExtendLengthSeries:(NSButton *)sender {
-    switch (sender.tag) {
-        case Front_Window:
-            [self completeLengthROIseriesForViewerController:[ViewerController frontMostDisplayed2DViewer]];
-            break;
-        case CT_Window:
-            [self completeLengthROIseriesForViewerController:self.viewerCT];
-            break;
-            
-        default:
-            break;
-    }
-}
 
 
 #pragma mark - MirrorROIPluginFilterOC
@@ -622,75 +754,7 @@
     return tempBuffer;
 }
 
--(void)addROI:(ROI *)roi toSeriesFromStart:(NSUInteger)start toEnd:(NSUInteger)end inViewerController:(ViewerController *)active2Dwindow
-{
-    //ViewerController	*active2Dwindow = [ViewerController frontMostDisplayed2DViewer] /*self->viewerController*/;
-    NSMutableArray  *allROIsList = [active2Dwindow roiList];
-    for (NSUInteger nextIndex = start; nextIndex<end; nextIndex++) {
-        ROI *roi2copy = roi;
-        [[allROIsList objectAtIndex:nextIndex] addObject:roi2copy];
-    }
-}
 
-
--(void)completeLengthROIseriesForViewerController:(ViewerController *)active2Dwindow
-{
-    if ([self valid2DViewer:active2Dwindow])
-    {
-        NSMutableArray  *allROIsList = [active2Dwindow roiList];
-        NSMutableArray *indicesOfDCMPixWithMeasureROI = [NSMutableArray arrayWithCapacity:allROIsList.count];
-        NSMutableArray *measureROIs = [NSMutableArray arrayWithCapacity:allROIsList.count];
-        NSString *measureROIname;
-        measureROIname = self.textLengthROIname.stringValue;
-        
-        //collect up the ROIs
-        for (int index = 0;index<allROIsList.count; index++) {
-            ROI *measureROI = [MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure];
-            if (measureROI != nil) {
-                //measureROI.hidden = true;//self.segmentShowHideTransformMarkers.selectedSegment;
-                measureROI.offsetTextBox_x = 10000.0;
-                //rename the ROIS
-                measureROI.name = measureROIname;
-                [measureROIs addObject:measureROI];
-                [indicesOfDCMPixWithMeasureROI addObject:[NSNumber numberWithInt:index]];
-            }
-        }
-        
-        switch (indicesOfDCMPixWithMeasureROI.count)
-        {
-            case 1:
-                switch (self.segmentExtendSingleLengthHow.selectedSegment)
-            {
-                case ExtendSingleLengthUp:
-                    [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:active2Dwindow];
-                    break;
-                case ExtendSingleLengthDown:
-                    [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:active2Dwindow];
-                    break;
-                case ExtendSingleLengthBoth:
-                    [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:active2Dwindow];
-                    [self addROI:[[measureROIs firstObject] copy] toSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:active2Dwindow];
-                    break;
-            }
-            default:
-                //-1 as we go in pairs and so skip the last one
-                for (int roiNumber=0; roiNumber<indicesOfDCMPixWithMeasureROI.count-1; roiNumber++)
-                {
-                    [self completeLengthROIseriesForViewerController:active2Dwindow
-                                                         betweenROI1:[measureROIs objectAtIndex:roiNumber]
-                                                             andROI2:[measureROIs objectAtIndex:roiNumber+1]
-                                                         inThisRange:NSMakeRange(
-                                                        //skip the start index it already has aROI
-                                                        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]+1,
-                                                        //length = difference between end and start minus 1 to skip last one
-                                                        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber+1] unsignedIntegerValue]-
-                                                        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]-1)];
-                }
-                break;
-        }
-        [active2Dwindow needsDisplayUpdate];
-    }
-}
 
 -(void)doShowHideTransformMarkersForViewerController:(ViewerController *)active2Dwindow
 {
@@ -740,47 +804,6 @@
     }
 }
 
--(void)mirrorActiveROIUsingLengthROIinViewerController:(ViewerController *)active2Dwindow in3D:(BOOL)in3D
-{
-    [active2Dwindow deleteSeriesROIwithName:self.textMirrorROIname.stringValue];
-
-    NSMutableArray  *roisInAllSlices  = [active2Dwindow roiList];
-    NSUInteger startSlice = 0;
-    NSUInteger endSlice = 0;
-    if (in3D) {
-        startSlice = 0;
-        endSlice = roisInAllSlices.count;
-    }
-    else
-    {
-        startSlice = [[active2Dwindow imageView] curImage];
-        endSlice = startSlice+1;
-
-    }
-    
-    for (NSUInteger slice=startSlice; slice<endSlice; slice++) {
-        NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];
-        ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tPlain];
-        //rename to keep in sync
-        roi2Clone.name = self.textActiveROIname.stringValue;
-        NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
-        
-        if ([MirrorROIPluginFilterOC validDeltaPoint:deltaXY]) {
-            ROI *createdROI = [[ROI alloc]
-                               initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
-                               textWidth:roi2Clone.textureWidth
-                               textHeight:roi2Clone.textureHeight
-                               textName:self.textMirrorROIname.stringValue
-                               positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
-                               positionY:roi2Clone.textureUpLeftCornerY+deltaXY.y
-                               spacingX:roi2Clone.pixelSpacingX
-                               spacingY:roi2Clone.pixelSpacingY
-                               imageOrigin:roi2Clone.imageOrigin];
-            [roisInThisSlice addObject:createdROI];
-            [active2Dwindow needsDisplayUpdate];
-        }
-    }
-}
 
 
 +(NSPoint)deltaXYFromROI:(ROI*)roi2Clone usingLengthROI:(ROI*)lengthROI
