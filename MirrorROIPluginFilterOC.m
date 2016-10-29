@@ -106,27 +106,27 @@
     {
         self.viewerCT = viewController;
         if (viewController != nil) {
-            self.boxCT.title = viewController.window.title;
+            self.labelCT.stringValue = viewController.window.title;
         }
         else
         {
-            self.boxCT.title = @"Not Assigned";
+            self.labelCT.stringValue = @"Not Assigned";
         }
     }
     if (type == PET_Window || type == CTandPET_Windows)
     {
         self.viewerPET = viewController;
         if (viewController != nil) {
-            self.boxPET.title = viewController.window.title;
+            self.labelPET.stringValue = viewController.window.title;
         }
         else
         {
-            self.boxPET.title = @"Not Assigned";
+            self.labelPET.stringValue = @"Not Assigned";
         }
     }
-    self.boxCT.hidden = self.viewerCT == nil || self.viewerPET == nil;
-    self.boxPET.hidden = self.boxCT.hidden;
-    self.boxTop.hidden = self.boxCT.hidden;
+    //self.boxCT.hidden = self.viewerCT == nil || self.viewerPET == nil;
+    //self.boxPET.hidden = self.boxCT.hidden;
+    //self.boxTop.hidden = self.boxCT.hidden;
     
 }
 -(void)smartAssignCTPETwindows {

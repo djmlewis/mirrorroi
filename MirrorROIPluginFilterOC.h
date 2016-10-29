@@ -64,9 +64,8 @@ typedef enum : NSInteger {
 @property (nonatomic, retain) ViewerController *viewerCT;
 @property (nonatomic, retain) ViewerController *viewerPET;
 
-@property (assign) IBOutlet NSBox *boxCT;
-@property (assign) IBOutlet NSBox *boxPET;
-@property (assign) IBOutlet NSBox *boxTop;
+@property (assign) IBOutlet NSTextField *labelCT;
+@property (assign) IBOutlet NSTextField *labelPET;
 
 /*
 @property (assign) IBOutlet NSTextField *labelCTviewerName;
