@@ -33,6 +33,18 @@ typedef enum : NSUInteger {
     Front_Window = 5
 } ViewerWindow_Type;
 
+typedef enum : NSUInteger {
+    MoveROI_Reset = 0,
+    MoveROI_Up = 1,
+    MoveROI_Right = 2,
+    MoveROI_Down = 3,
+    MoveROI_Left = 4,
+    MoveROI_NE = 5,
+    MoveROI_SE = 6,
+    MoveROI_SW = 7,
+    MoveROI_NW = 8
+} MoveROIDirection;
+
 typedef enum : NSInteger {
     tAnyROItype = -999
 } ROItypeAdditional;
@@ -60,6 +72,7 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSTextField *labelCTviewerName;
 @property (assign) IBOutlet NSTextField *labelPETviewerName;
 */
+@property (assign) IBOutlet NSSlider *sliderMovevalue;
 
 @property (assign) IBOutlet NSTextField *textLengthROIname;
 @property (assign) IBOutlet NSTextField *textMirrorROIname;

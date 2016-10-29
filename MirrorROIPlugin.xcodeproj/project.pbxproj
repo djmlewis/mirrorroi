@@ -26,8 +26,16 @@
 		8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE41DAE6039007C14A9 /* CT.png */; };
 		8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE51DAE6039007C14A9 /* PET.png */; };
 		8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */; };
+		8EF2964C1DC4D17200CC638E /* Erase Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EF2964B1DC4D17200CC638E /* Erase Filled-50.png */; };
+		8EF2964E1DC4D1ED00CC638E /* downward.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EF2964D1DC4D1ED00CC638E /* downward.png */; };
+		8EF296511DC4D2FB00CC638E /* end.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EF2964F1DC4D2FB00CC638E /* end.png */; };
+		8EF296521DC4D2FB00CC638E /* start.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EF296501DC4D2FB00CC638E /* start.png */; };
 		ABA48A650680BB600089EB4F /* MirrorROIPluginFilterOC.h in Headers */ = {isa = PBXBuildFile; fileRef = ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */; };
 		ABA48A670680BB690089EB4F /* MirrorROIPluginFilterOC.m in Sources */ = {isa = PBXBuildFile; fileRef = ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */; };
+		C52843BA1DC250BA00371742 /* aup.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843B91DC250BA00371742 /* aup.png */; };
+		C52843BE1DC250C600371742 /* adownward.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BB1DC250C600371742 /* adownward.png */; };
+		C52843BF1DC250C600371742 /* aleft.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BC1DC250C600371742 /* aleft.png */; };
+		C52843C01DC250C600371742 /* aright.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BD1DC250C600371742 /* aright.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,9 +62,17 @@
 		8EDB8BE51DAE6039007C14A9 /* PET.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PET.png; path = PNGs/PET.png; sourceTree = "<group>"; };
 		8EE909791DA15C6F00AFAA00 /* unusedCode */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = unusedCode; sourceTree = "<group>"; };
 		8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MirrorROIPlugin_Prefix.pch; sourceTree = "<group>"; };
+		8EF2964B1DC4D17200CC638E /* Erase Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Erase Filled-50.png"; path = "PNGs/Erase Filled-50.png"; sourceTree = "<group>"; };
+		8EF2964D1DC4D1ED00CC638E /* downward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = downward.png; path = PNGs/downward.png; sourceTree = "<group>"; };
+		8EF2964F1DC4D2FB00CC638E /* end.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = end.png; path = PNGs/end.png; sourceTree = "<group>"; };
+		8EF296501DC4D2FB00CC638E /* start.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = start.png; path = PNGs/start.png; sourceTree = "<group>"; };
 		AB5D36050680E57E00F4007A /* MirrorROIPlugin.osirixplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MirrorROIPlugin.osirixplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MirrorROIPluginFilterOC.h; sourceTree = "<group>"; };
-		ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = MirrorROIPluginFilterOC.m; sourceTree = "<group>"; };
+		ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MirrorROIPluginFilterOC.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		C52843B91DC250BA00371742 /* aup.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aup.png; path = PNGs/aup.png; sourceTree = "<group>"; };
+		C52843BB1DC250C600371742 /* adownward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = adownward.png; path = PNGs/adownward.png; sourceTree = "<group>"; };
+		C52843BC1DC250C600371742 /* aleft.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aleft.png; path = PNGs/aleft.png; sourceTree = "<group>"; };
+		C52843BD1DC250C600371742 /* aright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aright.png; path = PNGs/aright.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,6 +166,14 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				8EF2964F1DC4D2FB00CC638E /* end.png */,
+				8EF296501DC4D2FB00CC638E /* start.png */,
+				8EF2964D1DC4D1ED00CC638E /* downward.png */,
+				8EF2964B1DC4D17200CC638E /* Erase Filled-50.png */,
+				C52843B91DC250BA00371742 /* aup.png */,
+				C52843BB1DC250C600371742 /* adownward.png */,
+				C52843BC1DC250C600371742 /* aleft.png */,
+				C52843BD1DC250C600371742 /* aright.png */,
 				8EB2BDF41DB80A7500D7B0CA /* growRegion.png */,
 				8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */,
 				8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */,
@@ -246,17 +270,25 @@
 			files = (
 				8E8EA0B31DB5329D00940C46 /* Flip Vertical Filled-50.png in Resources */,
 				8E8EA0B51DB5329D00940C46 /* Hide Filled-50.png in Resources */,
+				8EF296511DC4D2FB00CC638E /* end.png in Resources */,
 				8EB2BDED1DB78D6A00D7B0CA /* Brush.png in Resources */,
 				8EDB8BE21DAE5EE9007C14A9 /* Upload-50.png in Resources */,
 				8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */,
+				8EF2964C1DC4D17200CC638E /* Erase Filled-50.png in Resources */,
 				8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */,
+				C52843BA1DC250BA00371742 /* aup.png in Resources */,
 				8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */,
+				8EF296521DC4D2FB00CC638E /* start.png in Resources */,
+				8EF2964E1DC4D1ED00CC638E /* downward.png in Resources */,
 				8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */,
+				C52843BE1DC250C600371742 /* adownward.png in Resources */,
 				8E9D96351DB3E35A00259579 /* Link-50.png in Resources */,
 				8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */,
 				8EB2BDEC1DB78D6A00D7B0CA /* Closed Polygon.png in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
+				C52843BF1DC250C600371742 /* aleft.png in Resources */,
 				8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */,
+				C52843C01DC250C600371742 /* aright.png in Resources */,
 				8EDB8BE31DAE5EE9007C14A9 /* Download-50.png in Resources */,
 				8EB2BDE91DB789FE00D7B0CA /* Length.png in Resources */,
 				8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */,
