@@ -46,6 +46,22 @@
         [active2Dwindow needsDisplayUpdate];
     }
 }
+- (void)deleteROIsInSlice:(NSUInteger)slice inViewerController:(ViewerController *)active2Dwindow withName:(NSString *)name {
+    if (active2Dwindow && slice<active2Dwindow.roiList.count)
+    {
+        NSMutableArray *roisInSlice = [active2Dwindow.roiList objectAtIndex:slice];
+        NSMutableIndexSet *set = [NSMutableIndexSet indexSet];
+        for (NSUInteger i = 0; i<[roisInSlice count];i++) {
+            ROI *roi = [roisInSlice objectAtIndex:i];
+            if ([roi.name isEqualToString:name]) {
+                [set addIndex:i];
+            }
+        }
+        if (set.count>0) {
+            [roisInSlice removeObjectsAtIndexes:set];
+        }
+    }
+}
 - (void)deleteAllROIsFromViewerController:(ViewerController *)active2Dwindow {
     if (active2Dwindow)
     {
@@ -344,7 +360,7 @@
         for (NSUInteger pixIndex = 0; pixIndex<[[self.viewerCT roiList] count]; pixIndex++) {
             for (ROI *roi in [[self.viewerCT roiList] objectAtIndex:pixIndex]) {
                 if ([roi.name isEqualToString:transformname]) {
-                    [self addROI2Pix:[roi copy] atSlice:pixIndex inViewer:self.viewerPET hidden:NO];
+                    [self addROI2Pix:[roi copy] atSlice:pixIndex inViewer:self.viewerPET hidden:YES];
                 }
             }
         }
@@ -399,24 +415,26 @@
     for (NSUInteger slice=startSlice; slice<endSlice; slice++) {
         NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];
         ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tPlain];
-        //rename to keep in sync
-        roi2Clone.name = self.textActiveROIname.stringValue;
-        NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
-        
-        if ([MirrorROIPluginFilterOC validDeltaPoint:deltaXY]) {
-            ROI *createdROI = [[ROI alloc]
-                               initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
-                               textWidth:roi2Clone.textureWidth
-                               textHeight:roi2Clone.textureHeight
-                               textName:self.textMirrorROIname.stringValue
-                               positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
-                               positionY:roi2Clone.textureUpLeftCornerY-deltaXY.y
-                               spacingX:roi2Clone.pixelSpacingX
-                               spacingY:roi2Clone.pixelSpacingY
-                               imageOrigin:roi2Clone.imageOrigin];
-            [roisInThisSlice addObject:createdROI];
-            [self addPolygonsToCTAtSlice:slice forActiveROI:roi2Clone mirroredROI:createdROI];
-
+        if (roi2Clone != nil) {
+            //rename to keep in sync
+            roi2Clone.name = self.textActiveROIname.stringValue;
+            NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
+            
+            if ([MirrorROIPluginFilterOC validDeltaPoint:deltaXY]) {
+                ROI *createdROI = [[ROI alloc]
+                                   initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
+                                   textWidth:roi2Clone.textureWidth
+                                   textHeight:roi2Clone.textureHeight
+                                   textName:self.textMirrorROIname.stringValue
+                                   positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
+                                   positionY:roi2Clone.textureUpLeftCornerY-deltaXY.y
+                                   spacingX:roi2Clone.pixelSpacingX
+                                   spacingY:roi2Clone.pixelSpacingY
+                                   imageOrigin:roi2Clone.imageOrigin];
+                [roisInThisSlice addObject:createdROI];
+                [self addPolygonsToCTAtSlice:slice forActiveROI:roi2Clone mirroredROI:createdROI];
+                
+            }
         }
     }
     [self.viewerPET needsDisplayUpdate];
@@ -426,12 +444,12 @@
 -(void)addPolygonsToCTAtSlice:(NSUInteger)slice forActiveROI:(ROI *)activeROI mirroredROI:(ROI *)mirroredROI {
     if (activeROI) {
         ROI *aP = [self.viewerPET convertBrushROItoPolygon:activeROI numPoints:50];
-        aP.name = self.textActiveROIname.stringValue;
+        aP.name = activeROI.name;//self.textActiveROIname.stringValue;
         [self addROI2Pix:aP atSlice:slice inViewer:self.viewerCT hidden:NO];
     }
     if (mirroredROI) {
         ROI *mP = [self.viewerPET convertBrushROItoPolygon:mirroredROI numPoints:50];
-        mP.name = self.textMirrorROIname.stringValue;
+        mP.name = mirroredROI.name;//self.textMirrorROIname.stringValue;
         [self addROI2Pix:mP atSlice:slice inViewer:self.viewerCT hidden:NO];
     }
 
@@ -518,16 +536,13 @@
             [roisInThisSlice replaceObjectAtIndex:i withObject:createdROI];
             
             //move the polygon
-            NSInteger indexOfPolyROI = [self indexOfFirstROIInFromViewerController:self.viewerCT atSlice:i withName:self.textMirrorROIname.stringValue];
-            if (indexOfPolyROI != NSNotFound) {
-                ROI *newPoly = [self.viewerPET convertBrushROItoPolygon:createdROI numPoints:50];
-                newPoly.name = self.textMirrorROIname.stringValue;
-                [self replaceROIInPix:newPoly atIndex:indexOfPolyROI inSlice:i inViewer:self.viewerCT hidden:NO];
-            }
+            [self deleteROIsInSlice:activeSlice inViewerController:self.viewerCT withName:createdROI.name];
+            [self addPolygonsToCTAtSlice:activeSlice forActiveROI:nil mirroredROI:createdROI];
+
+            
             break;
         }
     }
-    //[self burnActiveAndMirrorROIsIntoCTViewer];
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
 }
