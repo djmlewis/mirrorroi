@@ -21,6 +21,10 @@
 		8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */; };
 		8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */; };
 		8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF41DB80A7500D7B0CA /* growRegion.png */; };
+		8EC18BA01DCA1F42002CEF58 /* right.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EC18B9C1DCA1F42002CEF58 /* right.png */; };
+		8EC18BA11DCA1F42002CEF58 /* left.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EC18B9D1DCA1F42002CEF58 /* left.png */; };
+		8EC18BA21DCA1F42002CEF58 /* up.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EC18B9E1DCA1F42002CEF58 /* up.png */; };
+		8EC18BA31DCA1F42002CEF58 /* downward.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EC18B9F1DCA1F42002CEF58 /* downward.png */; };
 		8ED845F81DC6295D008399F1 /* SW.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F41DC6295D008399F1 /* SW.png */; };
 		8ED845F91DC6295D008399F1 /* SE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F51DC6295D008399F1 /* SE.png */; };
 		8ED845FA1DC6295D008399F1 /* NE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F61DC6295D008399F1 /* NE.png */; };
@@ -39,6 +43,7 @@
 		C52843BE1DC250C600371742 /* adownward.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BB1DC250C600371742 /* adownward.png */; };
 		C52843BF1DC250C600371742 /* aleft.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BC1DC250C600371742 /* aleft.png */; };
 		C52843C01DC250C600371742 /* aright.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BD1DC250C600371742 /* aright.png */; };
+		C5DCDAEE1DCA169B005A97CD /* MirrorROISwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DCDAED1DCA169B005A97CD /* MirrorROISwift.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -58,6 +63,10 @@
 		8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length +.png"; path = "PNGs/Length +.png"; sourceTree = "<group>"; };
 		8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = Tiling2x1.pdf; path = PNGs/Tiling2x1.pdf; sourceTree = "<group>"; };
 		8EB2BDF41DB80A7500D7B0CA /* growRegion.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = growRegion.png; path = PNGs/growRegion.png; sourceTree = "<group>"; };
+		8EC18B9C1DCA1F42002CEF58 /* right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = right.png; path = PNGs/right.png; sourceTree = "<group>"; };
+		8EC18B9D1DCA1F42002CEF58 /* left.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = left.png; path = PNGs/left.png; sourceTree = "<group>"; };
+		8EC18B9E1DCA1F42002CEF58 /* up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = up.png; path = PNGs/up.png; sourceTree = "<group>"; };
+		8EC18B9F1DCA1F42002CEF58 /* downward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = downward.png; path = PNGs/downward.png; sourceTree = "<group>"; };
 		8ED845F41DC6295D008399F1 /* SW.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = SW.png; path = PNGs/SW.png; sourceTree = "<group>"; };
 		8ED845F51DC6295D008399F1 /* SE.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = SE.png; path = PNGs/SE.png; sourceTree = "<group>"; };
 		8ED845F61DC6295D008399F1 /* NE.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NE.png; path = PNGs/NE.png; sourceTree = "<group>"; };
@@ -79,6 +88,8 @@
 		C52843BB1DC250C600371742 /* adownward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = adownward.png; path = PNGs/adownward.png; sourceTree = "<group>"; };
 		C52843BC1DC250C600371742 /* aleft.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aleft.png; path = PNGs/aleft.png; sourceTree = "<group>"; };
 		C52843BD1DC250C600371742 /* aright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aright.png; path = PNGs/aright.png; sourceTree = "<group>"; };
+		C5DCDAEC1DCA1699005A97CD /* MirrorROIPlugin-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MirrorROIPlugin-Bridging-Header.h"; sourceTree = "<group>"; };
+		C5DCDAED1DCA169B005A97CD /* MirrorROISwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MirrorROISwift.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,6 +183,10 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				8EC18B9C1DCA1F42002CEF58 /* right.png */,
+				8EC18B9D1DCA1F42002CEF58 /* left.png */,
+				8EC18B9E1DCA1F42002CEF58 /* up.png */,
+				8EC18B9F1DCA1F42002CEF58 /* downward.png */,
 				8ED845F41DC6295D008399F1 /* SW.png */,
 				8ED845F51DC6295D008399F1 /* SE.png */,
 				8ED845F61DC6295D008399F1 /* NE.png */,
@@ -206,6 +221,8 @@
 			children = (
 				ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */,
 				ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */,
+				C5DCDAED1DCA169B005A97CD /* MirrorROISwift.swift */,
+				C5DCDAEC1DCA1699005A97CD /* MirrorROIPlugin-Bridging-Header.h */,
 			);
 			name = MirrorROIPlugin;
 			sourceTree = "<group>";
@@ -251,7 +268,12 @@
 		089C1669FE841209C02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0810;
+				TargetAttributes = {
+					8D5B49AC048680CD000E48DA = {
+						LastSwiftMigration = 0810;
+					};
+				};
 			};
 			buildConfigurationList = CE6A9A9408AC841300D0C1EE /* Build configuration list for PBXProject "MirrorROIPlugin" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -277,17 +299,21 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EC18BA21DCA1F42002CEF58 /* up.png in Resources */,
 				8ED845FA1DC6295D008399F1 /* NE.png in Resources */,
 				8E8EA0B31DB5329D00940C46 /* Flip Vertical Filled-50.png in Resources */,
 				8E8EA0B51DB5329D00940C46 /* Hide Filled-50.png in Resources */,
 				8EF296511DC4D2FB00CC638E /* end.png in Resources */,
 				8ED845F81DC6295D008399F1 /* SW.png in Resources */,
+				8EC18BA11DCA1F42002CEF58 /* left.png in Resources */,
 				8EB2BDED1DB78D6A00D7B0CA /* Brush.png in Resources */,
+				8EC18BA01DCA1F42002CEF58 /* right.png in Resources */,
 				8EDB8BE21DAE5EE9007C14A9 /* Upload-50.png in Resources */,
 				8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */,
 				8EF2964C1DC4D17200CC638E /* Erase Filled-50.png in Resources */,
 				8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */,
 				C52843BA1DC250BA00371742 /* aup.png in Resources */,
+				8EC18BA31DCA1F42002CEF58 /* downward.png in Resources */,
 				8ED845F91DC6295D008399F1 /* SE.png in Resources */,
 				8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */,
 				8EF296521DC4D2FB00CC638E /* start.png in Resources */,
@@ -325,6 +351,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				ABA48A670680BB690089EB4F /* MirrorROIPluginFilterOC.m in Sources */,
+				C5DCDAEE1DCA169B005A97CD /* MirrorROISwift.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -353,6 +380,7 @@
 		CE6A9A9108AC841300D0C1EE /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUGGING_SYMBOLS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -372,6 +400,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Plug-ins";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
@@ -384,6 +413,9 @@
 				PRODUCT_BUNDLE_IDENTIFIER = djml.eu;
 				PRODUCT_NAME = MirrorROIPlugin;
 				SECTORDER_FLAGS = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "MirrorROIPlugin-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -397,6 +429,7 @@
 		CE6A9A9208AC841300D0C1EE /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -411,6 +444,7 @@
 				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "@executable_path/../Plug-ins";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = Bundle;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
@@ -423,6 +457,8 @@
 				PRODUCT_BUNDLE_IDENTIFIER = djml.eu;
 				PRODUCT_NAME = MirrorROIPlugin;
 				SECTORDER_FLAGS = "";
+				SWIFT_OBJC_BRIDGING_HEADER = "MirrorROIPlugin-Bridging-Header.h";
+				SWIFT_VERSION = 3.0;
 				WARNING_CFLAGS = (
 					"-Wmost",
 					"-Wno-four-char-constants",
@@ -484,6 +520,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.12;
 				SDKROOT = macosx;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 			};
 			name = Deployment;
 		};

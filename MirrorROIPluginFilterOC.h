@@ -42,7 +42,8 @@ typedef enum : NSUInteger {
     MoveROI_NE = 5,
     MoveROI_SE = 6,
     MoveROI_SW = 7,
-    MoveROI_NW = 8
+    MoveROI_NW = 8,
+    MoveROI_Accept = 9
 } MoveROIDirection;
 
 typedef enum : NSInteger {
@@ -55,10 +56,7 @@ typedef enum : NSInteger {
     SetPixels_AllPixels = 2
 } SetROIpixel_Options;
 
-@interface MirrorROIPluginFilterOC : PluginFilter {
-    
-
-}
+@interface MirrorROIPluginFilterOC : PluginFilter {}
 
 
 @property (nonatomic, retain) ViewerController *viewerCT;
@@ -66,23 +64,14 @@ typedef enum : NSInteger {
 
 @property (assign) IBOutlet NSTextField *labelCT;
 @property (assign) IBOutlet NSTextField *labelPET;
+@property (assign) IBOutlet NSView *viewTools;
 
-/*
-@property (assign) IBOutlet NSTextField *labelCTviewerName;
-@property (assign) IBOutlet NSTextField *labelPETviewerName;
-*/
 @property (assign) IBOutlet NSSlider *sliderMovevalue;
 
 @property (assign) IBOutlet NSTextField *textLengthROIname;
 @property (assign) IBOutlet NSTextField *textMirrorROIname;
 @property (assign) IBOutlet NSTextField *textActiveROIname;
 @property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
-@property (assign) IBOutlet NSSegmentedControl *segmentShowHideTransformMarkers;
-@property (assign) IBOutlet NSSegmentedControl *segmentTransformMarkersPasteCopySliceOrSeries;
-
-@property (nonatomic, retain) NSMutableArray *arrayTransformROIsCopied;
-@property (nonatomic, retain) NSMutableArray *arrayMirrorROIsCopied;
-@property (nonatomic, retain) NSMutableArray *arrayActiveROIsCopied;
 
 - (long) filterImage:(NSString*) menuName;
 
