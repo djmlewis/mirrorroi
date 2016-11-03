@@ -33,8 +33,6 @@
 		8EF2964C1DC4D17200CC638E /* Erase Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EF2964B1DC4D17200CC638E /* Erase Filled-50.png */; };
 		8EF296511DC4D2FB00CC638E /* end.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EF2964F1DC4D2FB00CC638E /* end.png */; };
 		8EF296521DC4D2FB00CC638E /* start.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EF296501DC4D2FB00CC638E /* start.png */; };
-		ABA48A650680BB600089EB4F /* MirrorROIPluginFilterOC.h in Headers */ = {isa = PBXBuildFile; fileRef = ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */; };
-		ABA48A670680BB690089EB4F /* MirrorROIPluginFilterOC.m in Sources */ = {isa = PBXBuildFile; fileRef = ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */; };
 		C52843BA1DC250BA00371742 /* aup.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843B91DC250BA00371742 /* aup.png */; };
 		C52843BE1DC250C600371742 /* adownward.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BB1DC250C600371742 /* adownward.png */; };
 		C52843BF1DC250C600371742 /* aleft.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BC1DC250C600371742 /* aleft.png */; };
@@ -51,6 +49,8 @@
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E27A7BD1DA1AECD00BDC497 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MirrorWindow.xib; sourceTree = "<group>"; };
 		8E8EA0B11DB531ED00940C46 /* Hide Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Hide Filled-50.png"; path = "PNGs/Hide Filled-50.png"; sourceTree = "<group>"; };
+		8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MirrorROIPluginFilterOC.m; sourceTree = "<group>"; };
+		8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MirrorROIPluginFilterOC.h; sourceTree = "<group>"; };
 		8E9D96341DB3E35A00259579 /* Link-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Link-50.png"; path = "PNGs/Link-50.png"; sourceTree = "<group>"; };
 		8EB2BDE81DB789FE00D7B0CA /* Length.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Length.png; path = PNGs/Length.png; sourceTree = "<group>"; };
 		8EB2BDEA1DB78D6A00D7B0CA /* Closed Polygon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Closed Polygon.png"; path = "PNGs/Closed Polygon.png"; sourceTree = "<group>"; };
@@ -74,8 +74,6 @@
 		8EF2964F1DC4D2FB00CC638E /* end.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = end.png; path = PNGs/end.png; sourceTree = "<group>"; };
 		8EF296501DC4D2FB00CC638E /* start.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = start.png; path = PNGs/start.png; sourceTree = "<group>"; };
 		AB5D36050680E57E00F4007A /* MirrorROIPlugin.osirixplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MirrorROIPlugin.osirixplugin; sourceTree = BUILT_PRODUCTS_DIR; };
-		ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = MirrorROIPluginFilterOC.h; sourceTree = "<group>"; };
-		ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MirrorROIPluginFilterOC.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		C52843B91DC250BA00371742 /* aup.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aup.png; path = PNGs/aup.png; sourceTree = "<group>"; };
 		C52843BB1DC250C600371742 /* adownward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = adownward.png; path = PNGs/adownward.png; sourceTree = "<group>"; };
 		C52843BC1DC250C600371742 /* aleft.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aleft.png; path = PNGs/aleft.png; sourceTree = "<group>"; };
@@ -207,8 +205,8 @@
 		AB2C26750677B0C400A08910 /* MirrorROIPlugin */ = {
 			isa = PBXGroup;
 			children = (
-				ABA48A640680BB600089EB4F /* MirrorROIPluginFilterOC.h */,
-				ABA48A660680BB690089EB4F /* MirrorROIPluginFilterOC.m */,
+				8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */,
+				8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */,
 				C5DCDAED1DCA169B005A97CD /* MirrorROISwift.swift */,
 				C5DCDAEC1DCA1699005A97CD /* MirrorROIPlugin-Bridging-Header.h */,
 			);
@@ -223,7 +221,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */,
-				ABA48A650680BB600089EB4F /* MirrorROIPluginFilterOC.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -334,7 +331,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ABA48A670680BB690089EB4F /* MirrorROIPluginFilterOC.m in Sources */,
 				C5DCDAEE1DCA169B005A97CD /* MirrorROISwift.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -364,6 +360,7 @@
 		CE6A9A9108AC841300D0C1EE /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUGGING_SYMBOLS = YES;
@@ -413,6 +410,7 @@
 		CE6A9A9208AC841300D0C1EE /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (

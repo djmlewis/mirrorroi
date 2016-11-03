@@ -6,10 +6,11 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="MirrorROIPluginFilterOC">
+        <customObject id="-2" userLabel="File's Owner" customClass="MirrorROISwift" customModule="MirrorROIPlugin" customModuleProvider="target">
             <connections>
                 <outlet property="labelCT" destination="cDS-xb-qwA" id="NOs-y9-mrQ"/>
-                <outlet property="labelPET" destination="LyE-Lv-WwT" id="f4R-Pd-eGE"/>
+                <outlet property="labelPET" destination="LyE-Lv-WwT" id="2oy-jg-6HK"/>
+                <outlet property="panelTop" destination="GiC-Tf-amF" id="dJe-3m-jPP"/>
                 <outlet property="segmentExtendSingleLengthHow" destination="88u-5a-rgk" id="wAt-1Z-jEh"/>
                 <outlet property="sliderMovevalue" destination="HiA-Ci-29d" id="T4l-wf-LHw"/>
                 <outlet property="textActiveROIname" destination="8jC-GY-IP6" id="bx2-ng-bza"/>
@@ -378,7 +379,7 @@
                             <font key="font" metaFont="system"/>
                         </buttonCell>
                         <connections>
-                            <action selector="assignWindowClicked:" target="-2" id="og7-f6-cy1"/>
+                            <action selector="testy:" target="-2" id="bmx-CT-CNj"/>
                         </connections>
                     </button>
                     <button verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="wKP-oY-cWA">
@@ -423,7 +424,7 @@
                     </textField>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="-5434.5" y="-1988.5"/>
+            <point key="canvasLocation" x="-6004" y="-2156"/>
         </window>
     </objects>
     <resources>

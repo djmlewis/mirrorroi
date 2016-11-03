@@ -6,7 +6,10 @@
 //
 
 #import "MirrorROIPluginFilterOC.h"
+#import <OsiriXAPI/PluginFilter.h>
 #import <OsiriXAPI/Notifications.h>
+
+#import "MirrorROIPlugin-Swift.h"
 
 @implementation MirrorROIPluginFilterOC
 
@@ -460,7 +463,8 @@
     return deltaPoint;
 }
 +(BOOL)validDeltaPoint:(NSPoint)delta2test{
-    return delta2test.x != CGFLOAT_MAX && delta2test.y != CGFLOAT_MAX;
+    BOOL ok = [MirrorROISwift okDeltaPointWithDelta2test:delta2test];
+    return ok;
 }
 - (IBAction)moveMirrorROI:(NSButton *)sender {
     int moveX = 0;
