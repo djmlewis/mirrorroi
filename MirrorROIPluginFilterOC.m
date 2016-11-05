@@ -9,7 +9,6 @@
 #import <OsiriXAPI/PluginFilter.h>
 #import <OsiriXAPI/Notifications.h>
 
-#import "MirrorROIPlugin-Swift.h"
 
 @implementation MirrorROIPluginFilterOC
 
@@ -21,6 +20,9 @@
 }
 
 - (long) filterImage:(NSString*) menuName {
+    //Some defaults
+    [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
+    
     //essential use this with OWNER specified so it looks in OUR bundle for resource.
     NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
     [windowController showWindow:self];
@@ -30,7 +32,7 @@
         self.textActiveROIname.stringValue = activeName;
     }
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixCloseViewerNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerDidChangeNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerControllerDidLoadImagesNotification object:nil];
     
     BOOL completedOK = YES;
     
@@ -39,7 +41,8 @@
 }
 
 -(void)handleNotification:(NSNotification *)notification {
-    if ([notification.name isEqualToString:OsirixViewerDidChangeNotification] || [notification.name isEqualToString:OsirixCloseViewerNotification]) {
+    if ([notification.name isEqualToString:OsirixViewerControllerDidLoadImagesNotification] ||
+        [notification.name isEqualToString:OsirixCloseViewerNotification]) {
         [self smartAssignCTPETwindows];
     }
 }
@@ -73,6 +76,17 @@
         }
     }
     [self showHideControlsIfViewersValid];
+    [MirrorROIPluginFilterOC deselectROIforViewer:viewController];
+
+}
++(void)deselectROIforViewer:(ViewerController *)viewController {
+    if (viewController != nil) {
+        //make a dummy just for the tag == 0 for deselect
+        NSMenuItem *dummy = [[NSMenuItem alloc] init];
+        dummy.tag = 0;
+        [viewController roiSelectDeselectAll:dummy];
+        [viewController needsDisplayUpdate];
+    }
 }
 -(void)showHideControlsIfViewersValid {
     self.viewTools.hidden = ![self validCTandPETwindows];
@@ -143,7 +157,8 @@
         [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:YES]
                              andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:NO]
                  toViewerController:self.viewerCT
-                            atIndex:indexesWithROI.firstIndex];
+                            atIndex:indexesWithROI.firstIndex
+                         withType:Transform_ROI_Placed];
         [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
         
     }
@@ -151,12 +166,14 @@
         [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:YES]
                              andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:NO]
                  toViewerController:self.viewerCT
-                            atIndex:indexesWithROI.firstIndex];
+                            atIndex:indexesWithROI.firstIndex
+                         withType:Transform_ROI_Placed];
         
         [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:YES]
                              andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:NO]
                  toViewerController:self.viewerCT
-                            atIndex:indexesWithROI.lastIndex];
+                            atIndex:indexesWithROI.lastIndex
+                         withType:Transform_ROI_Placed];
         
         [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
     }
@@ -169,12 +186,35 @@
     [self.viewerCT needsDisplayUpdate];
     
 }
--(void)addLengthROIWithStart:(NSPoint)startPoint andEnd:(NSPoint)endPoint toViewerController:(ViewerController *)active2Dwindow atIndex:(NSUInteger)index {
+-(void)addLengthROIWithStart:(NSPoint)startPoint andEnd:(NSPoint)endPoint toViewerController:(ViewerController *)active2Dwindow atIndex:(NSUInteger)index withType:(ROI_Type)type {
     ROI *newR = [active2Dwindow newROI:tMesure];
+    [self setROIcolour:newR forType:type];
     [newR.points addObject:[active2Dwindow newPoint:startPoint.x :startPoint.y]];
     [newR.points addObject:[active2Dwindow newPoint:endPoint.x :endPoint.y]];
     [[[active2Dwindow roiList] objectAtIndex:index] addObject:newR];
 }
+-(void)setROIcolour:(ROI *)roi forType:(ROI_Type)type {
+    NSColor *colour = [NSColor blackColor];
+    switch (type) {
+        case Active_ROI:
+            colour = [NSColor yellowColor];
+            break;
+        case Mirrored_ROI:
+            colour = [NSColor blueColor];
+            break;
+        case Transform_ROI_Placed:
+            colour = [NSColor greenColor];
+            break;
+        case Transform_Intercalated:
+            colour = [NSColor redColor];
+            break;
+        default:
+            break;
+    }
+    colour = [colour colorWithAlphaComponent:0.5];
+    [roi setNSColor:colour globally:NO];
+}
+
 -(NSPoint)pointForImageIndex:(short)index inWindow:(ViewerController *)vc start:(BOOL)start {
     NSPoint point = NSMakePoint(100.0, 100.0);
     CGFloat divisor = 0.3;//end
@@ -247,7 +287,6 @@
         [self.viewerCT needsDisplayUpdate];
     }
 }
-
 -(void)completeLengthROIseriesForViewerController:(ViewerController *)active2Dwindow betweenROI1:(ROI *)roi1 andROI2:(ROI *)roi2 inThisRange:(NSRange)rangeOfIndices{
     NSMutableArray  *allROIsList = [active2Dwindow roiList];
     MyPoint *roi1_Point1 = [roi1.points objectAtIndex:0];
@@ -267,7 +306,7 @@
     for (NSUInteger nextIndex = rangeOfIndices.location; nextIndex<rangeOfIndices.location+rangeOfIndices.length; nextIndex++)
     {
         ROI *newROI = [roi1 copy];
-        //[newROI setNSColor:[NSColor redColor]];
+        [self setROIcolour:newROI forType:Transform_Intercalated];
         [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
         [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
         [[allROIsList objectAtIndex:nextIndex] addObject:newROI];
@@ -279,7 +318,6 @@
         YincrementCurrent2 += Yincrement2;
     }
 }
-
 -(void)extendROI:(ROI *)roi withinSeriesFromStart:(NSUInteger)start toEnd:(NSUInteger)end inViewerController:(ViewerController *)active2Dwindow {
     NSMutableArray  *allROIsList = [active2Dwindow roiList];
     for (NSUInteger nextIndex = start; nextIndex<end; nextIndex++) {
@@ -302,7 +340,6 @@
         }
     }
 }
-
 
 #pragma mark - Do Mirror
 - (IBAction)mirrorActiveROI3D:(NSButton *)sender {
@@ -373,7 +410,6 @@
     }
 }
 -(void)mirrorActiveROIUsingLengthROIn3D:(BOOL)in3D {
-    
     NSMutableArray  *roisInAllSlices  = [self.viewerPET roiList];
     NSUInteger startSlice = 0;
     NSUInteger endSlice = 0;
@@ -399,6 +435,8 @@
         if (roi2Clone != nil) {
             //rename to keep in sync
             roi2Clone.name = self.textActiveROIname.stringValue;
+            [self setROIcolour:roi2Clone forType:Active_ROI];
+
             NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
             
             if ([MirrorROIPluginFilterOC validDeltaPoint:deltaXY]) {
@@ -412,30 +450,34 @@
                                    spacingX:roi2Clone.pixelSpacingX
                                    spacingY:roi2Clone.pixelSpacingY
                                    imageOrigin:roi2Clone.imageOrigin];
-                [roisInThisSlice addObject:createdROI];
+                [self setROIcolour:createdROI forType:Mirrored_ROI];
+               [roisInThisSlice addObject:createdROI];
                 [self addPolygonsToCTAtSlice:slice forActiveROI:roi2Clone mirroredROI:createdROI];
-                
             }
         }
     }
+    [MirrorROIPluginFilterOC deselectROIforViewer:self.viewerPET];
+    [MirrorROIPluginFilterOC deselectROIforViewer:self.viewerCT];
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
 }
 -(void)addPolygonsToCTAtSlice:(NSUInteger)slice forActiveROI:(ROI *)activeROI mirroredROI:(ROI *)mirroredROI {
     if (activeROI) {
-        ROI *aP = [self.viewerPET convertBrushROItoPolygon:activeROI numPoints:50];
-        aP.name = activeROI.name;//self.textActiveROIname.stringValue;
+        ROI *aP = [activeROI copy];
+        //[self.viewerPET convertBrushROItoPolygon:activeROI numPoints:50];
+        //aP.name = activeROI.name;
         [self addROI2Pix:aP atSlice:slice inViewer:self.viewerCT hidden:NO];
     }
     if (mirroredROI) {
-        ROI *mP = [self.viewerPET convertBrushROItoPolygon:mirroredROI numPoints:50];
-        mP.name = mirroredROI.name;//self.textMirrorROIname.stringValue;
+        ROI *mP = [mirroredROI copy];
+        //self.viewerPET convertBrushROItoPolygon:mirroredROI numPoints:50];
+        //mP.name = mirroredROI.name;
         [self addROI2Pix:mP atSlice:slice inViewer:self.viewerCT hidden:NO];
     }
 
 }
 +(NSPoint)deltaXYFromROI:(ROI*)roi2Clone usingLengthROI:(ROI*)lengthROI {
-    NSPoint deltaPoint = NSMakePoint(CGFLOAT_MAX, CGFLOAT_MAX);
+    NSPoint deltaPoint = [self anInvalidDeltaPoint];
     
     if (roi2Clone && lengthROI) {
         NSPoint ipsi = [(MyPoint *)[lengthROI.points objectAtIndex:0] point];
@@ -450,8 +492,8 @@
          delta = width+translation+ 2*offset
          offset = (ipsi - ROI leftX)-width
          
-         width                 translation                offset      */
-        deltaPoint.x = roi2Clone.textureWidth+(contra.x-ipsi.x)+(2.0*(ipsi.x-roi2Clone.textureUpLeftCornerX-roi2Clone.textureWidth));
+                        width                    translation            offset      */
+        deltaPoint.x = (roi2Clone.textureWidth)+(contra.x-ipsi.x)+(2.0*(ipsi.x-roi2Clone.textureUpLeftCornerX-roi2Clone.textureWidth));
         
         
         /*
@@ -463,9 +505,12 @@
     return deltaPoint;
 }
 +(BOOL)validDeltaPoint:(NSPoint)delta2test{
-    BOOL ok = [MirrorROISwift okDeltaPointWithDelta2test:delta2test];
-    return ok;
+    return delta2test.x != CGFLOAT_MAX && delta2test.y != CGFLOAT_MAX;
 }
++(NSPoint)anInvalidDeltaPoint{
+    return NSMakePoint(CGFLOAT_MAX, CGFLOAT_MAX);
+}
+
 - (IBAction)moveMirrorROI:(NSButton *)sender {
     int moveX = 0;
     int moveY = 0;
@@ -562,7 +607,7 @@
         case Active_ROI:
             [self deleteROIsFromViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
             break;
-        case Transform_ROI:
+        case Transform_ROI_Placed:
             [self deleteROIsFromViewerController:self.viewerPET withName:self.textLengthROIname.stringValue];
             [self deleteROIsFromViewerController:self.viewerCT withName:self.textLengthROIname.stringValue];
         case AllROI_CT:

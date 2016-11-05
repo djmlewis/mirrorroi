@@ -12,11 +12,8 @@
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */; };
 		8E8EA0B31DB5329D00940C46 /* Flip Vertical Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */; };
-		8E8EA0B51DB5329D00940C46 /* Hide Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E8EA0B11DB531ED00940C46 /* Hide Filled-50.png */; };
-		8E9D96351DB3E35A00259579 /* Link-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E9D96341DB3E35A00259579 /* Link-50.png */; };
-		8EB2BDE91DB789FE00D7B0CA /* Length.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDE81DB789FE00D7B0CA /* Length.png */; };
-		8EB2BDEC1DB78D6A00D7B0CA /* Closed Polygon.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDEA1DB78D6A00D7B0CA /* Closed Polygon.png */; };
-		8EB2BDED1DB78D6A00D7B0CA /* Brush.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDEB1DB78D6A00D7B0CA /* Brush.png */; };
+		8E9C42631DCE03C200E2A40C /* MirrorROIPluginFilterOC.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */; };
+		8E9C42641DCE03C600E2A40C /* MirrorROIPluginFilterOC.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */; };
 		8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDEE1DB7A03900D7B0CA /* Length extend.png */; };
 		8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */; };
 		8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */; };
@@ -25,8 +22,6 @@
 		8ED845F91DC6295D008399F1 /* SE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F51DC6295D008399F1 /* SE.png */; };
 		8ED845FA1DC6295D008399F1 /* NE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F61DC6295D008399F1 /* NE.png */; };
 		8ED845FB1DC6295D008399F1 /* NW.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F71DC6295D008399F1 /* NW.png */; };
-		8EDB8BE21DAE5EE9007C14A9 /* Upload-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDE1DAE5EE9007C14A9 /* Upload-50.png */; };
-		8EDB8BE31DAE5EE9007C14A9 /* Download-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDF1DAE5EE9007C14A9 /* Download-50.png */; };
 		8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE41DAE6039007C14A9 /* CT.png */; };
 		8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE51DAE6039007C14A9 /* PET.png */; };
 		8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */; };
@@ -37,7 +32,6 @@
 		C52843BE1DC250C600371742 /* adownward.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BB1DC250C600371742 /* adownward.png */; };
 		C52843BF1DC250C600371742 /* aleft.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BC1DC250C600371742 /* aleft.png */; };
 		C52843C01DC250C600371742 /* aright.png in Resources */ = {isa = PBXBuildFile; fileRef = C52843BD1DC250C600371742 /* aright.png */; };
-		C5DCDAEE1DCA169B005A97CD /* MirrorROISwift.swift in Sources */ = {isa = PBXBuildFile; fileRef = C5DCDAED1DCA169B005A97CD /* MirrorROISwift.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -48,13 +42,8 @@
 		8420023112E829A200E1E9CE /* OsiriXAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OsiriXAPI.framework; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E27A7BD1DA1AECD00BDC497 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MirrorWindow.xib; sourceTree = "<group>"; };
-		8E8EA0B11DB531ED00940C46 /* Hide Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Hide Filled-50.png"; path = "PNGs/Hide Filled-50.png"; sourceTree = "<group>"; };
 		8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MirrorROIPluginFilterOC.m; sourceTree = "<group>"; };
 		8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MirrorROIPluginFilterOC.h; sourceTree = "<group>"; };
-		8E9D96341DB3E35A00259579 /* Link-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Link-50.png"; path = "PNGs/Link-50.png"; sourceTree = "<group>"; };
-		8EB2BDE81DB789FE00D7B0CA /* Length.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Length.png; path = PNGs/Length.png; sourceTree = "<group>"; };
-		8EB2BDEA1DB78D6A00D7B0CA /* Closed Polygon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Closed Polygon.png"; path = "PNGs/Closed Polygon.png"; sourceTree = "<group>"; };
-		8EB2BDEB1DB78D6A00D7B0CA /* Brush.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Brush.png; path = PNGs/Brush.png; sourceTree = "<group>"; };
 		8EB2BDEE1DB7A03900D7B0CA /* Length extend.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length extend.png"; path = "PNGs/Length extend.png"; sourceTree = "<group>"; };
 		8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length +.png"; path = "PNGs/Length +.png"; sourceTree = "<group>"; };
 		8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = Tiling2x1.pdf; path = PNGs/Tiling2x1.pdf; sourceTree = "<group>"; };
@@ -64,8 +53,6 @@
 		8ED845F61DC6295D008399F1 /* NE.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NE.png; path = PNGs/NE.png; sourceTree = "<group>"; };
 		8ED845F71DC6295D008399F1 /* NW.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NW.png; path = PNGs/NW.png; sourceTree = "<group>"; };
 		8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled-50.png"; path = "PNGs/Flip Vertical Filled-50.png"; sourceTree = "<group>"; };
-		8EDB8BDE1DAE5EE9007C14A9 /* Upload-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Upload-50.png"; path = "PNGs/Upload-50.png"; sourceTree = "<group>"; };
-		8EDB8BDF1DAE5EE9007C14A9 /* Download-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Download-50.png"; path = "PNGs/Download-50.png"; sourceTree = "<group>"; };
 		8EDB8BE41DAE6039007C14A9 /* CT.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = CT.png; path = PNGs/CT.png; sourceTree = "<group>"; };
 		8EDB8BE51DAE6039007C14A9 /* PET.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PET.png; path = PNGs/PET.png; sourceTree = "<group>"; };
 		8EE909791DA15C6F00AFAA00 /* unusedCode */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = unusedCode; sourceTree = "<group>"; };
@@ -78,8 +65,6 @@
 		C52843BB1DC250C600371742 /* adownward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = adownward.png; path = PNGs/adownward.png; sourceTree = "<group>"; };
 		C52843BC1DC250C600371742 /* aleft.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aleft.png; path = PNGs/aleft.png; sourceTree = "<group>"; };
 		C52843BD1DC250C600371742 /* aright.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aright.png; path = PNGs/aright.png; sourceTree = "<group>"; };
-		C5DCDAEC1DCA1699005A97CD /* MirrorROIPlugin-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MirrorROIPlugin-Bridging-Header.h"; sourceTree = "<group>"; };
-		C5DCDAED1DCA169B005A97CD /* MirrorROISwift.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MirrorROISwift.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -188,16 +173,9 @@
 				8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */,
 				8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */,
 				8EB2BDEE1DB7A03900D7B0CA /* Length extend.png */,
-				8EB2BDEA1DB78D6A00D7B0CA /* Closed Polygon.png */,
-				8EB2BDEB1DB78D6A00D7B0CA /* Brush.png */,
-				8EB2BDE81DB789FE00D7B0CA /* Length.png */,
-				8E9D96341DB3E35A00259579 /* Link-50.png */,
 				8EDB8BE41DAE6039007C14A9 /* CT.png */,
 				8EDB8BE51DAE6039007C14A9 /* PET.png */,
 				8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */,
-				8EDB8BDE1DAE5EE9007C14A9 /* Upload-50.png */,
-				8EDB8BDF1DAE5EE9007C14A9 /* Download-50.png */,
-				8E8EA0B11DB531ED00940C46 /* Hide Filled-50.png */,
 			);
 			name = PNGs;
 			sourceTree = "<group>";
@@ -207,8 +185,6 @@
 			children = (
 				8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */,
 				8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */,
-				C5DCDAED1DCA169B005A97CD /* MirrorROISwift.swift */,
-				C5DCDAEC1DCA1699005A97CD /* MirrorROIPlugin-Bridging-Header.h */,
 			);
 			name = MirrorROIPlugin;
 			sourceTree = "<group>";
@@ -221,6 +197,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */,
+				8E9C42641DCE03C600E2A40C /* MirrorROIPluginFilterOC.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -286,11 +263,8 @@
 			files = (
 				8ED845FA1DC6295D008399F1 /* NE.png in Resources */,
 				8E8EA0B31DB5329D00940C46 /* Flip Vertical Filled-50.png in Resources */,
-				8E8EA0B51DB5329D00940C46 /* Hide Filled-50.png in Resources */,
 				8EF296511DC4D2FB00CC638E /* end.png in Resources */,
 				8ED845F81DC6295D008399F1 /* SW.png in Resources */,
-				8EB2BDED1DB78D6A00D7B0CA /* Brush.png in Resources */,
-				8EDB8BE21DAE5EE9007C14A9 /* Upload-50.png in Resources */,
 				8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */,
 				8EF2964C1DC4D17200CC638E /* Erase Filled-50.png in Resources */,
 				8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */,
@@ -300,16 +274,12 @@
 				8EF296521DC4D2FB00CC638E /* start.png in Resources */,
 				8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */,
 				C52843BE1DC250C600371742 /* adownward.png in Resources */,
-				8E9D96351DB3E35A00259579 /* Link-50.png in Resources */,
 				8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */,
-				8EB2BDEC1DB78D6A00D7B0CA /* Closed Polygon.png in Resources */,
 				8ED845FB1DC6295D008399F1 /* NW.png in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
 				C52843BF1DC250C600371742 /* aleft.png in Resources */,
 				8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */,
 				C52843C01DC250C600371742 /* aright.png in Resources */,
-				8EDB8BE31DAE5EE9007C14A9 /* Download-50.png in Resources */,
-				8EB2BDE91DB789FE00D7B0CA /* Length.png in Resources */,
 				8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -331,7 +301,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				C5DCDAEE1DCA169B005A97CD /* MirrorROISwift.swift in Sources */,
+				8E9C42631DCE03C200E2A40C /* MirrorROIPluginFilterOC.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,7 +330,7 @@
 		CE6A9A9108AC841300D0C1EE /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUGGING_SYMBOLS = YES;
@@ -410,7 +380,7 @@
 		CE6A9A9208AC841300D0C1EE /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				CLANG_ENABLE_MODULES = YES;
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (

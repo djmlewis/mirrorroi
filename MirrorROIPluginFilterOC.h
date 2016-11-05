@@ -20,9 +20,10 @@ typedef enum : NSUInteger {
     Mirrored_ROI = 1,
     Active_ROI = 2,
     MirroredAndActive_ROI = 3,
-    Transform_ROI = 4,
+    Transform_ROI_Placed = 4,
     AllROI_CT = 5,
     AllROI_PET = 6,
+    Transform_Intercalated = 7
 } ROI_Type;
 
 typedef enum : NSUInteger {

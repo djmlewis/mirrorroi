@@ -46,8 +46,8 @@ public class MirrorROISwift: PluginFilter {
         if let activeName = UserDefaults().string(forKey: "growingRegionROIName") {
             self.textActiveROIname.stringValue = activeName
         }
-        NotificationCenter.default.addObserver(self, selector: #selector(handleNotification), name: NSNotification.Name.OsirixCloseViewer, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(handleNotification), name: NSNotification.Name.OsirixViewerControllerDidLoadImages, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(MirrorROISwift.handleNotification), name: NSNotification.Name.OsirixCloseViewer, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(MirrorROISwift.handleNotification), name: NSNotification.Name.OsirixViewerControllerDidLoadImages, object: nil)
 
         
         return 0
@@ -69,26 +69,23 @@ public class MirrorROISwift: PluginFilter {
         self.assignViewerWindow(viewController: nil, type: .CTandPET_Windows)
         //try to find
         while (i<self.viewerControllersList().count && (notfoundCT || notfoundPET)) {
-            if let vc = self.viewerControllersList()[i] as? ViewerController {
+            if let modeString = (self.viewerControllersList()[i] as? ViewerController)?.modality() {
                 //modality is a function
-                if let mode = vc.modality() {
-                    switch mode {
-                    case "CT":
-                        notfoundCT = false
-                        self.assignViewerWindow(viewController: vc, type: .CT_Window)
-                    case "PT":
-                        notfoundPET = false
-                        self.assignViewerWindow(viewController: vc, type: .PET_Window)
-                    default:
-                        break
-                    }
+                switch modeString {
+                case "CT":
+                    notfoundCT = false
+                    self.assignViewerWindow(viewController: (self.viewerControllersList()[i] as! ViewerController), type: .CT_Window)
+                case "PT":
+                    notfoundPET = false
+                    self.assignViewerWindow(viewController: (self.viewerControllersList()[i] as! ViewerController), type: .PET_Window)
+                default:
+                    break
                 }
             }
             i += 1;
         }
     }
 
-    
     func assignViewerWindow(viewController: ViewerController?, type:ViewerWindowType) {
         switch type {
         case .CT_Window:
@@ -140,23 +137,98 @@ public class MirrorROISwift: PluginFilter {
     
     
      @IBAction func assignWindowClicked(_ sender: NSButton) {
-        print(sender);
+        self.assignViewerWindow(viewController: ViewerController.frontMostDisplayed2DViewer(), type: ViewerWindowType(rawValue: sender.tag)!)
     }
 
      @IBAction func smartAssignCTPETwindowsClicked(_ sender: NSButton) {
-        print(sender);
+        self.smartAssignCTPETwindows()
 
     }
 
      @IBAction func growRegionClicked(_ sender: NSButton) {
-        print(sender);
-
+        self.viewerPET?.window?.makeKeyAndOrderFront(nil)
+        NSApplication.shared().sendAction(Selector(("segmentationTest:")), to: self.viewerPET, from: self.viewerPET)
     }
     
      @IBAction func addTransformROIs(_ sender: NSButton) {
-        print(sender);
+        self.addBoundingTransformROIS()
+    }
+    
+    
+    
+    func addBoundingTransformROIS() {
+        guard let viewCT = self.viewerCT, let viewPET = self.viewerPET else {
+                return
+        }
+        viewCT.setROIToolTag(tMesure)
+        viewCT.deleteSeriesROIwithName(self.textLengthROIname.stringValue)
+        
+        //find the first and last pixIndex with an ACTIVE ROI
+        let indexesWithROI = NSMutableIndexSet()
+        let activeROIname = self.textActiveROIname.stringValue
+        for pixIndex in 0..<viewPET.pixList().count {
+            let roiArray = (viewPET.roiList().object(at: pixIndex) as! NSMutableArray)
+            for roiIndex in 0..<roiArray.count {
+                let curROI = (roiArray.object(at: roiIndex) as! ROI)
+                if (curROI.name == activeROIname)
+                {
+                    indexesWithROI.add(pixIndex)
+                    break;
+                }
+            }
+        }
+        
+        if (indexesWithROI.count==1) {
+            self.addLengthROIWithStart(startPoint: self.pointForImageIndex(index: indexesWithROI.firstIndex, viewer: viewCT, start: true), endPoint: self.pointForImageIndex(index: indexesWithROI.firstIndex, viewer: viewCT, start: false), active2Dwindow: viewCT, index: indexesWithROI.firstIndex)
+            self.displayImageInCTandPETviewersWithIndex(index: indexesWithROI.firstIndex)
+        }
+        else if(indexesWithROI.count>1) {
+            self.addLengthROIWithStart(startPoint: self.pointForImageIndex(index: indexesWithROI.firstIndex, viewer: viewCT, start: true), endPoint: self.pointForImageIndex(index: indexesWithROI.firstIndex, viewer: viewCT, start: false), active2Dwindow: viewCT, index: indexesWithROI.firstIndex)
+            self.addLengthROIWithStart(startPoint: self.pointForImageIndex(index: indexesWithROI.lastIndex, viewer: viewCT, start: true), endPoint: self.pointForImageIndex(index: indexesWithROI.lastIndex, viewer: viewCT, start: false), active2Dwindow: viewCT, index: indexesWithROI.lastIndex)
+            self.displayImageInCTandPETviewersWithIndex(index: indexesWithROI.firstIndex)
+        }
+    }
+    
+    func displayImageInCTandPETviewersWithIndex(index:Int) {
+        //do it in ImageView for correct order
+        self.viewerPET?.imageView().setIndexWithReset(Int16(index), true)
+        self.viewerCT?.imageView().setIndexWithReset(Int16(index), true)
+        self.viewerPET?.needsDisplayUpdate()
+        self.viewerCT?.needsDisplayUpdate()
+    }
+
+    
+    func addLengthROIWithStart(startPoint:NSPoint, endPoint:NSPoint, active2Dwindow:ViewerController, index:Int) {
+
+        guard let newR = active2Dwindow.newROI(Int(tMesure.rawValue)) else {
+                return
+            }
+            newR.points.add(active2Dwindow.newPoint(Float(startPoint.x), Float(startPoint.y)))
+            newR.points.add(active2Dwindow.newPoint(Float(endPoint.x), Float(endPoint.y)))
+            //(active2Dwindow.roiList().object(at: index) as! NSMutableArray).add(newR)
 
     }
+
+    
+    func pointForImageIndex(index:Int, viewer:ViewerController, start:Bool)->NSPoint {
+        var point = NSMakePoint(0.0, 0.0)
+        var divisor:CGFloat = 0.3;//end
+        if (start) { divisor = 0.6;}//start
+        if (index < viewer.pixList().count) {
+            let h:CGFloat = CGFloat((viewer.pixList()[index] as! DCMPix).pheight)
+            let w:CGFloat = CGFloat((viewer.pixList()[index] as! DCMPix).pwidth)
+            point.y = h/2.0
+            point.x = w*divisor;
+        }
+        return point;
+    }
+
+    
+    
+    
+    
+    
+    
     
      @IBAction func completeTransformSeries(_ sender: NSButton) {
         print(sender);
