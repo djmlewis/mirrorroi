@@ -72,7 +72,31 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSTextField *textLengthROIname;
 @property (assign) IBOutlet NSTextField *textMirrorROIname;
 @property (assign) IBOutlet NSTextField *textActiveROIname;
+@property (assign) IBOutlet NSTextField *textActiveData;
+@property (assign) IBOutlet NSTextField *textMirroredData;
+
+
 @property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
+
+@property (assign) IBOutlet NSColorWell *colorWellActive;
+@property (assign) IBOutlet NSColorWell *colorWellMirrored;
+@property (assign) IBOutlet NSColorWell *colorWellTransformPlaced;
+@property (assign) IBOutlet NSColorWell *colorWellTransformIntercalated;
+
+
+@property (assign) IBOutlet NSView *viewMarkers;
+@property (assign) IBOutlet NSTextField *markerMeanActive;
+@property (assign) IBOutlet NSTextField *markerSDupActive;
+@property (assign) IBOutlet NSTextField *markerSDlowActive;
+@property (assign) IBOutlet NSTextField *markerMaxActive;
+@property (assign) IBOutlet NSTextField *markerMinActive;
+@property (assign) IBOutlet NSTextField *markerMeanMirrored;
+@property (assign) IBOutlet NSTextField *markerSDupMirrored;
+@property (assign) IBOutlet NSTextField *markerSDlowMirrored;
+@property (assign) IBOutlet NSTextField *markerMaxMirrored;
+@property (assign) IBOutlet NSTextField *markerMinMirrored;
+
+
 
 - (long) filterImage:(NSString*) menuName;
 

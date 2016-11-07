@@ -42,8 +42,8 @@
 		8420023112E829A200E1E9CE /* OsiriXAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OsiriXAPI.framework; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E27A7BD1DA1AECD00BDC497 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MirrorWindow.xib; sourceTree = "<group>"; };
-		8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MirrorROIPluginFilterOC.m; sourceTree = "<group>"; };
-		8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MirrorROIPluginFilterOC.h; sourceTree = "<group>"; };
+		8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MirrorROIPluginFilterOC.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = MirrorROIPluginFilterOC.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		8EB2BDEE1DB7A03900D7B0CA /* Length extend.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length extend.png"; path = "PNGs/Length extend.png"; sourceTree = "<group>"; };
 		8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length +.png"; path = "PNGs/Length +.png"; sourceTree = "<group>"; };
 		8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = Tiling2x1.pdf; path = PNGs/Tiling2x1.pdf; sourceTree = "<group>"; };

@@ -6,3 +6,8 @@
     #import <Foundation/Foundation.h>
     #import <AppKit/AppKit.h>
 #endif
+
+#define kColor_Active @"kColor_Active"
+#define kColor_Mirrored @"kColor_Mirrored"
+#define kColor_TransformPlaced @"kColor_TransformPlaced"
+#define kColor_TransformIntercalated @"kColor_TransformIntercalated"

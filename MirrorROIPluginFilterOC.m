@@ -16,6 +16,13 @@
 #pragma mark - Plugin
 
 - (void) initPlugin {
+    // Register the preference defaults early.
+    NSMutableDictionary *defaults = [NSMutableDictionary dictionary];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor yellowColor]] forKey:kColor_Active];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor blueColor]] forKey:kColor_Mirrored];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor greenColor]] forKey:kColor_TransformPlaced];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor redColor]] forKey:kColor_TransformIntercalated];
+    [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
 }
 
@@ -181,38 +188,20 @@
 -(void)displayImageInCTandPETviewersWithIndex:(short)index {
     //do it in ImageView for correct order
     [self.viewerPET.imageView setIndexWithReset:index :YES];
-    [self.viewerCT.imageView setIndexWithReset:index :YES];
+    //[self.viewerPET adjustSlider];
     [self.viewerPET needsDisplayUpdate];
+
+    [self.viewerCT.imageView setIndexWithReset:index :YES];
+    //[self.viewerCT adjustSlider];
     [self.viewerCT needsDisplayUpdate];
     
 }
 -(void)addLengthROIWithStart:(NSPoint)startPoint andEnd:(NSPoint)endPoint toViewerController:(ViewerController *)active2Dwindow atIndex:(NSUInteger)index withType:(ROI_Type)type {
     ROI *newR = [active2Dwindow newROI:tMesure];
-    [self setROIcolour:newR forType:type];
+    [MirrorROIPluginFilterOC  setROIcolour:newR forType:type];
     [newR.points addObject:[active2Dwindow newPoint:startPoint.x :startPoint.y]];
     [newR.points addObject:[active2Dwindow newPoint:endPoint.x :endPoint.y]];
     [[[active2Dwindow roiList] objectAtIndex:index] addObject:newR];
-}
--(void)setROIcolour:(ROI *)roi forType:(ROI_Type)type {
-    NSColor *colour = [NSColor blackColor];
-    switch (type) {
-        case Active_ROI:
-            colour = [NSColor yellowColor];
-            break;
-        case Mirrored_ROI:
-            colour = [NSColor blueColor];
-            break;
-        case Transform_ROI_Placed:
-            colour = [NSColor greenColor];
-            break;
-        case Transform_Intercalated:
-            colour = [NSColor redColor];
-            break;
-        default:
-            break;
-    }
-    colour = [colour colorWithAlphaComponent:0.5];
-    [roi setNSColor:colour globally:NO];
 }
 
 -(NSPoint)pointForImageIndex:(short)index inWindow:(ViewerController *)vc start:(BOOL)start {
@@ -306,7 +295,7 @@
     for (NSUInteger nextIndex = rangeOfIndices.location; nextIndex<rangeOfIndices.location+rangeOfIndices.length; nextIndex++)
     {
         ROI *newROI = [roi1 copy];
-        [self setROIcolour:newROI forType:Transform_Intercalated];
+        [MirrorROIPluginFilterOC  setROIcolour:newROI forType:Transform_Intercalated];
         [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
         [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
         [[allROIsList objectAtIndex:nextIndex] addObject:newROI];
@@ -435,7 +424,7 @@
         if (roi2Clone != nil) {
             //rename to keep in sync
             roi2Clone.name = self.textActiveROIname.stringValue;
-            [self setROIcolour:roi2Clone forType:Active_ROI];
+            [MirrorROIPluginFilterOC  setROIcolour:roi2Clone forType:Active_ROI];
 
             NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
             
@@ -450,7 +439,7 @@
                                    spacingX:roi2Clone.pixelSpacingX
                                    spacingY:roi2Clone.pixelSpacingY
                                    imageOrigin:roi2Clone.imageOrigin];
-                [self setROIcolour:createdROI forType:Mirrored_ROI];
+                [MirrorROIPluginFilterOC  setROIcolour:createdROI forType:Mirrored_ROI];
                [roisInThisSlice addObject:createdROI];
                 [self addPolygonsToCTAtSlice:slice forActiveROI:roi2Clone mirroredROI:createdROI];
             }
@@ -511,6 +500,26 @@
     return NSMakePoint(CGFLOAT_MAX, CGFLOAT_MAX);
 }
 
+#pragma mark - ROI functions
++(ROI*) roiFromList:(NSMutableArray *)roiList WithType:(int)type2Find{
+    for (ROI *roi in roiList) {
+        if (roi.type == type2Find){
+            return roi;}
+    }
+    return nil;
+}
++(NSMutableIndexSet *)indicesInViewer:(ViewerController *)viewer withROIofType:(int)type2Find {
+    NSMutableIndexSet *set = [NSMutableIndexSet indexSet];
+    for (NSUInteger roiIndex =0; roiIndex<viewer.roiList.count;roiIndex++) {
+        NSMutableArray *roisInSlice = [viewer.roiList objectAtIndex:roiIndex];
+        for (ROI *roi in roisInSlice) {
+            if (roi.type == type2Find){
+                [set addIndex:roiIndex];}
+            break;
+        }
+    }
+    return set;
+}
 - (IBAction)moveMirrorROI:(NSButton *)sender {
     int moveX = 0;
     int moveY = 0;
@@ -562,39 +571,20 @@
                                spacingX:roi2Clone.pixelSpacingX
                                spacingY:roi2Clone.pixelSpacingY
                                imageOrigin:roi2Clone.imageOrigin];
+            [createdROI setNSColor:roi2Clone.NSColor globally:NO];
             [roisInThisSlice replaceObjectAtIndex:i withObject:createdROI];
             
             //move the polygon
             [self deleteROIsInSlice:activeSlice inViewerController:self.viewerCT withName:createdROI.name];
             [self addPolygonsToCTAtSlice:activeSlice forActiveROI:nil mirroredROI:createdROI];
-
+            
             
             break;
         }
     }
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
-}
-
-#pragma mark - ROI functions
-+(ROI*) roiFromList:(NSMutableArray *)roiList WithType:(int)type2Find{
-    for (ROI *roi in roiList) {
-        if (roi.type == type2Find){
-            return roi;}
-    }
-    return nil;
-}
-+(NSMutableIndexSet *)indicesInViewer:(ViewerController *)viewer withROIofType:(int)type2Find {
-    NSMutableIndexSet *set = [NSMutableIndexSet indexSet];
-    for (NSUInteger roiIndex =0; roiIndex<viewer.roiList.count;roiIndex++) {
-        NSMutableArray *roisInSlice = [viewer.roiList objectAtIndex:roiIndex];
-        for (ROI *roi in roisInSlice) {
-            if (roi.type == type2Find){
-                [set addIndex:roiIndex];}
-            break;
-        }
-    }
-    return set;
+    [self refreshDisplayedDataForViewer:self.viewerCT];
 }
 
 #pragma mark - Delete ROIs
@@ -674,6 +664,103 @@
         }
     }
     return tempBuffer;
+}
+
+#pragma mark - Colour
+- (IBAction)colourWellAction:(NSColorWell *)sender {
+    [[NSUserDefaults standardUserDefaults] setObject:[NSArchiver archivedDataWithRootObject:sender.color] forKey:sender.identifier];
+}
++(NSColor *)colourFromData:(NSData *)data {
+    if (data != nil) return (NSColor *)[NSUnarchiver unarchiveObjectWithData:data];
+    return [NSColor blackColor];
+}
+
+-(void)setColourWellsToDefaults {
+    self.colorWellActive.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Active]];
+    self.colorWellMirrored.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Mirrored]];
+    self.colorWellTransformPlaced.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformPlaced]];
+    self.colorWellTransformIntercalated.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformIntercalated]];
+}
++(void)setROIcolour:(ROI *)roi forType:(ROI_Type)type {
+    NSColor *colour = [NSColor blackColor];
+    switch (type) {
+        case Active_ROI:
+            colour = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Active]];
+            break;
+        case Mirrored_ROI:
+            colour = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Mirrored]];
+            break;
+        case Transform_ROI_Placed:
+            colour = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformPlaced]];
+            break;
+        case Transform_Intercalated:
+            colour = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformIntercalated]];
+            break;
+        default:
+            break;
+    }
+    colour = [colour colorWithAlphaComponent:0.5];
+    [roi setNSColor:colour globally:NO];
+}
+
+
+#pragma mark - ROI Data
+- (IBAction)refreshDisplayedDataCTTapped:(NSButton *)sender {
+    [self refreshDisplayedDataForViewer:self.viewerCT];
+}
+- (void)refreshDisplayedDataForViewer:(ViewerController *)viewer{
+    ROI *activeRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textActiveROIname.stringValue];
+    ROI *mirroredRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textMirrorROIname.stringValue];
+    if (activeRoi != nil && mirroredRoi != nil) {
+        [activeRoi recompute];
+        [mirroredRoi recompute];
+
+        self.textActiveData.stringValue = [NSString stringWithFormat:@"%.0f±%.1f %.0f—%.0f", activeRoi.mean, activeRoi.dev, activeRoi.min, activeRoi.max];
+        self.textMirroredData.stringValue = [NSString stringWithFormat:@"%.0f±%.1f %.0f—%.0f", mirroredRoi.mean, mirroredRoi.dev, mirroredRoi.min, mirroredRoi.max];
+        //NSMutableArray *vals = [activeRoi dataValues];
+        //NSMutableDictionary *dic = [activeRoi dataString];
+        float margin = 20.0;
+        float minGrey = fminf(activeRoi.min, mirroredRoi.min);
+        minGrey = fminf(minGrey, mirroredRoi.mean-mirroredRoi.dev);
+        minGrey = fminf(minGrey, activeRoi.mean-activeRoi.dev);
+        float maxGrey = fmaxf(activeRoi.max, mirroredRoi.max);
+        maxGrey = fmaxf(maxGrey, mirroredRoi.mean+mirroredRoi.dev);
+        maxGrey = fmaxf(maxGrey, activeRoi.mean+activeRoi.dev);
+        float ratio = 0;
+        if (minGrey != maxGrey) {
+            ratio = (self.viewMarkers.frame.size.width-(2.0*margin))/(maxGrey-minGrey);
+        }
+        [self.markerMeanActive setFrameOrigin:NSMakePoint((activeRoi.mean-minGrey)*ratio+margin-(self.markerMeanActive.frame.size.width/2.0), self.markerMeanActive.frame.origin.y)];
+        [self.markerSDupActive setFrameOrigin:NSMakePoint((activeRoi.mean+activeRoi.dev-minGrey)*ratio+margin-(self.markerSDupActive.frame.size.width/2.0), self.markerSDupActive.frame.origin.y)];
+        [self.markerSDlowActive setFrameOrigin:NSMakePoint((activeRoi.mean-activeRoi.dev-minGrey)*ratio+margin-(self.markerSDlowActive.frame.size.width/2.0), self.markerSDlowActive.frame.origin.y)];
+        [self.markerMaxActive setFrameOrigin:NSMakePoint((activeRoi.max-minGrey)*ratio+margin-(self.markerMaxActive.frame.size.width/2.0), self.markerMaxActive.frame.origin.y)];
+        [self.markerMinActive setFrameOrigin:NSMakePoint((activeRoi.min-minGrey)*ratio+margin-(self.markerMinActive.frame.size.width/2.0), self.markerMinActive.frame.origin.y)];
+        
+        [self.markerMeanMirrored setFrameOrigin:NSMakePoint((mirroredRoi.mean-minGrey)*ratio+margin-(self.markerMeanMirrored.frame.size.width/2.0), self.markerMeanMirrored.frame.origin.y)];
+        [self.markerSDupMirrored setFrameOrigin:NSMakePoint((mirroredRoi.mean+mirroredRoi.dev-minGrey)*ratio+margin-(self.markerSDupMirrored.frame.size.width/2.0), self.markerSDupMirrored.frame.origin.y)];
+        [self.markerSDlowMirrored setFrameOrigin:NSMakePoint((mirroredRoi.mean-mirroredRoi.dev-minGrey)*ratio+margin-(self.markerSDlowMirrored.frame.size.width/2.0), self.markerSDlowMirrored.frame.origin.y)];
+        [self.markerMaxMirrored setFrameOrigin:NSMakePoint((mirroredRoi.max-minGrey)*ratio+margin-(self.markerMaxMirrored.frame.size.width/2.0), self.markerMaxMirrored.frame.origin.y)];
+        [self.markerMinMirrored setFrameOrigin:NSMakePoint((mirroredRoi.min-minGrey)*ratio+margin-(self.markerMinMirrored.frame.size.width/2.0), self.markerMinMirrored.frame.origin.y)];
+        self.viewMarkers.hidden = NO;
+    }
+    else
+    {
+        self.viewMarkers.hidden = YES;
+        self.textActiveData.stringValue = @"";
+        self.textMirroredData.stringValue = @"";
+    }
+}
+-(ROI *)ROIfromCurrentSliceInViewer:(ViewerController *)viewer withName:(NSString *)name {
+    for (ROI *roi in [[viewer roiList] objectAtIndex:[[viewer imageView] curImage]]) {
+        if ([roi.name isEqualToString:name]) {
+            return roi;
+        }
+    }
+    return nil;
+}
+
+- (IBAction)fuseDefusetapped:(NSButton *)sender {
+    [self.viewerCT blendWindows:[[NSMenuItem alloc] init]];
 }
 
 
