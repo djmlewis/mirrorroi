@@ -22,6 +22,12 @@
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor blueColor]] forKey:kColor_Mirrored];
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor greenColor]] forKey:kColor_TransformPlaced];
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor redColor]] forKey:kColor_TransformIntercalated];
+    [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
+    [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
+    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeDataDefault];
+    
+    
+    
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
 }
@@ -34,10 +40,6 @@
     NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
     [windowController showWindow:self];
     [self smartAssignCTPETwindows];
-    NSString *activeName = [[NSUserDefaults standardUserDefaults] stringForKey:@"growingRegionROIName"];
-    if (activeName) {
-        self.textActiveROIname.stringValue = activeName;
-    }
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixCloseViewerNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerControllerDidLoadImagesNotification object:nil];
     
@@ -128,10 +130,16 @@
 -(BOOL)validCTandPETwindows {
     return ([self valid2DViewer:self.viewerCT] && [self valid2DViewer:self.viewerPET]);
 }
+- (IBAction)fuseDefusetapped:(NSButton *)sender {
+    [self.viewerCT blendWindows:[[NSMenuItem alloc] init]];
+}
+
 
 #pragma mark - Create Active
 - (IBAction)growRegionClicked:(id)sender {
     [self.viewerPET.window makeKeyAndOrderFront:nil];
+    //[defaultValues setObject:NSLocalizedString(@"Growing Region", nil) forKey:@"growingRegionROIName"];
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
     [[NSApplication sharedApplication] sendAction:@selector(segmentationTest:) to:self.viewerPET from:self.viewerPET];
@@ -676,10 +684,12 @@
 }
 
 -(void)setColourWellsToDefaults {
+    /*
     self.colorWellActive.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Active]];
     self.colorWellMirrored.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Mirrored]];
     self.colorWellTransformPlaced.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformPlaced]];
     self.colorWellTransformIntercalated.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformIntercalated]];
+     */
 }
 +(void)setROIcolour:(ROI *)roi forType:(ROI_Type)type {
     NSColor *colour = [NSColor blackColor];
@@ -758,11 +768,92 @@
     }
     return nil;
 }
-
-- (IBAction)fuseDefusetapped:(NSButton *)sender {
-    [self.viewerCT blendWindows:[[NSMenuItem alloc] init]];
+- (IBAction)exportROIdataTapped:(NSButton *)sender {
+    [self exportROIdataForType:sender.tag];
 }
 
+-(void)exportROIdataForType:(ROI_Type)type {
+    NSString *name = @"";
+    switch (type) {
+        case Active_ROI:
+            name = self.textActiveROIname.stringValue;
+            break;
+        case Mirrored_ROI:
+            name = self.textMirrorROIname.stringValue;
+            break;
+        default:
+            break;
+    }
+    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
+        for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
+            ROI *roi = [roiList objectAtIndex:roiIndex];
+            if ([roi.name isEqualToString:name]) {
+                [roi recompute];
+                NSMutableArray *roiData = roi.dataValues;
+                [roiData insertObject:[NSNumber numberWithInteger:pix] atIndex:0];
+                [arrayOfRows addObject:roiData];
+                break;
+            }
+        }
+    }
+    if (arrayOfRows.count>0) {
+        NSSavePanel *savePanel = [NSSavePanel savePanel];
+        savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
+        savePanel.nameFieldStringValue = name;
+        if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
+            NSString *dataString = [self stringForDataArray:arrayOfRows];
+            NSError *error = [[NSError alloc] init];
+            [dataString writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
+        }
+    }
+}
 
+-(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData {
+    if (arrayOfData.count>0) {
+        NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kTransposeExportedDataDefault]) {
+            //find the max length of the rows = the number of rows we need when we switch
+            NSUInteger maxRowLength = 0;
+            for (NSUInteger r=0; r<arrayOfData.count; r++) {
+                maxRowLength = MAX(maxRowLength,[[arrayOfData objectAtIndex:r] count]);
+            }
+            //Make an array to hold these rows of data
+            NSMutableArray *arrayTransposedRows = [NSMutableArray arrayWithCapacity:maxRowLength];
+            for (int c=0; c<maxRowLength; c++) {
+                [arrayTransposedRows addObject:[NSMutableArray array]];
+            }
+            //r is the original row with data from ROI in slice 0..count
+            //i is the item in each roiArray
+            //go thru the new array of maxRowLength cols, askeach ROI data array  if it can contribute. If roiarray.count<maxRowLength use @"" as a placeholder
+            for (int roiArraysIndex=0; roiArraysIndex<arrayOfData.count; roiArraysIndex++) {
+                NSMutableArray *arrayOfDataFromROIatIndex = [arrayOfData objectAtIndex:roiArraysIndex];
+                NSUInteger roiArrayCount = arrayOfDataFromROIatIndex.count;
+                for (int roiarrayDataIndex=0; roiarrayDataIndex<maxRowLength; roiarrayDataIndex++) {
+                    if (roiarrayDataIndex<roiArrayCount) {
+                        [[arrayTransposedRows objectAtIndex:roiarrayDataIndex] addObject:[arrayOfDataFromROIatIndex objectAtIndex:roiarrayDataIndex]];
+                    }
+                    else {
+                        [[arrayTransposedRows objectAtIndex:roiarrayDataIndex] addObject:@""];
+                    }
+                }
+            }
+            // now fuse the new cols as rows
+            for (int r=0; r<arrayTransposedRows.count; r++) {
+                [arrayOfRowStrings addObject:[[arrayTransposedRows objectAtIndex:r]componentsJoinedByString:@"\t"]];
+            }
+        }
+        else {
+            // just fuse the new cols as rows
+            for (int r=0; r<arrayOfData.count; r++) {
+                [arrayOfRowStrings addObject:[[arrayOfData objectAtIndex:r]componentsJoinedByString:@"\t"]];
+            }
+        }
+        //  fuse the new rows as table
+        return [arrayOfRowStrings componentsJoinedByString:@"\n"];
+    }
+    return nil;
+}
 
 @end

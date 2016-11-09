@@ -11,3 +11,9 @@
 #define kColor_Mirrored @"kColor_Mirrored"
 #define kColor_TransformPlaced @"kColor_TransformPlaced"
 #define kColor_TransformIntercalated @"kColor_TransformIntercalated"
+#define kTransformROInameDefault @"kTransformROInameDefault"
+#define kMirroredROInameDefault @"kMirroredROInameDefault"
+#define kTransposeDataDefault @"kTransposeDataDefault"
+#define kExtendSingleTransformDefault @"kExtendSingleTransformDefault"
+#define kTransposeExportedDataDefault @"kTransposeExportedDataDefault"
+
