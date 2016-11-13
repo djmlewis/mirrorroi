@@ -6,6 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <SpriteKit/SpriteKit.h>
 #import <OsiriXAPI/PluginFilter.h>
 
 
@@ -57,6 +58,9 @@ typedef enum : NSInteger {
     SetPixels_AllPixels = 2
 } SetROIpixel_Options;
 
+
+
+
 @interface MirrorROIPluginFilterOC : PluginFilter {}
 
 
@@ -96,6 +100,8 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSTextField *markerMaxMirrored;
 @property (assign) IBOutlet NSTextField *markerMinMirrored;
 
+@property (assign) IBOutlet SKView *skView;
+@property (retain) SKScene *skScene;
 
 
 - (long) filterImage:(NSString*) menuName;

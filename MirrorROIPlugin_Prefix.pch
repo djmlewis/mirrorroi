@@ -7,6 +7,8 @@
     #import <AppKit/AppKit.h>
 #endif
 
+#define kSceneMargin 2.0
+
 #define kColor_Active @"kColor_Active"
 #define kColor_Mirrored @"kColor_Mirrored"
 #define kColor_TransformPlaced @"kColor_TransformPlaced"
