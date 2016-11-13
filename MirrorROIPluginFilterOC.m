@@ -734,8 +734,6 @@
         [activeRoi recompute];
         [mirroredRoi recompute];
 
-        self.textActiveData.stringValue = [NSString stringWithFormat:@"%.0f ± %.0f (%.0f—%.0f)", activeRoi.mean, activeRoi.dev, activeRoi.min, activeRoi.max];
-        self.textMirroredData.stringValue = [NSString stringWithFormat:@"%.0f ± %.0f (%.0f—%.0f)", mirroredRoi.mean, mirroredRoi.dev, mirroredRoi.min, mirroredRoi.max];
         //draw the boxes
         float minGrey = fminf(activeRoi.min, mirroredRoi.min);
         minGrey = fminf(minGrey, mirroredRoi.mean-mirroredRoi.dev);
@@ -745,7 +743,7 @@
         maxGrey = fmaxf(maxGrey, activeRoi.mean+activeRoi.dev);
         float ratio = 0;
         if (minGrey != maxGrey) {
-            ratio = (self.viewMarkers.frame.size.width-(2.0*kSceneMargin))/(maxGrey-minGrey);
+            ratio = (self.skView.frame.size.width-(2.0*kSceneMargin))/(maxGrey-minGrey);
         }
         
         [self setLocationOfSpriteNamed:@"A"
@@ -761,24 +759,11 @@
                                   sdev:mirroredRoi.dev*ratio
                                    atY:0.33];
         
-        [self.markerMeanActive setFrameOrigin:NSMakePoint((activeRoi.mean-minGrey)*ratio+kSceneMargin-(self.markerMeanActive.frame.size.width/2.0), self.markerMeanActive.frame.origin.y)];
-        [self.markerSDupActive setFrameOrigin:NSMakePoint((activeRoi.mean+activeRoi.dev-minGrey)*ratio+kSceneMargin-(self.markerSDupActive.frame.size.width/2.0), self.markerSDupActive.frame.origin.y)];
-        [self.markerSDlowActive setFrameOrigin:NSMakePoint((activeRoi.mean-activeRoi.dev-minGrey)*ratio+kSceneMargin-(self.markerSDlowActive.frame.size.width/2.0), self.markerSDlowActive.frame.origin.y)];
-        [self.markerMaxActive setFrameOrigin:NSMakePoint((activeRoi.max-minGrey)*ratio+kSceneMargin-(self.markerMaxActive.frame.size.width/2.0), self.markerMaxActive.frame.origin.y)];
-        [self.markerMinActive setFrameOrigin:NSMakePoint((activeRoi.min-minGrey)*ratio+kSceneMargin-(self.markerMinActive.frame.size.width/2.0), self.markerMinActive.frame.origin.y)];
-        
-        [self.markerMeanMirrored setFrameOrigin:NSMakePoint((mirroredRoi.mean-minGrey)*ratio+kSceneMargin-(self.markerMeanMirrored.frame.size.width/2.0), self.markerMeanMirrored.frame.origin.y)];
-        [self.markerSDupMirrored setFrameOrigin:NSMakePoint((mirroredRoi.mean+mirroredRoi.dev-minGrey)*ratio+kSceneMargin-(self.markerSDupMirrored.frame.size.width/2.0), self.markerSDupMirrored.frame.origin.y)];
-        [self.markerSDlowMirrored setFrameOrigin:NSMakePoint((mirroredRoi.mean-mirroredRoi.dev-minGrey)*ratio+kSceneMargin-(self.markerSDlowMirrored.frame.size.width/2.0), self.markerSDlowMirrored.frame.origin.y)];
-        [self.markerMaxMirrored setFrameOrigin:NSMakePoint((mirroredRoi.max-minGrey)*ratio+kSceneMargin-(self.markerMaxMirrored.frame.size.width/2.0), self.markerMaxMirrored.frame.origin.y)];
-        [self.markerMinMirrored setFrameOrigin:NSMakePoint((mirroredRoi.min-minGrey)*ratio+kSceneMargin-(self.markerMinMirrored.frame.size.width/2.0), self.markerMinMirrored.frame.origin.y)];
-        self.viewMarkers.hidden = NO;
+        self.skView.hidden = NO;
     }
     else
     {
-        self.viewMarkers.hidden = YES;
-        self.textActiveData.stringValue = @"";
-        self.textMirroredData.stringValue = @"";
+        self.skView.hidden = YES;
     }
 }
 -(ROI *)ROIfromCurrentSliceInViewer:(ViewerController *)viewer withName:(NSString *)name {
@@ -887,7 +872,8 @@
     // Load the SKScene from 'GameScene.sks'
     self.skScene = [SKScene sceneWithSize:self.skView.frame.size];
     self.skScene.scaleMode = SKSceneScaleModeResizeFill;
-    self.skScene.backgroundColor = [NSColor whiteColor];
+    self.skScene.backgroundColor = [NSColor clearColor];
+    self.skView.allowsTransparency = YES;
     [self.skView presentScene:self.skScene];
     self.skView.showsFPS = NO;
     self.skView.showsNodeCount = NO;
