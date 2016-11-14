@@ -9,6 +9,12 @@
 #import <SpriteKit/SpriteKit.h>
 #import <OsiriXAPI/PluginFilter.h>
 
+struct ROIValues {
+    float mean;
+    float sdev;
+    float min;
+    float max;
+};
 
 typedef enum : NSInteger {
     ExtendSingleLengthUp = 0,
@@ -72,6 +78,7 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSView *viewTools;
 
 @property (assign) IBOutlet NSSlider *sliderMovevalue;
+@property (assign) IBOutlet NSSlider *sliderSelectMirrorROIindex;
 
 @property (assign) IBOutlet NSTextField *textLengthROIname;
 @property (assign) IBOutlet NSTextField *textMirrorROIname;

@@ -6,6 +6,7 @@
 //
 
 #import "MirrorROIPluginFilterOC.h"
+#import "ROIValues.h"
 #import <OsiriXAPI/PluginFilter.h>
 #import <OsiriXAPI/Notifications.h>
 
@@ -867,7 +868,7 @@
 
 #pragma mark - ROI Data
 
-- (void)loadStatsScene {
+-(void)loadStatsScene {
     
     // Load the SKScene from 'GameScene.sks'
     self.skScene = [SKScene sceneWithSize:self.skView.frame.size];
@@ -944,5 +945,48 @@
     [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"T"]] setText:[NSString stringWithFormat:@"%.0f ± %.0f (%.0f—%.0f—%.0f)", mean, sdev, min, median, max]];
 
 }
+- (IBAction)selectBestMirrorTapped:(NSButton *)sender {
+    [self selectBestMirror];
+}
 
+- (IBAction)sliderSelectBestROIchanged:(NSSlider *)sender {
+}
+
+-(void)selectBestMirror {
+    ROI *roi2Clone = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];
+    if (roi2Clone != nil) {
+        NSMutableArray *arrayOfvalues = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+        for (int moveX=-2; moveX<3; moveX++) {
+            for (int moveY=-1; moveY<3; moveY++) {
+                ROI *createdROI = [[ROI alloc]
+                                   initWithTexture:roi2Clone.textureBuffer
+                                   textWidth:roi2Clone.textureWidth
+                                   textHeight:roi2Clone.textureHeight
+                                   textName:roi2Clone.name
+                                   positionX:roi2Clone.textureUpLeftCornerX+moveX
+                                   positionY:roi2Clone.textureUpLeftCornerY+moveY
+                                   spacingX:roi2Clone.pixelSpacingX
+                                   spacingY:roi2Clone.pixelSpacingY
+                                   imageOrigin:roi2Clone.imageOrigin];
+                createdROI.name = @"jiggle";
+                [self addROI2Pix:createdROI atSlice:[[self.viewerCT imageView] curImage] inViewer:self.viewerCT hidden:YES];
+                [arrayOfvalues addObject:
+                 [ROIValues roiValuesWithMean: fabsf(roi2Clone.mean-createdROI.mean)
+                                         sdev:fabsf(roi2Clone.dev-createdROI.dev)
+                                          max:fabsf(roi2Clone.max-createdROI.max)
+                                          min:fabsf(roi2Clone.min-createdROI.min)
+                                          range:fabsf(roi2Clone.max-roi2Clone.min-createdROI.max-createdROI.min)
+                                          median:fabsf(((roi2Clone.max-roi2Clone.min)/2.0f)-((createdROI.max-createdROI.min)/2.0f))
+                                     location:NSMakePoint(roi2Clone.textureUpLeftCornerX+moveX, roi2Clone.textureUpLeftCornerY+moveY)]];
+            }
+        }
+        
+        [arrayOfvalues sortUsingDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"mean" ascending:YES],
+                                              [[NSSortDescriptor alloc] initWithKey:@"sdev" ascending:YES]]];
+        
+        NSLog(@"%@",arrayOfvalues);
+    }
+ 
+    
+}
 @end
