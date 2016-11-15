@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <OsiriXAPI/ROI.h>
 
 @interface ROIValues : NSObject
 
@@ -16,10 +17,13 @@
 @property (retain) NSNumber *max;
 @property (retain) NSNumber *range;
 @property (retain) NSNumber *median;
-@property (retain) NSValue *location;
+@property (retain) ROI *roi;
 
--(id)initWithMean:(float)mean sdev:(float)sdev max:(float)max min:(float)min range:(float)range median:(float)median location:(NSPoint)location;
-+(id)roiValuesWithMean:(float)mean sdev:(float)sdev max:(float)max min:(float)min range:(float)range median:(float)median location:(NSPoint)location;
+-(NSComparisonResult)compare:(ROIValues *)otherROIValues;
+-(id)initWithMean:(float)mean sdev:(float)sdev max:(float)max min:(float)min range:(float)range median:(float)median roi:(ROI *)roi;
+//+(id)roiValuesWithMean:(float)mean sdev:(float)sdev max:(float)max min:(float)min range:(float)range median:(float)median location:(NSPoint)location comparator:(ROI *)comparator;
++(id)roiValuesWithComparatorROI:(ROI *)comparator andJiggleROI:(ROI *)jiggleROI;
+
 
 
 @end

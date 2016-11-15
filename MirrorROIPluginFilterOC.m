@@ -26,11 +26,9 @@
     [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
     [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeDataDefault];
-    
-    
-    
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
+    self.sortedJiggleROIs = [NSMutableArray array];
 }
 
 - (long) filterImage:(NSString*) menuName {
@@ -654,6 +652,7 @@
         if (set.count>0) {
             [roisInSlice removeObjectsAtIndexes:set];
         }
+        [active2Dwindow needsDisplayUpdate];
     }
 }
 - (void)deleteAllROIsFromViewerController:(ViewerController *)active2Dwindow {
@@ -715,6 +714,9 @@
             break;
         case Transform_Intercalated:
             colour = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformIntercalated]];
+            break;
+        case Jiggle_ROI:
+            colour = [NSColor purpleColor];
             break;
         default:
             break;
@@ -878,32 +880,37 @@
     [self.skView presentScene:self.skScene];
     self.skView.showsFPS = NO;
     self.skView.showsNodeCount = NO;
-    [self addStatsMarkersWithName:@"A"];
-    [self addStatsMarkersWithName:@"M"];
-    SKLabelNode *statsA = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
-    statsA.text = @"statsA";
-    statsA.name = @"AT";
-    statsA.fontSize = 13;
-    statsA.fontColor = [NSColor blackColor];
-    statsA.position = CGPointMake(CGRectGetMidX(self.skView.bounds),self.skView.frame.size.height-statsA.frame.size.height-kSceneMargin);
-    [self.skScene addChild:statsA];
-    SKLabelNode *statsM = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
-    statsM.text = @"statsM";
-    statsM.name = @"MT";
-    statsM.fontSize = 13;
-    statsM.fontColor = [NSColor blackColor];
-    statsM.position = CGPointMake(CGRectGetMidX(self.skView.bounds),kSceneMargin);
-    [self.skScene addChild:statsM];
+    [self addStatsMarkersWithName:@"A" position:5.0];
+    [self addStatsMarkersWithName:@"M" position:3.0];
+    [self addStatsMarkersWithName:@"J" position:1.0];
+//    SKLabelNode *statsA = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
+//    statsA.text = @"statsA";
+//    statsA.name = @"AT";
+//    statsA.fontSize = 13;
+//    statsA.fontColor = [NSColor blackColor];
+//    statsA.position = CGPointMake(CGRectGetMidX(self.skView.bounds),self.skView.frame.size.height-statsA.frame.size.height-kSceneMargin);
+//    [self.skScene addChild:statsA];
+//    SKLabelNode *statsM = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
+//    statsM.text = @"statsM";
+//    statsM.name = @"MT";
+//    statsM.fontSize = 13;
+//    statsM.fontColor = [NSColor blackColor];
+//    statsM.position = CGPointMake(CGRectGetMidX(self.skView.bounds),kSceneMargin);
+//    [self.skScene addChild:statsM];
 
     
 }
--(void)addStatsMarkersWithName:(NSString *)name {
+-(void)addStatsMarkersWithName:(NSString *)name position:(CGFloat)position{
+    CGFloat posY = self.skView.frame.size.height*position*kHeightFraction;
+    CGFloat posYT = self.skView.frame.size.height*(position+1)*kHeightFraction;
     SKSpriteNode *rangeA = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(0.0, 3.0)];
     rangeA.name = [name stringByAppendingString:@"R"];
     SKSpriteNode *median = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(2, 25.0)];
     median.name = [name stringByAppendingString:@"MD"];
     [rangeA addChild:median];
     [self.skScene addChild:rangeA];
+    rangeA.position = CGPointMake(0.0, posY);
+    
     SKSpriteNode *sdevA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(0.0, 15.0)];
     sdevA.name = [name stringByAppendingString:@"S"];
     SKSpriteNode *meanA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(2, 31.0)];
@@ -911,7 +918,18 @@
     [self colourNode:sdevA forName:name];
     [sdevA addChild:meanA];
     [self.skScene addChild:sdevA];
+    sdevA.position = CGPointMake(0.0, posY);
+
     
+    SKLabelNode *statsA = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
+    statsA.text = name;
+    statsA.name = [name stringByAppendingString:@"T"];
+    statsA.fontSize = 13;
+    statsA.fontColor = [NSColor blackColor];
+    statsA.position = CGPointMake(CGRectGetMidX(self.skView.bounds),self.skView.frame.size.height-statsA.frame.size.height-kSceneMargin);
+    [self.skScene addChild:statsA];
+    statsA.position = CGPointMake(0.0, posYT);
+
 
 }
 -(void)colourNode:(SKSpriteNode *)node forName:(NSString *)name {
@@ -930,12 +948,12 @@
     CGFloat posY = self.skView.frame.size.height*divisorY;
     SKSpriteNode *rangenode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"R"]];
     if (rangenode != nil) {
-        rangenode.position = CGPointMake(min+median, posY);
+        rangenode.position = CGPointMake(min+median, rangenode.position.y);
         rangenode.size = CGSizeMake(range, rangenode.size.height);
     }
     SKSpriteNode *sdnode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"S"]];
     if (sdnode != nil) {
-        sdnode.position = CGPointMake(mean, posY);
+        sdnode.position = CGPointMake(mean, rangenode.position.y);
         sdnode.size = CGSizeMake(sdev*2.0, sdnode.size.height);
         [self colourNode:sdnode forName:name];
         //mean node moves with SD node
@@ -955,7 +973,11 @@
 -(void)selectBestMirror {
     ROI *roi2Clone = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];
     if (roi2Clone != nil) {
-        NSMutableArray *arrayOfvalues = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+        //clear the decks
+        NSUInteger currentSlice = [[self.viewerCT imageView] curImage];
+        self.sortedJiggleROIs = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+        [self deleteROIsInSlice:currentSlice inViewerController:self.viewerCT withName:kJiggleROIName];
+        //make the ROIS grid
         for (int moveX=-2; moveX<3; moveX++) {
             for (int moveY=-1; moveY<3; moveY++) {
                 ROI *createdROI = [[ROI alloc]
@@ -968,25 +990,25 @@
                                    spacingX:roi2Clone.pixelSpacingX
                                    spacingY:roi2Clone.pixelSpacingY
                                    imageOrigin:roi2Clone.imageOrigin];
-                createdROI.name = @"jiggle";
-                [self addROI2Pix:createdROI atSlice:[[self.viewerCT imageView] curImage] inViewer:self.viewerCT hidden:YES];
-                [arrayOfvalues addObject:
-                 [ROIValues roiValuesWithMean: fabsf(roi2Clone.mean-createdROI.mean)
-                                         sdev:fabsf(roi2Clone.dev-createdROI.dev)
-                                          max:fabsf(roi2Clone.max-createdROI.max)
-                                          min:fabsf(roi2Clone.min-createdROI.min)
-                                          range:fabsf(roi2Clone.max-roi2Clone.min-createdROI.max-createdROI.min)
-                                          median:fabsf(((roi2Clone.max-roi2Clone.min)/2.0f)-((createdROI.max-createdROI.min)/2.0f))
-                                     location:NSMakePoint(roi2Clone.textureUpLeftCornerX+moveX, roi2Clone.textureUpLeftCornerY+moveY)]];
+                createdROI.name = kJiggleROIName;
+                [MirrorROIPluginFilterOC setROIcolour:createdROI forType:Jiggle_ROI];
+                [self addROI2Pix:createdROI atSlice:currentSlice inViewer:self.viewerCT hidden:YES];
+                [self.sortedJiggleROIs addObject:[ROIValues roiValuesWithComparatorROI:roi2Clone andJiggleROI:createdROI]];
             }
         }
-        
-        [arrayOfvalues sortUsingDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"mean" ascending:YES],
-                                              [[NSSortDescriptor alloc] initWithKey:@"sdev" ascending:YES]]];
-        
-        NSLog(@"%@",arrayOfvalues);
+        [self.sortedJiggleROIs sortUsingDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"mean" ascending:YES]]];
+        self.sliderSelectMirrorROIindex.enabled = self.sortedJiggleROIs.count >0;
+        self.sliderSelectMirrorROIindex.maxValue = self.sortedJiggleROIs.count-1;
+        self.sliderSelectMirrorROIindex.integerValue = 0;
+        self.sliderSelectMirrorROIindex.numberOfTickMarks = self.sortedJiggleROIs.count;
+        if (self.sortedJiggleROIs.count>0) {
+            [[(ROIValues *)[self.sortedJiggleROIs firstObject] roi] setHidden:FALSE];
+        }
     }
- 
-    
 }
+
+
+
+
+
 @end

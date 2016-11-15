@@ -30,7 +30,8 @@ typedef enum : NSUInteger {
     Transform_ROI_Placed = 4,
     AllROI_CT = 5,
     AllROI_PET = 6,
-    Transform_Intercalated = 7
+    Transform_Intercalated = 7,
+    Jiggle_ROI = 8
 } ROI_Type;
 
 typedef enum : NSUInteger {
@@ -95,6 +96,7 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet SKView *skView;
 @property (retain) SKScene *skScene;
 
+@property (strong) NSMutableArray *sortedJiggleROIs;
 
 - (long) filterImage:(NSString*) menuName;
 

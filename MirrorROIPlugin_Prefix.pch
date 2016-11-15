@@ -7,7 +7,8 @@
     #import <AppKit/AppKit.h>
 #endif
 
-#define kSceneMargin 2.0
+#define kSceneMargin 2.0f
+#define kHeightFraction 0.142857142857143f
 
 #define kColor_Active @"kColor_Active"
 #define kColor_Mirrored @"kColor_Mirrored"
@@ -19,3 +20,4 @@
 #define kExtendSingleTransformDefault @"kExtendSingleTransformDefault"
 #define kTransposeExportedDataDefault @"kTransposeExportedDataDefault"
 
+#define kJiggleROIName @"jiggle"
