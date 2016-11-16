@@ -85,6 +85,8 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSTextField *textMirrorROIname;
 @property (assign) IBOutlet NSTextField *textActiveROIname;
 
+@property (assign) IBOutlet NSButton *buttonJiggleWorse;
+@property (assign) IBOutlet NSButton *buttonJiggleBetter;
 
 @property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
 

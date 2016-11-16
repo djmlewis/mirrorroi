@@ -23,9 +23,17 @@
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor blueColor]] forKey:kColor_Mirrored];
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor greenColor]] forKey:kColor_TransformPlaced];
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor redColor]] forKey:kColor_TransformIntercalated];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor purpleColor]] forKey:kColor_Jiggle];
     [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
     [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeDataDefault];
+    
+    //the sortKeys used in sorting jiggleROI are in an Array, each key a dict
+    NSMutableArray *arrayOfKeys = [NSMutableArray array];
+    [arrayOfKeys addObject:@{@"sortKey" : @"mean",@"checkKey" : @"0"}];
+    [arrayOfKeys addObject:@{@"sortKey" : @"sdev",@"checkKey" : @"1"}];
+    [arrayOfKeys addObject:@{@"sortKey" : @"median",@"checkKey" : @"1"}];
+    [defaults setObject:arrayOfKeys forKey:@"jiggleSortTable"];
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
     self.sortedJiggleROIs = [NSMutableArray array];
@@ -397,7 +405,7 @@
         [roi2add setOriginAndSpacing: pix.pixelSpacingX :pix.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: pix]];
         [[viewer.roiList objectAtIndex: slice] addObject: roi2add];
         roi2add.curView = viewer.imageView;
-        [roi2add recompute];
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi2add];
     }
 }
 -(void)replaceROIInPix:(ROI *)roi2add atIndex:(NSUInteger)index inSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
@@ -411,7 +419,7 @@
         [roi2add setOriginAndSpacing: pix.pixelSpacingX :pix.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: pix]];
         [[viewer.roiList objectAtIndex: slice] replaceObjectAtIndex:index withObject:roi2add];
         roi2add.curView = viewer.imageView;
-        [roi2add recompute];
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi2add];
     }
 }
 -(void)mirrorActiveROIUsingLengthROIn3D:(BOOL)in3D {
@@ -571,6 +579,10 @@
         default:
             break;
     }
+    
+    [self moveMirrorROIByAmount:NSMakePoint([[NSNumber numberWithInt:moveX] floatValue],[[NSNumber numberWithInt:moveY] floatValue] )];
+}
+- (void)moveMirrorROIByAmount:(NSPoint)amount {
     short activeSlice = [[self.viewerPET imageView] curImage];
     NSMutableArray  *roisInAllSlices  = [self.viewerPET roiList];
     NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:activeSlice];
@@ -582,22 +594,22 @@
                                textWidth:roi2Clone.textureWidth
                                textHeight:roi2Clone.textureHeight
                                textName:roi2Clone.name
-                               positionX:roi2Clone.textureUpLeftCornerX+moveX
-                               positionY:roi2Clone.textureUpLeftCornerY+moveY
+                               positionX:roi2Clone.textureUpLeftCornerX+amount.x
+                               positionY:roi2Clone.textureUpLeftCornerY+amount.y
                                spacingX:roi2Clone.pixelSpacingX
                                spacingY:roi2Clone.pixelSpacingY
                                imageOrigin:roi2Clone.imageOrigin];
             [createdROI setNSColor:roi2Clone.NSColor globally:NO];
             [roisInThisSlice replaceObjectAtIndex:i withObject:createdROI];
-            
+            [MirrorROIPluginFilterOC forceRecomputeDataForROI:createdROI];
             //move the polygon
             [self deleteROIsInSlice:activeSlice inViewerController:self.viewerCT withName:createdROI.name];
             [self addPolygonsToCTAtSlice:activeSlice forActiveROI:nil mirroredROI:createdROI];
-            
-            
+            //we found the mirror skip rest
             break;
         }
     }
+    
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
     [self refreshDisplayedDataForViewer:self.viewerCT];
@@ -612,6 +624,9 @@
             break;
         case Active_ROI:
             [self deleteROIsFromViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
+            break;
+        case Jiggle_ROI:
+            [self deleteJiggleROIsFromViewer:self.viewerCT inSlice:kAllSlices];
             break;
         case Transform_ROI_Placed:
             [self deleteROIsFromViewerController:self.viewerPET withName:self.textLengthROIname.stringValue];
@@ -663,6 +678,17 @@
     }
 }
 
+-(void)deleteJiggleROIsFromViewer:(ViewerController *)viewer inSlice:(NSInteger)slice {
+    if (slice == kAllSlices) {
+        [self deleteROIsFromViewerController:viewer withName:kJiggleROIName];
+        [self deleteROIsFromViewerController:viewer withName:kJiggleSelectedROIName];
+    }
+    else {
+        [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleROIName];
+        [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleSelectedROIName];
+    }
+    [viewer needsDisplayUpdate];
+}
 
 
 #pragma mark - Buffer
@@ -700,7 +726,7 @@
     self.colorWellTransformIntercalated.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformIntercalated]];
      */
 }
-+(void)setROIcolour:(ROI *)roi forType:(ROI_Type)type {
++(NSColor *)colourForType:(ROI_Type)type {
     NSColor *colour = [NSColor blackColor];
     switch (type) {
         case Active_ROI:
@@ -716,13 +742,16 @@
             colour = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformIntercalated]];
             break;
         case Jiggle_ROI:
-            colour = [NSColor purpleColor];
+            colour = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Jiggle]];
             break;
         default:
             break;
     }
-    colour = [colour colorWithAlphaComponent:0.5];
-    [roi setNSColor:colour globally:NO];
+    return colour;
+}
+
++(void)setROIcolour:(ROI *)roi forType:(ROI_Type)type {
+    [roi setNSColor:[[MirrorROIPluginFilterOC colourForType:type] colorWithAlphaComponent:0.5] globally:NO];
 }
 
 
@@ -730,12 +759,19 @@
 - (IBAction)refreshDisplayedDataCTTapped:(NSButton *)sender {
     [self refreshDisplayedDataForViewer:self.viewerCT];
 }
+
++(void)forceRecomputeDataForROI:(ROI *)roi {
+    [roi recompute];
+    [roi computeROIIfNedeed];
+}
+
 - (void)refreshDisplayedDataForViewer:(ViewerController *)viewer{
     ROI *activeRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textActiveROIname.stringValue];
     ROI *mirroredRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textMirrorROIname.stringValue];
+    ROI *jiggleRoi = [self ROIfromCurrentSliceInViewer:viewer withName:kJiggleSelectedROIName];
     if (activeRoi != nil && mirroredRoi != nil) {
-        [activeRoi recompute];
-        [mirroredRoi recompute];
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:activeRoi];
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:mirroredRoi];
 
         //draw the boxes
         float minGrey = fminf(activeRoi.min, mirroredRoi.min);
@@ -744,6 +780,14 @@
         float maxGrey = fmaxf(activeRoi.max, mirroredRoi.max);
         maxGrey = fmaxf(maxGrey, mirroredRoi.mean+mirroredRoi.dev);
         maxGrey = fmaxf(maxGrey, activeRoi.mean+activeRoi.dev);
+        
+        if (jiggleRoi != nil) {
+            minGrey = fminf(minGrey, jiggleRoi.min);
+            minGrey = fminf(minGrey, jiggleRoi.mean-jiggleRoi.dev);
+            maxGrey = fmaxf(maxGrey, jiggleRoi.mean+jiggleRoi.dev);
+            minGrey = fminf(minGrey, jiggleRoi.max);
+        }
+        
         float ratio = 0;
         if (minGrey != maxGrey) {
             ratio = (self.skView.frame.size.width-(2.0*kSceneMargin))/(maxGrey-minGrey);
@@ -753,14 +797,20 @@
                                   mean:(activeRoi.mean-minGrey)*ratio+kSceneMargin
                                    min:(activeRoi.min-minGrey)*ratio+kSceneMargin
                                    max:(activeRoi.max-minGrey)*ratio+kSceneMargin
-                                  sdev:activeRoi.dev*ratio
-                                   atY:0.66];
+                                  sdev:activeRoi.dev*ratio];
         [self setLocationOfSpriteNamed:@"M"
                                   mean:(mirroredRoi.mean-minGrey)*ratio+kSceneMargin
                                    min:(mirroredRoi.min-minGrey)*ratio+kSceneMargin
                                    max:(mirroredRoi.max-minGrey)*ratio+kSceneMargin
-                                  sdev:mirroredRoi.dev*ratio
-                                   atY:0.33];
+                                  sdev:mirroredRoi.dev*ratio];
+        
+        if (jiggleRoi != nil) {
+            [self setLocationOfSpriteNamed:@"J"
+                                      mean:(jiggleRoi.mean-minGrey)*ratio+kSceneMargin
+                                       min:(jiggleRoi.min-minGrey)*ratio+kSceneMargin
+                                       max:(jiggleRoi.max-minGrey)*ratio+kSceneMargin
+                                      sdev:jiggleRoi.dev*ratio];
+        }
         
         self.skView.hidden = NO;
     }
@@ -802,7 +852,7 @@
         for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
             ROI *roi = [roiList objectAtIndex:roiIndex];
             if ([roi.name isEqualToString:name]) {
-                [roi recompute];
+                [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
                 NSMutableArray *roiData = roi.dataValues;
                 [roiData insertObject:[NSNumber numberWithInteger:pix] atIndex:0];
                 [arrayOfRows addObject:roiData];
@@ -922,30 +972,32 @@
 
     
     SKLabelNode *statsA = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
+    statsA.verticalAlignmentMode = SKLabelVerticalAlignmentModeCenter;
     statsA.text = name;
     statsA.name = [name stringByAppendingString:@"T"];
     statsA.fontSize = 13;
     statsA.fontColor = [NSColor blackColor];
-    statsA.position = CGPointMake(CGRectGetMidX(self.skView.bounds),self.skView.frame.size.height-statsA.frame.size.height-kSceneMargin);
     [self.skScene addChild:statsA];
-    statsA.position = CGPointMake(0.0, posYT);
+    statsA.position = CGPointMake(CGRectGetMidX(self.skView.bounds),posYT);
 
 
 }
 -(void)colourNode:(SKSpriteNode *)node forName:(NSString *)name {
     if (node != nil) {
         if ([name isEqualToString:@"A"]) {
-            node.color = self.colorWellActive.color;
+            node.color = [MirrorROIPluginFilterOC colourForType:Active_ROI];
         }
-        else {
-            node.color = self.colorWellMirrored.color;
+        else if ([name isEqualToString:@"M"]){
+            node.color = [MirrorROIPluginFilterOC colourForType:Mirrored_ROI];
+        }
+        else if ([name isEqualToString:@"J"]){
+            node.color = [MirrorROIPluginFilterOC colourForType:Jiggle_ROI];
         }
     }
 }
--(void)setLocationOfSpriteNamed:(NSString *)name mean:(CGFloat)mean min:(CGFloat)min max:(CGFloat)max sdev:(CGFloat)sdev atY:(CGFloat)divisorY{
+-(void)setLocationOfSpriteNamed:(NSString *)name mean:(CGFloat)mean min:(CGFloat)min max:(CGFloat)max sdev:(CGFloat)sdev{
     CGFloat range = (max-min);
     CGFloat median = (max-min)/2.0;
-    CGFloat posY = self.skView.frame.size.height*divisorY;
     SKSpriteNode *rangenode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"R"]];
     if (rangenode != nil) {
         rangenode.position = CGPointMake(min+median, rangenode.position.y);
@@ -964,50 +1016,101 @@
 
 }
 - (IBAction)selectBestMirrorTapped:(NSButton *)sender {
-    [self selectBestMirror];
+    if (sender.tag == 0) {
+        [self generateJiggleROIs];
+    }
+    else {
+        [self replaceMirrorWithJiggleROI];
+    }
 }
 
 - (IBAction)sliderSelectBestROIchanged:(NSSlider *)sender {
 }
 
--(void)selectBestMirror {
-    ROI *roi2Clone = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];
-    if (roi2Clone != nil) {
+- (IBAction)changeJiggleROItapped:(NSButton *)sender {
+    
+}
+
+
+-(void)enableJiggleControls:(BOOL)enable {
+    self.sliderSelectMirrorROIindex.enabled = enable;
+
+}
+
+-(void)generateJiggleROIs {
+    ROI *roi2ClonePET = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];//we take the position of the MIRROR
+    ROI *roi2CloneCT = [self ROIfromCurrentSliceInViewer:self.viewerCT withName:self.textActiveROIname.stringValue];//take VALUES of the ACTIVE
+    if (roi2ClonePET != nil && roi2CloneCT != nil) {
         //clear the decks
         NSUInteger currentSlice = [[self.viewerCT imageView] curImage];
         self.sortedJiggleROIs = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
-        [self deleteROIsInSlice:currentSlice inViewerController:self.viewerCT withName:kJiggleROIName];
+        [self deleteJiggleROIsFromViewer:self.viewerCT inSlice:currentSlice];
         //make the ROIS grid
         for (int moveX=-2; moveX<3; moveX++) {
-            for (int moveY=-1; moveY<3; moveY++) {
+            for (int moveY=-2; moveY<3; moveY++) {
                 ROI *createdROI = [[ROI alloc]
-                                   initWithTexture:roi2Clone.textureBuffer
-                                   textWidth:roi2Clone.textureWidth
-                                   textHeight:roi2Clone.textureHeight
-                                   textName:roi2Clone.name
-                                   positionX:roi2Clone.textureUpLeftCornerX+moveX
-                                   positionY:roi2Clone.textureUpLeftCornerY+moveY
-                                   spacingX:roi2Clone.pixelSpacingX
-                                   spacingY:roi2Clone.pixelSpacingY
-                                   imageOrigin:roi2Clone.imageOrigin];
+                                   initWithTexture:roi2ClonePET.textureBuffer
+                                   textWidth:roi2ClonePET.textureWidth
+                                   textHeight:roi2ClonePET.textureHeight
+                                   textName:roi2ClonePET.name
+                                   positionX:roi2ClonePET.textureUpLeftCornerX+moveX
+                                   positionY:roi2ClonePET.textureUpLeftCornerY+moveY
+                                   spacingX:roi2ClonePET.pixelSpacingX
+                                   spacingY:roi2ClonePET.pixelSpacingY
+                                   imageOrigin:roi2ClonePET.imageOrigin];
                 createdROI.name = kJiggleROIName;
                 [MirrorROIPluginFilterOC setROIcolour:createdROI forType:Jiggle_ROI];
                 [self addROI2Pix:createdROI atSlice:currentSlice inViewer:self.viewerCT hidden:YES];
-                [self.sortedJiggleROIs addObject:[ROIValues roiValuesWithComparatorROI:roi2Clone andJiggleROI:createdROI]];
+                //createdROI is now in CT, so we can use its pixels straight, alongside its mirror in CT
+                [self.sortedJiggleROIs addObject:[ROIValues roiValuesWithComparatorROI:roi2CloneCT andJiggleROI:createdROI location:NSMakePoint(moveX, moveY)]];
             }
         }
-        [self.sortedJiggleROIs sortUsingDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"mean" ascending:YES]]];
-        self.sliderSelectMirrorROIindex.enabled = self.sortedJiggleROIs.count >0;
-        self.sliderSelectMirrorROIindex.maxValue = self.sortedJiggleROIs.count-1;
-        self.sliderSelectMirrorROIindex.integerValue = 0;
-        self.sliderSelectMirrorROIindex.numberOfTickMarks = self.sortedJiggleROIs.count;
+        
+        //SORT the ROIS by the criteria
+        [self.sortedJiggleROIs sortUsingDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"meanfloor" ascending:YES],[[NSSortDescriptor alloc] initWithKey:@"medianfloor" ascending:YES]]];
+                
+        //update the controls & show ROIs
+        [self enableJiggleControls:self.sortedJiggleROIs.count >0];
         if (self.sortedJiggleROIs.count>0) {
+            self.sliderSelectMirrorROIindex.maxValue = self.sortedJiggleROIs.count-1;
+            self.sliderSelectMirrorROIindex.integerValue = 0;
+            //self.sliderSelectMirrorROIindex.numberOfTickMarks = self.sortedJiggleROIs.count;
             [[(ROIValues *)[self.sortedJiggleROIs firstObject] roi] setHidden:FALSE];
+            [[(ROIValues *)[self.sortedJiggleROIs firstObject] roi] setName:kJiggleSelectedROIName];
+            [self refreshDisplayedDataForViewer:self.viewerCT];
         }
     }
 }
 
+-(void)replaceMirrorWithJiggleROI {
+    ROI *mirroredROI = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];
+    ROI *selJiggleROI = [self ROIfromCurrentSliceInViewer:self.viewerCT withName:kJiggleSelectedROIName];
+    if (mirroredROI != nil && selJiggleROI != nil) {
+        NSInteger index = [self indexOfJiggleForROI:selJiggleROI];
+        if (index != NSNotFound) {
+            NSPoint delta = [(ROIValues *)[self.sortedJiggleROIs objectAtIndex:index] location];
+            [self moveMirrorROIByAmount:delta];
+            NSUInteger currentSlice = [[self.viewerCT imageView] curImage];
+            [self deleteJiggleROIsFromViewer:self.viewerCT inSlice:currentSlice];
+        }
+    }
+}
 
+-(NSInteger)indexOfJiggleForROI:(ROI *)roi2Test {
+    for (int i=0; i<self.sortedJiggleROIs.count; i++) {
+        ROIValues *rv = [self.sortedJiggleROIs objectAtIndex:i];
+        if (rv.roi == roi2Test) {
+            return i;
+        }
+    }
+    return NSNotFound;
+}
+
+- (IBAction)tap:(id)sender {
+//    id object = [[NSUserDefaults standardUserDefaults] objectForKey:@"jiggleSortKeys"];
+//    NSMutableArray *d = [[NSUserDefaults standardUserDefaults] arrayForKey:@"jiggleSortKeys"];
+//    NSLog(@"%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"jiggleSortKeys"]);
+}
 
 
 

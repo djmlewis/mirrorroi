@@ -8,12 +8,15 @@
 #endif
 
 #define kSceneMargin 2.0f
-#define kHeightFraction 0.142857142857143f
+#define kHeightFraction 1.0f/7.0f
+
+#define kAllSlices -1
 
 #define kColor_Active @"kColor_Active"
 #define kColor_Mirrored @"kColor_Mirrored"
 #define kColor_TransformPlaced @"kColor_TransformPlaced"
 #define kColor_TransformIntercalated @"kColor_TransformIntercalated"
+#define kColor_Jiggle @"kColor_Jiggle"
 #define kTransformROInameDefault @"kTransformROInameDefault"
 #define kMirroredROInameDefault @"kMirroredROInameDefault"
 #define kTransposeDataDefault @"kTransposeDataDefault"
@@ -21,3 +24,5 @@
 #define kTransposeExportedDataDefault @"kTransposeExportedDataDefault"
 
 #define kJiggleROIName @"jiggle"
+#define kJiggleSelectedROIName @"jiggleselected"
+
