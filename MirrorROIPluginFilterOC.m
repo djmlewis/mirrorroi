@@ -761,64 +761,12 @@
 }
 
 +(void)forceRecomputeDataForROI:(ROI *)roi {
-    [roi recompute];
-    [roi computeROIIfNedeed];
-}
-
-- (void)refreshDisplayedDataForViewer:(ViewerController *)viewer{
-    ROI *activeRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textActiveROIname.stringValue];
-    ROI *mirroredRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textMirrorROIname.stringValue];
-    ROI *jiggleRoi = [self ROIfromCurrentSliceInViewer:viewer withName:kJiggleSelectedROIName];
-    if (activeRoi != nil && mirroredRoi != nil) {
-        [MirrorROIPluginFilterOC forceRecomputeDataForROI:activeRoi];
-        [MirrorROIPluginFilterOC forceRecomputeDataForROI:mirroredRoi];
-
-        //draw the boxes
-        float minGrey = fminf(activeRoi.min, mirroredRoi.min);
-        minGrey = fminf(minGrey, mirroredRoi.mean-mirroredRoi.dev);
-        minGrey = fminf(minGrey, activeRoi.mean-activeRoi.dev);
-        float maxGrey = fmaxf(activeRoi.max, mirroredRoi.max);
-        maxGrey = fmaxf(maxGrey, mirroredRoi.mean+mirroredRoi.dev);
-        maxGrey = fmaxf(maxGrey, activeRoi.mean+activeRoi.dev);
-        
-        if (jiggleRoi != nil) {
-            minGrey = fminf(minGrey, jiggleRoi.min);
-            minGrey = fminf(minGrey, jiggleRoi.mean-jiggleRoi.dev);
-            maxGrey = fmaxf(maxGrey, jiggleRoi.mean+jiggleRoi.dev);
-            minGrey = fminf(minGrey, jiggleRoi.max);
-        }
-        
-        float ratio = 0;
-        if (minGrey != maxGrey) {
-            ratio = (self.skView.frame.size.width-(2.0*kSceneMargin))/(maxGrey-minGrey);
-        }
-        
-        [self setLocationOfSpriteNamed:@"A"
-                                  mean:(activeRoi.mean-minGrey)*ratio+kSceneMargin
-                                   min:(activeRoi.min-minGrey)*ratio+kSceneMargin
-                                   max:(activeRoi.max-minGrey)*ratio+kSceneMargin
-                                  sdev:activeRoi.dev*ratio];
-        [self setLocationOfSpriteNamed:@"M"
-                                  mean:(mirroredRoi.mean-minGrey)*ratio+kSceneMargin
-                                   min:(mirroredRoi.min-minGrey)*ratio+kSceneMargin
-                                   max:(mirroredRoi.max-minGrey)*ratio+kSceneMargin
-                                  sdev:mirroredRoi.dev*ratio];
-        
-        if (jiggleRoi != nil) {
-            [self setLocationOfSpriteNamed:@"J"
-                                      mean:(jiggleRoi.mean-minGrey)*ratio+kSceneMargin
-                                       min:(jiggleRoi.min-minGrey)*ratio+kSceneMargin
-                                       max:(jiggleRoi.max-minGrey)*ratio+kSceneMargin
-                                      sdev:jiggleRoi.dev*ratio];
-        }
-        
-        self.skView.hidden = NO;
-    }
-    else
-    {
-        self.skView.hidden = YES;
+    if (roi != nil) {
+        [roi recompute];
+        [roi computeROIIfNedeed];
     }
 }
+
 -(ROI *)ROIfromCurrentSliceInViewer:(ViewerController *)viewer withName:(NSString *)name {
     if (viewer != nil)
     {
@@ -933,22 +881,6 @@
     [self addStatsMarkersWithName:@"A" position:5.0];
     [self addStatsMarkersWithName:@"M" position:3.0];
     [self addStatsMarkersWithName:@"J" position:1.0];
-//    SKLabelNode *statsA = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
-//    statsA.text = @"statsA";
-//    statsA.name = @"AT";
-//    statsA.fontSize = 13;
-//    statsA.fontColor = [NSColor blackColor];
-//    statsA.position = CGPointMake(CGRectGetMidX(self.skView.bounds),self.skView.frame.size.height-statsA.frame.size.height-kSceneMargin);
-//    [self.skScene addChild:statsA];
-//    SKLabelNode *statsM = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
-//    statsM.text = @"statsM";
-//    statsM.name = @"MT";
-//    statsM.fontSize = 13;
-//    statsM.fontColor = [NSColor blackColor];
-//    statsM.position = CGPointMake(CGRectGetMidX(self.skView.bounds),kSceneMargin);
-//    [self.skScene addChild:statsM];
-
-    
 }
 -(void)addStatsMarkersWithName:(NSString *)name position:(CGFloat)position{
     CGFloat posY = self.skView.frame.size.height*position*kHeightFraction;
@@ -995,6 +927,82 @@
         }
     }
 }
+
+- (void)refreshDisplayedDataForViewer:(ViewerController *)viewer{
+    ROI *activeRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textActiveROIname.stringValue];
+    ROI *mirroredRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textMirrorROIname.stringValue];
+    ROI *jiggleRoi = [self ROIfromCurrentSliceInViewer:viewer withName:kJiggleSelectedROIName];
+    //if (activeRoi != nil && mirroredRoi != nil) {
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:activeRoi];
+    [MirrorROIPluginFilterOC forceRecomputeDataForROI:mirroredRoi];
+    [MirrorROIPluginFilterOC forceRecomputeDataForROI:jiggleRoi];
+    
+        //draw the boxes
+        float minGrey = INT_MAX;
+        float maxGrey = -INT_MAX;
+        
+        if (activeRoi != nil) {
+            minGrey = fminf(minGrey, activeRoi.min);
+            minGrey = fminf(minGrey, activeRoi.mean-activeRoi.dev);
+            maxGrey = fmaxf(maxGrey, activeRoi.mean+activeRoi.dev);
+            minGrey = fminf(minGrey, activeRoi.max);
+        }
+
+        if (mirroredRoi != nil) {
+            minGrey = fminf(minGrey, mirroredRoi.min);
+            minGrey = fminf(minGrey, mirroredRoi.mean-mirroredRoi.dev);
+            maxGrey = fmaxf(maxGrey, mirroredRoi.mean+mirroredRoi.dev);
+            minGrey = fminf(minGrey, mirroredRoi.max);
+        }
+        
+        if (jiggleRoi != nil) {
+            minGrey = fminf(minGrey, jiggleRoi.min);
+            minGrey = fminf(minGrey, jiggleRoi.mean-jiggleRoi.dev);
+            maxGrey = fmaxf(maxGrey, jiggleRoi.mean+jiggleRoi.dev);
+            minGrey = fminf(minGrey, jiggleRoi.max);
+        }
+        
+        float ratio = 0;
+        if (minGrey != maxGrey) {
+            ratio = (self.skView.frame.size.width-(2.0*kSceneMargin))/(maxGrey-minGrey);
+        }
+        
+        if (activeRoi != nil) {
+        [self setLocationOfSpriteNamed:@"A"
+                                  mean:(activeRoi.mean-minGrey)*ratio+kSceneMargin
+                                   min:(activeRoi.min-minGrey)*ratio+kSceneMargin
+                                   max:(activeRoi.max-minGrey)*ratio+kSceneMargin
+                                  sdev:activeRoi.dev*ratio];
+        }
+        if (mirroredRoi != nil) {
+        [self setLocationOfSpriteNamed:@"M"
+                                  mean:(mirroredRoi.mean-minGrey)*ratio+kSceneMargin
+                                   min:(mirroredRoi.min-minGrey)*ratio+kSceneMargin
+                                   max:(mirroredRoi.max-minGrey)*ratio+kSceneMargin
+                                  sdev:mirroredRoi.dev*ratio];
+        }
+        if (jiggleRoi != nil) {
+            [self setLocationOfSpriteNamed:@"J"
+                                      mean:(jiggleRoi.mean-minGrey)*ratio+kSceneMargin
+                                       min:(jiggleRoi.min-minGrey)*ratio+kSceneMargin
+                                       max:(jiggleRoi.max-minGrey)*ratio+kSceneMargin
+                                      sdev:jiggleRoi.dev*ratio];
+        }
+        
+        [self hideNodeNamed:@"A" hidden:activeRoi == nil];
+        [self hideNodeNamed:@"M" hidden:mirroredRoi == nil];
+        [self hideNodeNamed:@"J" hidden:jiggleRoi == nil];
+        
+        self.skView.hidden = activeRoi == nil && mirroredRoi == nil && jiggleRoi == nil;
+//    }
+//    else
+//    {
+//        self.skView.hidden = YES;
+//    }
+}
+
+
+
 -(void)setLocationOfSpriteNamed:(NSString *)name mean:(CGFloat)mean min:(CGFloat)min max:(CGFloat)max sdev:(CGFloat)sdev{
     CGFloat range = (max-min);
     CGFloat median = (max-min)/2.0;
@@ -1015,6 +1023,14 @@
     [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"T"]] setText:[NSString stringWithFormat:@"%.0f ± %.0f (%.0f—%.0f—%.0f)", mean, sdev, min, median, max]];
 
 }
+
+-(void)hideNodeNamed:(NSString *)name hidden:(BOOL)hidden {
+    [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"R"]] setHidden:hidden];
+    [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"S"]] setHidden:hidden];
+    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"T"]] setHidden:hidden];
+
+}
+
 - (IBAction)selectBestMirrorTapped:(NSButton *)sender {
     if (sender.tag == 0) {
         [self generateJiggleROIs];
@@ -1092,6 +1108,7 @@
             [self moveMirrorROIByAmount:delta];
             NSUInteger currentSlice = [[self.viewerCT imageView] curImage];
             [self deleteJiggleROIsFromViewer:self.viewerCT inSlice:currentSlice];
+            [self refreshDisplayedDataForViewer:self.viewerCT];
         }
     }
 }
