@@ -24,6 +24,7 @@
         self.range = [NSNumber numberWithFloat:range];
         self.median = [NSNumber numberWithFloat:median];
         self.medianfloor = [NSNumber numberWithFloat:floorf(median)];
+        self.distance = [NSNumber numberWithFloat:fabs(location.x)+fabs(location.y)];
         self.location = location;
         self.roi = roi;
     }

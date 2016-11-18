@@ -16,10 +16,10 @@
                 <outlet property="colorWellTransformPlaced" destination="8B7-Dw-GT5" id="kUh-Jl-Fqu"/>
                 <outlet property="labelCT" destination="cDS-xb-qwA" id="NOs-y9-mrQ"/>
                 <outlet property="labelPET" destination="LyE-Lv-WwT" id="2oy-jg-6HK"/>
+                <outlet property="levelJiggleIndex" destination="VJ1-tL-RJT" id="pAZ-WW-c6R"/>
                 <outlet property="segmentExtendSingleLengthHow" destination="88u-5a-rgk" id="wAt-1Z-jEh"/>
                 <outlet property="skView" destination="vII-iG-cJN" id="Xcc-6t-q2R"/>
                 <outlet property="sliderMovevalue" destination="HiA-Ci-29d" id="T4l-wf-LHw"/>
-                <outlet property="sliderSelectMirrorROIindex" destination="pSH-qM-6SX" id="fye-Ej-8yq"/>
                 <outlet property="textActiveROIname" destination="8jC-GY-IP6" id="bx2-ng-bza"/>
                 <outlet property="textLengthROIname" destination="yur-AW-CMX" id="h8H-xp-oLq"/>
                 <outlet property="textMirrorROIname" destination="jtc-ug-mNi" id="WFQ-OO-LJc"/>
@@ -404,7 +404,7 @@
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qdC-b8-FdG">
-                                            <rect key="frame" x="42" y="343" width="24" height="24"/>
+                                            <rect key="frame" x="81" y="343" width="24" height="24"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="start" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" tag="-1" imageScaling="proportionallyDown" inset="2" id="hJh-AA-Ft4">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -426,7 +426,7 @@
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="uVX-wk-OyW">
-                                            <rect key="frame" x="90" y="343" width="24" height="24"/>
+                                            <rect key="frame" x="152" y="343" width="24" height="24"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="end" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="DXG-B1-yXb">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -436,16 +436,8 @@
                                                 <action selector="changeJiggleROItapped:" target="-2" id="PFY-6h-Ddr"/>
                                             </connections>
                                         </button>
-                                        <slider horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pSH-qM-6SX">
-                                            <rect key="frame" x="63" y="340" width="28" height="30"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <sliderCell key="cell" alignment="left" maxValue="100" allowsTickMarkValuesOnly="YES" sliderType="circular" id="UIY-Oi-wrv"/>
-                                            <connections>
-                                                <action selector="sliderSelectBestROIchanged:" target="-2" id="ual-st-VeS"/>
-                                            </connections>
-                                        </slider>
                                         <button fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="wyG-qc-ue3">
-                                            <rect key="frame" x="127" y="339" width="32" height="32"/>
+                                            <rect key="frame" x="42" y="339" width="32" height="32"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="JiggleSelect" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="Jev-uB-MKr">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -455,6 +447,11 @@
                                                 <action selector="selectBestMirrorTapped:" target="-2" id="HQq-zi-dF9"/>
                                             </connections>
                                         </button>
+                                        <levelIndicator verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VJ1-tL-RJT">
+                                            <rect key="frame" x="107" y="349" width="45" height="12"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <levelIndicatorCell key="cell" alignment="left" doubleValue="16" maxValue="20" warningValue="10" criticalValue="15" levelIndicatorStyle="relevancy" id="RsX-Kk-fzM"/>
+                                        </levelIndicator>
                                     </subviews>
                                 </view>
                             </tabViewItem>
@@ -589,7 +586,7 @@
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <clipView key="contentView" ambiguous="YES" id="mUe-q2-YOQ">
                                                 <rect key="frame" x="1" y="1" width="167" height="133"/>
-                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <autoresizingMask key="autoresizingMask"/>
                                                 <subviews>
                                                     <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" selectionHighlightStyle="none" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" typeSelect="NO" id="Hyu-ZU-Sz4">
                                                         <rect key="frame" x="0.0" y="0.0" width="167" height="133"/>
@@ -676,7 +673,7 @@
                     </button>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="-9680.5" y="-2356"/>
+            <point key="canvasLocation" x="-9914" y="-2334"/>
         </window>
         <userDefaultsController representsSharedInstance="YES" id="fUA-5u-y3G"/>
         <arrayController preservesSelection="NO" selectsInsertedObjects="NO" avoidsEmptySelection="NO" id="7He-O6-hgQ" userLabel="sortKeysArrayController">

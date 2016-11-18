@@ -1,4 +1,34 @@
 
+-(void)setLocationOfSpriteNamed:(NSString *)name mean:(CGFloat)mean min:(CGFloat)min max:(CGFloat)max sdev:(CGFloat)sdev minGrey:(CGFloat)minGrey ratio:(CGFloat)ratio{
+
+CGFloat median = (max-min)/2.0;
+CGFloat adjmean = (mean-minGrey)*ratio+kSceneMargin;
+CGFloat adjmin = (min-minGrey)*ratio+kSceneMargin;
+CGFloat adjmax = (max-minGrey)*ratio+kSceneMargin;
+CGFloat adjsdev = sdev*ratio;
+CGFloat adjrange = (adjmax-adjmin);
+CGFloat adjmedian = (adjmax-adjmin)/2.0;
+SKSpriteNode *rangenode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"R"]];
+if (rangenode != nil) {
+rangenode.position = CGPointMake(adjmin+adjmedian, rangenode.position.y);
+rangenode.size = CGSizeMake(adjrange, rangenode.size.height);
+}
+SKSpriteNode *sdnode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"S"]];
+if (sdnode != nil) {
+sdnode.position = CGPointMake(adjmean, rangenode.position.y);
+sdnode.size = CGSizeMake(adjsdev*2.0, sdnode.size.height);
+[self colourNode:sdnode forName:name];
+//mean node moves with SD node
+}
+
+//update text
+[(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"T"]] setText:[NSString stringWithFormat:@"%.0f ± %.0f (%.0f—%.0f—%.0f)", mean, sdev, min, median, max]];
+
+}
+
+
+
+
 +(unsigned char*)ClonedBufferFromROI:(ROI *)roi2Clone
 {
 int textureBuffer_Length = roi2Clone.textureHeight * roi2Clone.textureWidth;

@@ -19,6 +19,7 @@
 @property (retain) NSNumber *range;
 @property (retain) NSNumber *median;
 @property (retain) NSNumber *medianfloor;
+@property (retain) NSNumber *distance;
 @property (retain) ROI *roi;
 @property NSPoint location;
 

@@ -129,7 +129,10 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				AB2C26750677B0C400A08910 /* MirrorROIPlugin */,
+				8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */,
+				8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */,
+				8E8838351DDA209400AE9166 /* ROIValues.h */,
+				8E8838361DDA209400AE9166 /* ROIValues.m */,
 			);
 			name = Classes;
 			sourceTree = "<group>";
@@ -194,17 +197,6 @@
 				8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */,
 			);
 			name = PNGs;
-			sourceTree = "<group>";
-		};
-		AB2C26750677B0C400A08910 /* MirrorROIPlugin */ = {
-			isa = PBXGroup;
-			children = (
-				8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */,
-				8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */,
-				8E8838351DDA209400AE9166 /* ROIValues.h */,
-				8E8838361DDA209400AE9166 /* ROIValues.m */,
-			);
-			name = MirrorROIPlugin;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
