@@ -1045,8 +1045,16 @@
 }
 
 - (IBAction)changeJiggleROItapped:(NSButton *)sender {
-    self.levelJiggleIndex.integerValue = MIN(MAX(self.levelJiggleIndex.doubleValue+sender.tag,self.levelJiggleIndex.minValue),self.levelJiggleIndex.maxValue);
-    NSLog(@"%li",(long)self.levelJiggleIndex.integerValue);
+    double newVal = self.levelJiggleIndex.doubleValue+sender.tag;
+    if (newVal<self.levelJiggleIndex.minValue) {
+        newVal = self.levelJiggleIndex.minValue;
+    }
+    else if (newVal>self.levelJiggleIndex.maxValue) {
+        newVal = self.levelJiggleIndex.maxValue;
+    }
+    self.levelJiggleIndex.doubleValue = newVal;
+    NSInteger i = MIN(MAX(self.levelJiggleIndex.integerValue+sender.tag,self.levelJiggleIndex.minValue),self.levelJiggleIndex.maxValue);
+    NSLog(@"%li %li",(long)self.levelJiggleIndex.integerValue, i);
 }
 
 
@@ -1063,9 +1071,12 @@
         NSUInteger currentSlice = [[self.viewerCT imageView] curImage];
         self.sortedJiggleROIs = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
         [self deleteJiggleROIsFromViewer:self.viewerCT inSlice:currentSlice];
-        //make the ROIS grid
+        //make the ROIS grid, dont add the zero ROI as its the already mirror
         for (int moveX=-2; moveX<3; moveX++) {
             for (int moveY=-2; moveY<3; moveY++) {
+                if (moveX == 0 && moveY == 0) {
+                    continue;
+                }
                 ROI *createdROI = [[ROI alloc]
                                    initWithTexture:roi2ClonePET.textureBuffer
                                    textWidth:roi2ClonePET.textureWidth
@@ -1085,19 +1096,30 @@
         }
         
         //SORT the ROIS by the criteria
-        [self.sortedJiggleROIs sortUsingDescriptors:@[[[NSSortDescriptor alloc] initWithKey:@"meanfloor" ascending:YES],[[NSSortDescriptor alloc] initWithKey:@"medianfloor" ascending:YES]]];
+        [self.sortedJiggleROIs sortUsingDescriptors:[self sortDescriptorsForJiggle]];
                 
         //update the controls & show ROIs
         [self enableJiggleControls:self.sortedJiggleROIs.count >0];
         if (self.sortedJiggleROIs.count>0) {
-            self.levelJiggleIndex.maxValue = self.sortedJiggleROIs.count-1;
-            self.levelJiggleIndex.integerValue = 0;
-            //self.levelJiggleIndex.numberOfTickMarks = self.sortedJiggleROIs.count;
+            [self resetLevelJiggleWithCount];
             [[(ROIValues *)[self.sortedJiggleROIs firstObject] roi] setHidden:FALSE];
             [[(ROIValues *)[self.sortedJiggleROIs firstObject] roi] setName:kJiggleSelectedROIName];
             [self refreshDisplayedDataForViewer:self.viewerCT];
         }
     }
+}
+
+-(void)resetLevelJiggleWithCount {
+    self.levelJiggleIndex.maxValue = self.sortedJiggleROIs.count-1;
+    self.levelJiggleIndex.integerValue = 0;
+    self.levelJiggleIndex.warningValue = self.levelJiggleIndex.maxValue/3;
+    self.levelJiggleIndex.criticalValue = self.levelJiggleIndex.maxValue*2/3;
+
+}
+
+-(NSArray *)sortDescriptorsForJiggle {
+    NSArray *array = @[[[NSSortDescriptor alloc] initWithKey:@"distance" ascending:YES],[[NSSortDescriptor alloc] initWithKey:@"meanfloor" ascending:YES]];
+    return array;
 }
 
 -(void)replaceMirrorWithJiggleROI {
