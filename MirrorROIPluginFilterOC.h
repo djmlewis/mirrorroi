@@ -87,6 +87,7 @@ typedef enum : NSInteger {
 
 @property (assign) IBOutlet NSButton *buttonJiggleWorse;
 @property (assign) IBOutlet NSButton *buttonJiggleBetter;
+@property (assign) IBOutlet NSButton *buttonJiggleSetNew;
 
 @property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
 
@@ -98,7 +99,7 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet SKView *skView;
 @property (retain) SKScene *skScene;
 
-@property (strong) NSMutableArray *sortedJiggleROIs;
+@property (strong) NSMutableArray *arrayJiggleROIvalues;
 
 - (long) filterImage:(NSString*) menuName;
 

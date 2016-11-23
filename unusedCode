@@ -8,12 +8,12 @@ CGFloat adjmax = (max-minGrey)*ratio+kSceneMargin;
 CGFloat adjsdev = sdev*ratio;
 CGFloat adjrange = (adjmax-adjmin);
 CGFloat adjmedian = (adjmax-adjmin)/2.0;
-SKSpriteNode *rangenode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"R"]];
+SKSpriteNode *rangenode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Range]];
 if (rangenode != nil) {
 rangenode.position = CGPointMake(adjmin+adjmedian, rangenode.position.y);
 rangenode.size = CGSizeMake(adjrange, rangenode.size.height);
 }
-SKSpriteNode *sdnode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"S"]];
+SKSpriteNode *sdnode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_SDEV]];
 if (sdnode != nil) {
 sdnode.position = CGPointMake(adjmean, rangenode.position.y);
 sdnode.size = CGSizeMake(adjsdev*2.0, sdnode.size.height);
@@ -22,7 +22,7 @@ sdnode.size = CGSizeMake(adjsdev*2.0, sdnode.size.height);
 }
 
 //update text
-[(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:@"T"]] setText:[NSString stringWithFormat:@"%.0f ± %.0f (%.0f—%.0f—%.0f)", mean, sdev, min, median, max]];
+[(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setText:[NSString stringWithFormat:@"%.0f ± %.0f (%.0f—%.0f—%.0f)", mean, sdev, min, median, max]];
 
 }
 

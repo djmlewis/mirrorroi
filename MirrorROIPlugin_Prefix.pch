@@ -22,7 +22,18 @@
 #define kTransposeDataDefault @"kTransposeDataDefault"
 #define kExtendSingleTransformDefault @"kExtendSingleTransformDefault"
 #define kTransposeExportedDataDefault @"kTransposeExportedDataDefault"
+#define kExcludeOriginalInJiggleDefault @"kExcludeOriginalInJiggleDefault"
 
 #define kJiggleROIName @"jiggle"
 #define kJiggleSelectedROIName @"jiggleselected"
+#define kJiggleUserDefaultsArrayName @"jiggleSorts"
+#define kJiggleCheckKey @"checkKey"
+#define kJiggleSortKey @"sortKey"
 
+
+#define kSpriteName_Active @"A"
+#define kSpriteName_Mirror @"M"
+#define kSpriteName_Jiggle @"J"
+#define kSpriteName_Range @"R"
+#define kSpriteName_SDEV @"S"
+#define kSpriteName_Text @"T"
