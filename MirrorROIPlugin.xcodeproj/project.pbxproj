@@ -257,6 +257,7 @@
 				Japanese,
 				French,
 				German,
+				en,
 			);
 			mainGroup = 089C166AFE841209C02AAC07 /* MyNewPlugin */;
 			projectDirPath = "";

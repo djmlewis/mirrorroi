@@ -128,7 +128,7 @@
                         <font key="font" metaFont="system"/>
                         <tabViewItems>
                             <tabViewItem label="Tools" identifier="1" id="1Ou-8y-wJl">
-                                <view key="view" id="fiA-Dk-EmD">
+                                <view key="view" ambiguous="YES" id="fiA-Dk-EmD">
                                     <rect key="frame" x="10" y="33" width="203" height="476"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -457,7 +457,7 @@
                                 </view>
                             </tabViewItem>
                             <tabViewItem label="Settings" identifier="2" id="2bk-cT-0C5">
-                                <view key="view" ambiguous="YES" id="uZV-FV-cp0">
+                                <view key="view" id="uZV-FV-cp0">
                                     <rect key="frame" x="10" y="33" width="203" height="476"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
