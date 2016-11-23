@@ -24,7 +24,7 @@
         self.range = [NSNumber numberWithFloat:range];
         self.median = [NSNumber numberWithFloat:median];
         self.medianfloor = [NSNumber numberWithFloat:floorf(median)];
-        self.distance = [NSNumber numberWithFloat:fmaxf(fabs(location.x),fabs(location.y))];
+        self.distance = [NSNumber numberWithFloat:(fabs(location.x)+fabs(location.y))];//fmaxf
         self.location = location;
         //NSLog(@"%f -- %f - %f",[self.distance floatValue], self.location.x, self.location.y);
         self.roi = roi;

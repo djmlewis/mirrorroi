@@ -75,7 +75,7 @@
     }
     if ([notification.name isEqualToString:OsirixDCMUpdateCurrentImageNotification] &&
         notification.object == self.viewerCT.imageView) {
-        NSLog(@"%@ -- %@ -- %@",notification.name, notification.object, notification.userInfo);
+        //NSLog(@"%@ -- %@ -- %@",notification.name, notification.object, notification.userInfo);
        [self refreshDisplayedDataForViewer:self.viewerCT];
         [self resetLevelJiggleWithCount];
     }
@@ -450,6 +450,7 @@
         [self deleteROIsInSlice:startSlice inViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
         [self deleteROIsInSlice:startSlice inViewerController:self.viewerCT withName:self.textActiveROIname.stringValue];
         [self deleteROIsInSlice:startSlice inViewerController:self.viewerCT withName:self.textMirrorROIname.stringValue];
+        [self deleteAllROIsFromViewerController:self.viewerCT];
    }
     
     for (NSUInteger slice=startSlice; slice<endSlice; slice++) {
@@ -667,7 +668,11 @@
     {
         [active2Dwindow deleteSeriesROIwithName:name];
         [active2Dwindow needsDisplayUpdate];
+        if (active2Dwindow == self.viewerCT) {
+            [self refreshDisplayedDataForViewer:self.viewerCT];
+        }
     }
+
 }
 - (void)deleteROIsInSlice:(NSUInteger)slice inViewerController:(ViewerController *)active2Dwindow withName:(NSString *)name {
     if (active2Dwindow && slice<active2Dwindow.roiList.count)
@@ -684,6 +689,9 @@
             [roisInSlice removeObjectsAtIndexes:set];
         }
         [active2Dwindow needsDisplayUpdate];
+        if (active2Dwindow == self.viewerCT) {
+            [self refreshDisplayedDataForViewer:self.viewerCT];
+        }
     }
 }
 - (void)deleteAllROIsFromViewerController:(ViewerController *)active2Dwindow {
@@ -691,7 +699,11 @@
     {
         [active2Dwindow roiDeleteAll:nil];
         [active2Dwindow needsDisplayUpdate];
-    }
+        if (active2Dwindow == self.viewerCT) {
+            [self clearJiggleROIs];
+            [self refreshDisplayedDataForViewer:self.viewerCT];
+        }
+   }
 }
 -(void)deleteJiggleROIsFromViewer:(ViewerController *)viewer inSlice:(NSInteger)slice {
     if (slice == kAllSlices) {
@@ -702,8 +714,7 @@
         [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleROIName];
         [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleSelectedROIName];
     }
-    self.arrayJiggleROIvalues = [NSMutableArray array];
-    [self resetLevelJiggleWithCount];
+    [self clearJiggleROIs];
     [viewer needsDisplayUpdate];
 }
 - (void)renameROIsInSlice:(NSUInteger)slice inViewerController:(ViewerController *)active2Dwindow containingName:(NSString *)name withNewName:(NSString *)newName{
@@ -1108,6 +1119,13 @@
 
 }
 
+-(void)clearJiggleROIs {
+    self.arrayJiggleROIvalues = [NSMutableArray array];
+    [self resetLevelJiggleWithCount];
+    
+}
+
+
 -(void)generateJiggleROIs {
     ROI *roi2ClonePET = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];//we take the position of the MIRROR
     ROI *roi2CloneCT = [self ROIfromCurrentSliceInViewer:self.viewerCT withName:self.textActiveROIname.stringValue];//take VALUES of the ACTIVE
@@ -1179,7 +1197,7 @@
         }
     }
 //    NSArray *array = @[[[NSSortDescriptor alloc] initWithKey:@"distance" ascending:YES],[[NSSortDescriptor alloc] initWithKey:@"meanfloor" ascending:YES]];
-    NSLog(@"%@",sorters);
+    //NSLog(@"%@",sorters);
     return sorters;
 }
 
