@@ -788,6 +788,19 @@
     }
     return colour;
 }
+-(NSString *)ROInameForType:(ROI_Type)type {
+    switch (type) {
+        case Active_ROI:
+            return self.textActiveROIname.stringValue;
+            break;
+        case Mirrored_ROI:
+            return self.textMirrorROIname.stringValue;
+            break;
+        default:
+            return @"";
+            break;
+    }
+}
 
 +(void)setROIcolour:(ROI *)roi forType:(ROI_Type)type {
     [roi setNSColor:[[MirrorROIPluginFilterOC colourForType:type] colorWithAlphaComponent:0.5] globally:NO];
@@ -815,21 +828,57 @@
     return nil;
 }
 - (IBAction)exportROIdataTapped:(NSButton *)sender {
-    [self exportROIdataForType:sender.tag];
+    switch (sender.tag) {
+        case 0:
+            [self exportROIsummaryDataForType:Active_ROI];
+            [self exportROIsummaryDataForType:Mirrored_ROI];
+            break;
+        case 1:
+            [self exportROIdataForType:Active_ROI];
+            [self exportROIdataForType:Mirrored_ROI];
+            break;
+    }
+}
+-(void)exportROIsummaryDataForType:(ROI_Type)type {
+    NSString *name = [self ROInameForType:type];
+    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+    //each row has the data for one roi
+    //add the headings
+    [arrayOfRows addObject:@"index\tmean\tsdev\tmax\tmin\tcount"];
+    
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
+        for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
+            ROI *roi = [roiList objectAtIndex:roiIndex];
+            if ([roi.name isEqualToString:name]) {
+                [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
+
+                [arrayOfRows addObject:[[NSArray arrayWithObjects:
+                                         [NSNumber numberWithInt:pix],
+                                         [NSNumber numberWithFloat:roi.mean],
+                                         [NSNumber numberWithFloat:roi.dev],
+                                         [NSNumber numberWithFloat:roi.max],
+                                         [NSNumber numberWithFloat:roi.min],
+                                         [NSNumber numberWithFloat:roi.total],
+                                         nil] componentsJoinedByString:@"\t"]];
+                break;
+            }
+        }
+    }
+    if (arrayOfRows.count>0) {
+        NSSavePanel *savePanel = [NSSavePanel savePanel];
+        savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
+        savePanel.nameFieldStringValue = [NSString stringWithFormat:@"%@-Computed-%@", name,self.viewerPET.window.title];
+        if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
+            NSError *error = [[NSError alloc] init];
+            [[arrayOfRows componentsJoinedByString:@"\n"]
+             writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
+        }
+    }
 }
 
 -(void)exportROIdataForType:(ROI_Type)type {
-    NSString *name = @"";
-    switch (type) {
-        case Active_ROI:
-            name = self.textActiveROIname.stringValue;
-            break;
-        case Mirrored_ROI:
-            name = self.textMirrorROIname.stringValue;
-            break;
-        default:
-            break;
-    }
+    NSString *name = [self ROInameForType:type];
     NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
         NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
@@ -847,7 +896,7 @@
     if (arrayOfRows.count>0) {
         NSSavePanel *savePanel = [NSSavePanel savePanel];
         savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
-        savePanel.nameFieldStringValue = name;
+        savePanel.nameFieldStringValue = [NSString stringWithFormat:@"%@-Raw-%@", name,self.viewerPET.window.title];
         if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
             NSString *dataString = [self stringForDataArray:arrayOfRows];
             NSError *error = [[NSError alloc] init];
@@ -855,7 +904,6 @@
         }
     }
 }
-
 -(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData {
     if (arrayOfData.count>0) {
         NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
@@ -902,8 +950,7 @@
     return nil;
 }
 
-#pragma mark - ROI Data
-
+#pragma mark - Plot Data
 -(void)loadStatsScene {
     
     // Load the SKScene from 'GameScene.sks'
@@ -963,11 +1010,9 @@
         }
     }
 }
-
 - (IBAction)refreshDisplayedDataCTTapped:(NSButton *)sender {
     [self refreshDisplayedDataForViewer:self.viewerCT];
 }
-
 - (void)refreshDisplayedDataForViewer:(ViewerController *)viewer{
 
     ROI *activeRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textActiveROIname.stringValue];
@@ -1038,9 +1083,6 @@
 //        self.skView.hidden = YES;
 //    }
 }
-
-
-
 -(void)setLocationOfSpriteNamed:(NSString *)name forROI:(ROI *)roi minGrey:(CGFloat)minGrey ratio:(CGFloat)ratio{
     
     CGFloat median = (roi.max-roi.min)/2.0;
@@ -1074,7 +1116,6 @@
     [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setText:[NSString stringWithFormat:@"%.0f ± %.0f (%.0f—%.0f—%.0f)%@", roi.mean, roi.dev, roi.min, median, roi.max, distanceString]];
     
 }
-
 -(void)hideNodeNamed:(NSString *)name hidden:(BOOL)hidden {
     [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Range]] setHidden:hidden];
     [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_SDEV]] setHidden:hidden];
@@ -1189,7 +1230,6 @@
     NSMutableArray *sorters = [NSMutableArray arrayWithCapacity:usersorts.count];
     if (usersorts.count>0) {
         for (int i=0; i<usersorts.count; i++) {
-            //@{kJiggleSortKey : @"max",kJiggleCheckKey : @"0"}
             NSMutableDictionary *dict = [usersorts objectAtIndex:i];
             if ([[dict objectForKey:kJiggleCheckKey] boolValue] == YES) {
                 [sorters addObject:[[NSSortDescriptor alloc] initWithKey:[dict objectForKey:kJiggleSortKey] ascending:YES]];

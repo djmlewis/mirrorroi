@@ -12,6 +12,8 @@
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
 		8E172CFD1DDD03F100F33DE5 /* Jiggle.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E172CFB1DDD03F100F33DE5 /* Jiggle.png */; };
 		8E172CFE1DDD03F100F33DE5 /* JiggleSelect.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E172CFC1DDD03F100F33DE5 /* JiggleSelect.png */; };
+		8E1D23C31DE6386800469190 /* decrease.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E1D23C11DE6386800469190 /* decrease.png */; };
+		8E1D23C41DE6386800469190 /* increase.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E1D23C21DE6386800469190 /* increase.png */; };
 		8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */; };
 		8E3F944D1DDB491F0085A162 /* Marker-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E3F944C1DDB491F0085A162 /* Marker-50.png */; };
 		8E8838371DDA209400AE9166 /* ROIValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E8838351DDA209400AE9166 /* ROIValues.h */; };
@@ -49,6 +51,8 @@
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E172CFB1DDD03F100F33DE5 /* Jiggle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Jiggle.png; path = PNGs/Jiggle.png; sourceTree = "<group>"; };
 		8E172CFC1DDD03F100F33DE5 /* JiggleSelect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = JiggleSelect.png; path = PNGs/JiggleSelect.png; sourceTree = "<group>"; };
+		8E1D23C11DE6386800469190 /* decrease.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = decrease.png; path = PNGs/decrease.png; sourceTree = "<group>"; };
+		8E1D23C21DE6386800469190 /* increase.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = increase.png; path = PNGs/increase.png; sourceTree = "<group>"; };
 		8E27A7BD1DA1AECD00BDC497 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MirrorWindow.xib; sourceTree = "<group>"; };
 		8E3F944C1DDB491F0085A162 /* Marker-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Marker-50.png"; path = "PNGs/Marker-50.png"; sourceTree = "<group>"; };
 		8E8838351DDA209400AE9166 /* ROIValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ROIValues.h; sourceTree = "<group>"; };
@@ -173,6 +177,8 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				8E1D23C11DE6386800469190 /* decrease.png */,
+				8E1D23C21DE6386800469190 /* increase.png */,
 				8E172CFB1DDD03F100F33DE5 /* Jiggle.png */,
 				8E172CFC1DDD03F100F33DE5 /* JiggleSelect.png */,
 				8E3F944C1DDB491F0085A162 /* Marker-50.png */,
@@ -280,10 +286,12 @@
 				8ED845F81DC6295D008399F1 /* SW.png in Resources */,
 				8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */,
 				8EF2964C1DC4D17200CC638E /* Erase Filled-50.png in Resources */,
+				8E1D23C41DE6386800469190 /* increase.png in Resources */,
 				8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */,
 				C52843BA1DC250BA00371742 /* aup.png in Resources */,
 				8ED845F91DC6295D008399F1 /* SE.png in Resources */,
 				8E172CFD1DDD03F100F33DE5 /* Jiggle.png in Resources */,
+				8E1D23C31DE6386800469190 /* decrease.png in Resources */,
 				8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */,
 				8EF296521DC4D2FB00CC638E /* start.png in Resources */,
 				8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */,
