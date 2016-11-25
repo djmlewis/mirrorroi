@@ -830,29 +830,90 @@
 - (IBAction)exportROIdataTapped:(NSButton *)sender {
     switch (sender.tag) {
         case 0:
-            [self exportROIsummaryDataForType:Active_ROI];
-            [self exportROIsummaryDataForType:Mirrored_ROI];
-            break;
-        case 1:
             [self exportROIdataForType:Active_ROI];
             [self exportROIdataForType:Mirrored_ROI];
+            break;
+        case 1:
+            [self exportROIpixelDataForType:Active_ROI];
+            [self exportROIpixelDataForType:Mirrored_ROI];
+            break;
+        case 2:
+            [self exportROIsummaryDataForType:Active_ROI];
+            [self exportROIsummaryDataForType:Mirrored_ROI];
             break;
     }
 }
 -(void)exportROIsummaryDataForType:(ROI_Type)type {
-    NSString *name = [self ROInameForType:type];
-    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+    NSUInteger capacity = self.viewerPET.roiList.count;
+    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:capacity];
     //each row has the data for one roi
-    //add the headings
-    [arrayOfRows addObject:@"index\tmean\tsdev\tmax\tmin\tcount"];
-    
+    NSMutableDictionary *dictOfRows = [NSMutableDictionary dictionaryWithCapacity:capacity];
+    NSString *roiname = [self ROInameForType:type];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
         NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
         for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
             ROI *roi = [roiList objectAtIndex:roiIndex];
-            if ([roi.name isEqualToString:name]) {
-                [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
+            if ([roi.name isEqualToString:roiname]) {
+                if (dictOfRows[@"index"] == nil) {
+                    dictOfRows[@"index"] = [NSMutableArray arrayWithCapacity:capacity];
+                    [dictOfRows[@"index"] addObject:[NSNumber numberWithInt:pix]];
+                } else {
+                    [dictOfRows[@"index"] addObject:[NSNumber numberWithInt:pix]];
+                }
 
+                [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
+                NSMutableDictionary *roidatadict = [roi dataString];
+                for (NSString *key in roidatadict) {
+                    id value = roidatadict[key];
+                    if (dictOfRows[key] == nil) {
+                        dictOfRows[key] = [NSMutableArray arrayWithCapacity:capacity];
+                        [dictOfRows[key] addObject:value];
+                    } else {
+                        [dictOfRows[key] addObject:value];
+                    }
+                }
+                break;
+            }
+        }
+    }
+    //add the  col data to array
+    for (NSString *key in dictOfRows) {
+        if (![key isEqualToString:@"Name"] && ![key isEqualToString:@"Type"]) {
+            [dictOfRows[key] insertObject:key atIndex:0];
+            [arrayOfRows addObject:dictOfRows[key]];
+        }
+    }
+    NSString *dataString = [self stringForDataArray:arrayOfRows forceTranspose:YES];
+    if (arrayOfRows.count>0) {
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Summary-%@", roiname,self.viewerPET.window.title]];
+    }
+
+}
+
+-(void)saveData:(NSString *)dataString withName:(NSString *)name {
+    NSSavePanel *savePanel = [NSSavePanel savePanel];
+    savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
+    savePanel.nameFieldStringValue = name;
+    if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
+        NSError *error = [[NSError alloc] init];
+        [dataString writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
+    }
+}
+
+
+-(void)exportROIdataForType:(ROI_Type)type {
+    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+    //each row has the data for one roi
+    //add the headings
+    [arrayOfRows addObject:@"index\tmean\tsdev\tmax\tmin\tcount"];
+    NSString *roiname = [self ROInameForType:type];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
+        for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
+            ROI *roi = [roiList objectAtIndex:roiIndex];
+            if ([roi.name isEqualToString:roiname]) {
+                [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
+                
                 [arrayOfRows addObject:[[NSArray arrayWithObjects:
                                          [NSNumber numberWithInt:pix],
                                          [NSNumber numberWithFloat:roi.mean],
@@ -865,26 +926,22 @@
             }
         }
     }
+    NSString *dataString = [arrayOfRows componentsJoinedByString:@"\n"];
     if (arrayOfRows.count>0) {
-        NSSavePanel *savePanel = [NSSavePanel savePanel];
-        savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
-        savePanel.nameFieldStringValue = [NSString stringWithFormat:@"%@-Computed-%@", name,self.viewerPET.window.title];
-        if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
-            NSError *error = [[NSError alloc] init];
-            [[arrayOfRows componentsJoinedByString:@"\n"]
-             writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
-        }
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Data-%@",roiname ,self.viewerPET.window.title]];
     }
+
 }
 
--(void)exportROIdataForType:(ROI_Type)type {
-    NSString *name = [self ROInameForType:type];
+-(void)exportROIpixelDataForType:(ROI_Type)type {
+    NSString *roiname = [self ROInameForType:type];
+
     NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
         NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
         for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
             ROI *roi = [roiList objectAtIndex:roiIndex];
-            if ([roi.name isEqualToString:name]) {
+            if ([roi.name isEqualToString:roiname]) {
                 [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
                 NSMutableArray *roiData = roi.dataValues;
                 [roiData insertObject:[NSNumber numberWithInteger:pix] atIndex:0];
@@ -893,21 +950,15 @@
             }
         }
     }
+    NSString *dataString = [self stringForDataArray:arrayOfRows forceTranspose:NO];
     if (arrayOfRows.count>0) {
-        NSSavePanel *savePanel = [NSSavePanel savePanel];
-        savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
-        savePanel.nameFieldStringValue = [NSString stringWithFormat:@"%@-Raw-%@", name,self.viewerPET.window.title];
-        if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
-            NSString *dataString = [self stringForDataArray:arrayOfRows];
-            NSError *error = [[NSError alloc] init];
-            [dataString writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
-        }
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Pixel-%@", roiname,self.viewerPET.window.title]];
     }
 }
--(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData {
+-(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
     if (arrayOfData.count>0) {
         NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kTransposeExportedDataDefault]) {
+        if (forceTranspose || [[NSUserDefaults standardUserDefaults] boolForKey:kTransposeExportedDataDefault]) {
             //find the max length of the rows = the number of rows we need when we switch
             NSUInteger maxRowLength = 0;
             for (NSUInteger r=0; r<arrayOfData.count; r++) {
