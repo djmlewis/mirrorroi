@@ -27,7 +27,7 @@
     [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
     [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeDataDefault];
-    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kExcludeOriginalInJiggleDefault];
+    [defaults setValue:[NSNumber numberWithBool:NO] forKey:kIncludeOriginalInJiggleDefault];
     
     //the sortKeys used in sorting jiggleROI are in an Array, each key a dict
     NSMutableArray *arrayOfKeys = [NSMutableArray array];
@@ -163,7 +163,6 @@
 #pragma mark - Create Active
 - (IBAction)growRegionClicked:(id)sender {
     [self.viewerPET.window makeKeyAndOrderFront:nil];
-    //[defaultValues setObject:NSLocalizedString(@"Growing Region", nil) forKey:@"growingRegionROIName"];
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
@@ -827,6 +826,19 @@
     }
     return nil;
 }
+-(ROI *)ROIfromFirstMatchedSliceInViewer:(ViewerController *)viewer withName:(NSString *)name {
+    if (viewer != nil)
+    {
+        for (int pixIndex=0; pixIndex<viewer.roiList.count; pixIndex++) {
+            for (ROI *roi in [[viewer roiList] objectAtIndex:pixIndex]) {
+                if ([roi.name isEqualToString:name]) {
+                    return roi;
+                }
+            }
+        }
+    }
+    return nil;
+}
 - (IBAction)exportROIdataTapped:(NSButton *)sender {
     switch (sender.tag) {
         case 0:
@@ -841,12 +853,22 @@
             [self exportROIsummaryDataForType:Active_ROI];
             [self exportROIsummaryDataForType:Mirrored_ROI];
             break;
+        case 3:
+            [self exportROI3DdataForType:Active_ROI];
+            [self exportROI3DdataForType:Mirrored_ROI];
+            break;
+        case -1:
+            [self exportROIdataForType:Active_ROI];
+            [self exportROIdataForType:Mirrored_ROI];
+            [self exportROIpixelDataForType:Active_ROI];
+            [self exportROIpixelDataForType:Mirrored_ROI];
+            [self exportROIsummaryDataForType:Active_ROI];
+            [self exportROIsummaryDataForType:Mirrored_ROI];
+            break;
     }
 }
 -(void)exportROIsummaryDataForType:(ROI_Type)type {
     NSUInteger capacity = self.viewerPET.roiList.count;
-    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:capacity];
-    //each row has the data for one roi
     NSMutableDictionary *dictOfRows = [NSMutableDictionary dictionaryWithCapacity:capacity];
     NSString *roiname = [self ROInameForType:type];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
@@ -877,6 +899,8 @@
         }
     }
     //add the  col data to array
+    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:capacity];
+    //each row has the data for one roi
     for (NSString *key in dictOfRows) {
         if (![key isEqualToString:@"Name"] && ![key isEqualToString:@"Type"]) {
             [dictOfRows[key] insertObject:key atIndex:0];
@@ -889,6 +913,29 @@
     }
 
 }
+
+-(void)exportROI3DdataForType:(ROI_Type)type {
+    [self.viewerPET roiSelectDeselectAll: nil];
+    NSString *roiname = [self ROInameForType:type];
+    ROI *roi = [self ROIfromFirstMatchedSliceInViewer:self.viewerPET withName:roiname];
+    NSString *error = nil;
+    NSMutableDictionary *dataDict = [NSMutableDictionary dictionary];
+    [self.viewerPET computeVolume:roi points:nil generateMissingROIs:NO generatedROIs:nil computeData:dataDict error:&error];
+    if (error == nil) {
+        NSUInteger capacity = self.viewerPET.roiList.count;
+        NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:capacity];
+        //each row has the data for one roi
+        for (NSString *key in dataDict) {
+            if (![key isEqualToString:@"rois"]) {
+                [arrayOfRows addObject:[NSString stringWithFormat:@"%@\t%@",key,dataDict[key]]];
+            }
+        }
+        if (arrayOfRows.count>0) {
+            [self saveData:[arrayOfRows componentsJoinedByString:@"\n"] withName:[NSString stringWithFormat:@"%@-3D-%@", roiname,self.viewerPET.window.title]];
+        }
+    }
+}
+
 
 -(void)saveData:(NSString *)dataString withName:(NSString *)name {
     NSSavePanel *savePanel = [NSSavePanel savePanel];
@@ -1227,7 +1274,7 @@
         self.arrayJiggleROIvalues = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
         [self deleteJiggleROIsFromViewer:self.viewerCT inSlice:currentSlice];
         //make the ROIS grid, dont add the zero ROI as its the already mirror unless specifically requested
-        BOOL excludeOriginal = [[NSUserDefaults standardUserDefaults] boolForKey:kExcludeOriginalInJiggleDefault];
+        BOOL excludeOriginal = ![[NSUserDefaults standardUserDefaults] boolForKey:kIncludeOriginalInJiggleDefault];
         for (int moveX=-2; moveX<3; moveX++) {
             for (int moveY=-2; moveY<3; moveY++) {
                 if (excludeOriginal && moveX == 0 && moveY == 0) {continue;}
@@ -1318,9 +1365,6 @@
 }
 
 - (IBAction)tap:(id)sender {
-//    id object = [[NSUserDefaults standardUserDefaults] objectForKey:@"jiggleSortKeys"];
-//    NSMutableArray *d = [[NSUserDefaults standardUserDefaults] arrayForKey:@"jiggleSortKeys"];
-//    NSLog(@"%@",[[NSUserDefaults standardUserDefaults] objectForKey:@"jiggleSortKeys"]);
 }
 
 
