@@ -76,6 +76,7 @@ typedef enum : NSInteger {
 
 @property (assign) IBOutlet NSTextField *labelCT;
 @property (assign) IBOutlet NSTextField *labelPET;
+@property (assign) IBOutlet NSTextField *labelWarningNoTools;
 @property (assign) IBOutlet NSView *viewTools;
 
 @property (assign) IBOutlet NSSlider *sliderMovevalue;

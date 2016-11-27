@@ -124,6 +124,7 @@
 }
 -(void)showHideControlsIfViewersValid {
     self.viewTools.hidden = ![self validCTandPETwindows];
+    self.labelWarningNoTools.hidden = !self.viewTools.hidden;
 }
 -(IBAction)smartAssignCTPETwindowsClicked:(id)sender {
     [self smartAssignCTPETwindows];
@@ -814,7 +815,6 @@
         [roi computeROIIfNedeed];
     }
 }
-
 -(ROI *)ROIfromCurrentSliceInViewer:(ViewerController *)viewer withName:(NSString *)name {
     if (viewer != nil)
     {
@@ -858,16 +858,33 @@
             [self exportROI3DdataForType:Mirrored_ROI];
             break;
         case -1:
-            [self exportROIdataForType:Active_ROI];
-            [self exportROIdataForType:Mirrored_ROI];
-            [self exportROIpixelDataForType:Active_ROI];
-            [self exportROIpixelDataForType:Mirrored_ROI];
-            [self exportROIsummaryDataForType:Active_ROI];
-            [self exportROIsummaryDataForType:Mirrored_ROI];
+            [self exportAllROIdataForType:Active_ROI];
+            [self exportAllROIdataForType:Mirrored_ROI];
             break;
     }
 }
+-(void)exportAllROIdataForType:(ROI_Type)type {
+    NSMutableArray *finalString = [NSMutableArray arrayWithCapacity:4];
+    NSString *dataString = [self dataStringFor3DROIdataForType:type];
+    if (dataString != nil) {[finalString addObject:@"3D data"];[finalString addObject:dataString];}
+    dataString = [self dataStringForSummaryROIdataForType:type];
+    if (dataString != nil) {[finalString addObject:@"Summary data"];[finalString addObject:dataString];}
+    dataString = [self dataStringForROIdataForType:type];
+    if (dataString != nil) {[finalString addObject:@"ROI data"];[finalString addObject:dataString];}
+    dataString = [self dataStringForROIpixelDataForType:type];
+    if (dataString != nil) {[finalString addObject:@"Pixel data"];[finalString addObject:dataString];}
+    if (finalString.count>0) {
+        [self saveData:[finalString componentsJoinedByString:@"\n\n"] withName:[NSString stringWithFormat:@"%@-All-Data-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+    }
+}
 -(void)exportROIsummaryDataForType:(ROI_Type)type {
+    NSString *dataString = [self dataStringForSummaryROIdataForType:type];
+    if (dataString != nil) {
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Summary-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+    }
+
+}
+-(NSString *)dataStringForSummaryROIdataForType:(ROI_Type)type {
     NSUInteger capacity = self.viewerPET.roiList.count;
     NSMutableDictionary *dictOfRows = [NSMutableDictionary dictionaryWithCapacity:capacity];
     NSString *roiname = [self ROInameForType:type];
@@ -907,14 +924,18 @@
             [arrayOfRows addObject:dictOfRows[key]];
         }
     }
-    NSString *dataString = [self stringForDataArray:arrayOfRows forceTranspose:YES];
     if (arrayOfRows.count>0) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Summary-%@", roiname,self.viewerPET.window.title]];
+        return [self stringForDataArray:arrayOfRows forceTranspose:YES];
     }
-
+    return nil;
 }
-
 -(void)exportROI3DdataForType:(ROI_Type)type {
+    NSString *dataString = [self dataStringFor3DROIdataForType:type];
+    if (dataString != nil) {
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-3D-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+    }
+}
+-(NSString *)dataStringFor3DROIdataForType:(ROI_Type)type {
     [self.viewerPET roiSelectDeselectAll: nil];
     NSString *roiname = [self ROInameForType:type];
     ROI *roi = [self ROIfromFirstMatchedSliceInViewer:self.viewerPET withName:roiname];
@@ -931,24 +952,18 @@
             }
         }
         if (arrayOfRows.count>0) {
-            [self saveData:[arrayOfRows componentsJoinedByString:@"\n"] withName:[NSString stringWithFormat:@"%@-3D-%@", roiname,self.viewerPET.window.title]];
+            return [arrayOfRows componentsJoinedByString:@"\n"];
         }
     }
+    return nil;
 }
-
-
--(void)saveData:(NSString *)dataString withName:(NSString *)name {
-    NSSavePanel *savePanel = [NSSavePanel savePanel];
-    savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
-    savePanel.nameFieldStringValue = name;
-    if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
-        NSError *error = [[NSError alloc] init];
-        [dataString writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
+-(void)exportROIdataForType:(ROI_Type)type {
+    NSString *dataString = [self dataStringForROIdataForType:type];
+    if (dataString != nil) {
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-ROIdata-%@", [self ROInameForType:type],self.viewerPET.window.title]];
     }
 }
-
-
--(void)exportROIdataForType:(ROI_Type)type {
+-(NSString *)dataStringForROIdataForType:(ROI_Type)type {
     NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
     //each row has the data for one roi
     //add the headings
@@ -960,7 +975,6 @@
             ROI *roi = [roiList objectAtIndex:roiIndex];
             if ([roi.name isEqualToString:roiname]) {
                 [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
-                
                 [arrayOfRows addObject:[[NSArray arrayWithObjects:
                                          [NSNumber numberWithInt:pix],
                                          [NSNumber numberWithFloat:roi.mean],
@@ -973,16 +987,19 @@
             }
         }
     }
-    NSString *dataString = [arrayOfRows componentsJoinedByString:@"\n"];
     if (arrayOfRows.count>0) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Data-%@",roiname ,self.viewerPET.window.title]];
+        return [arrayOfRows componentsJoinedByString:@"\n"];
     }
-
+    return nil;
 }
-
 -(void)exportROIpixelDataForType:(ROI_Type)type {
+    NSString *dataString = [self dataStringForROIpixelDataForType:type];
+    if (dataString != nil) {
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-ROIdata-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+    }
+}
+-(NSString *)dataStringForROIpixelDataForType:(ROI_Type)type {
     NSString *roiname = [self ROInameForType:type];
-
     NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
         NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
@@ -997,10 +1014,10 @@
             }
         }
     }
-    NSString *dataString = [self stringForDataArray:arrayOfRows forceTranspose:NO];
     if (arrayOfRows.count>0) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Pixel-%@", roiname,self.viewerPET.window.title]];
+        return [self stringForDataArray:arrayOfRows forceTranspose:NO];
     }
+    return nil;
 }
 -(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
     if (arrayOfData.count>0) {
@@ -1046,6 +1063,15 @@
         return [arrayOfRowStrings componentsJoinedByString:@"\n"];
     }
     return nil;
+}
+-(void)saveData:(NSString *)dataString withName:(NSString *)name {
+    NSSavePanel *savePanel = [NSSavePanel savePanel];
+    savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
+    savePanel.nameFieldStringValue = name;
+    if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
+        NSError *error = [[NSError alloc] init];
+        [dataString writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
+    }
 }
 
 #pragma mark - Plot Data
@@ -1230,7 +1256,6 @@
         [self replaceMirrorWithJiggleROI];
     }
 }
-
 - (IBAction)changeJiggleROItapped:(NSButton *)sender {
     //deselect and select
     NSInteger index4ROI = [self indexOfJiggleForROI: [self ROIfromCurrentSliceInViewer:self.viewerCT withName:kJiggleSelectedROIName]];
@@ -1240,7 +1265,6 @@
     [self selectJiggleROIwithIndex:newVal deselect:NO];
     [self refreshDisplayedDataForViewer:self.viewerCT];
 }
-
 -(void)resetLevelJiggleWithCount {
     self.levelJiggleIndex.maxValue = self.arrayJiggleROIvalues.count-1;
     self.levelJiggleIndex.integerValue = 0;
@@ -1248,7 +1272,6 @@
     self.levelJiggleIndex.criticalValue = self.levelJiggleIndex.maxValue+1;//just inactivates;
     [self hideJiggleControlsOnCount];
 }
-
 -(void)hideJiggleControlsOnCount {
     BOOL hide = self.arrayJiggleROIvalues.count<=0;
     self.levelJiggleIndex.hidden = hide;
@@ -1257,14 +1280,11 @@
     self.buttonJiggleSetNew.hidden = hide;
 
 }
-
 -(void)clearJiggleROIs {
     self.arrayJiggleROIvalues = [NSMutableArray array];
     [self resetLevelJiggleWithCount];
     
 }
-
-
 -(void)generateJiggleROIs {
     ROI *roi2ClonePET = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];//we take the position of the MIRROR
     ROI *roi2CloneCT = [self ROIfromCurrentSliceInViewer:self.viewerCT withName:self.textActiveROIname.stringValue];//take VALUES of the ACTIVE
@@ -1308,7 +1328,6 @@
         }
     }
 }
-
 -(void)selectJiggleROIwithIndex:(NSUInteger)index deselect:(BOOL)deselect{
     if (index<self.arrayJiggleROIvalues.count) {
         [[(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] roi] setHidden:deselect];
@@ -1321,8 +1340,6 @@
     }
 
 }
-
-
 -(NSArray *)sortDescriptorsForJiggle {
     NSArray *usersorts = [[NSUserDefaults standardUserDefaults] arrayForKey:kJiggleUserDefaultsArrayName];
     NSMutableArray *sorters = [NSMutableArray arrayWithCapacity:usersorts.count];
@@ -1338,7 +1355,6 @@
     //NSLog(@"%@",sorters);
     return sorters;
 }
-
 -(void)replaceMirrorWithJiggleROI {
     ROI *mirroredROI = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];
     ROI *selJiggleROI = [self ROIfromCurrentSliceInViewer:self.viewerCT withName:kJiggleSelectedROIName];
@@ -1353,7 +1369,6 @@
         }
     }
 }
-
 -(NSInteger)indexOfJiggleForROI:(ROI *)roi2Test {
     for (int i=0; i<self.arrayJiggleROIvalues.count; i++) {
         ROIValues *rv = [self.arrayJiggleROIvalues objectAtIndex:i];
