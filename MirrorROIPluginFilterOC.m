@@ -1095,22 +1095,30 @@
     CGFloat posYT = self.skView.frame.size.height*(position+1)*kHeightFraction;
     SKSpriteNode *rangeA = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(0.0, 3.0)];
     rangeA.name = [name stringByAppendingString:kSpriteName_Range];
-    SKSpriteNode *median = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(2, 25.0)];
-    median.name = [name stringByAppendingString:@"MD"];
-    [rangeA addChild:median];
     [self.skScene addChild:rangeA];
     rangeA.position = CGPointMake(0.0, posY);
+
+    SKSpriteNode *midrange = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(2, 25.0)];
+    midrange.name = [name stringByAppendingString:kSpriteName_MidRange];
+    [self.skScene addChild:midrange];
+    midrange.position = CGPointMake(0.0, posY);
     
     SKSpriteNode *sdevA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(0.0, 15.0)];
     sdevA.name = [name stringByAppendingString:kSpriteName_SDEV];
-    SKSpriteNode *meanA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(2, 31.0)];
-    meanA.name = [name stringByAppendingString:@"MN"];
     [self colourNode:sdevA forName:name];
-    [sdevA addChild:meanA];
     [self.skScene addChild:sdevA];
     sdevA.position = CGPointMake(0.0, posY);
-
     
+    SKSpriteNode *median = [SKSpriteNode spriteNodeWithColor:[NSColor redColor] size:CGSizeMake(2, 31.0)];
+    median.name = [name stringByAppendingString:kSpriteName_Median];
+    [self.skScene addChild:median];
+    median.position = CGPointMake(0.0, posY);
+
+    SKSpriteNode *meanA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(2, 31.0)];
+    meanA.name = [name stringByAppendingString:kSpriteName_Mean];
+    [self.skScene addChild:meanA];
+    meanA.position = CGPointMake(0.0, posY);
+
     SKLabelNode *statsA = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
     statsA.verticalAlignmentMode = SKLabelVerticalAlignmentModeCenter;
     statsA.text = name;
@@ -1209,17 +1217,19 @@
 //    }
 }
 -(void)setLocationOfSpriteNamed:(NSString *)name forROI:(ROI *)roi minGrey:(CGFloat)minGrey ratio:(CGFloat)ratio{
-    
-    CGFloat median = [ROIValues midRangeForMin:roi.min andMax:roi.max];
+    CGFloat median = [ROIValues medianForROI:roi];
+    CGFloat adjmedian = (median-minGrey)*ratio+kSceneMargin;
     CGFloat adjmean = (roi.mean-minGrey)*ratio+kSceneMargin;
+    CGFloat adjsdev = roi.dev*ratio;
     CGFloat adjmin = (roi.min-minGrey)*ratio+kSceneMargin;
     CGFloat adjmax = (roi.max-minGrey)*ratio+kSceneMargin;
-    CGFloat adjsdev = roi.dev*ratio;
     CGFloat adjrange = (adjmax-adjmin);
-    CGFloat adjmedian = [ROIValues midRangeForMin:adjmin andMax:adjmax];
+    CGFloat midrange = [ROIValues midRangeForMin:roi.min andMax:roi.max];
+    CGFloat adjmidrange = [ROIValues midRangeForMin:adjmin andMax:adjmax];
+    
     SKSpriteNode *rangenode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Range]];
     if (rangenode != nil) {
-        rangenode.position = CGPointMake(adjmin+adjmedian, rangenode.position.y);
+        rangenode.position = CGPointMake(adjmin+adjmidrange, rangenode.position.y);
         rangenode.size = CGSizeMake(adjrange, rangenode.size.height);
     }
     SKSpriteNode *sdnode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_SDEV]];
@@ -1227,7 +1237,16 @@
         sdnode.position = CGPointMake(adjmean, rangenode.position.y);
         sdnode.size = CGSizeMake(adjsdev*2.0, sdnode.size.height);
         [self colourNode:sdnode forName:name];
-        //mean node moves with SD node
+    }
+    
+    SKSpriteNode *mediannode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Median]];
+    if (mediannode != nil) {
+        mediannode.position = CGPointMake(adjmedian, rangenode.position.y);
+    }
+    
+    SKSpriteNode *meannode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Mean]];
+    if (meannode != nil) {
+        meannode.position = CGPointMake(adjmean, rangenode.position.y);
     }
     
     //update text
@@ -1243,7 +1262,7 @@
             }
         }
     }
-    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setText:[NSString stringWithFormat:@"%.0f ± %.0f (%.0f—%.0f—%.0f)%@%@", roi.mean, roi.dev, roi.min, median, roi.max, distanceString,rankString]];
+    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setText:[NSString stringWithFormat:@"%.0f ± %.0f %.0f (%.0f—%.0f—%.0f)%@%@", roi.mean, roi.dev, median, roi.min, midrange, roi.max, distanceString,rankString]];
     
 }
 -(void)hideNodeNamed:(NSString *)name hidden:(BOOL)hidden {

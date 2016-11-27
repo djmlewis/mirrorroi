@@ -37,5 +37,8 @@
 #define kSpriteName_Mirror @"M"
 #define kSpriteName_Jiggle @"J"
 #define kSpriteName_Range @"R"
+#define kSpriteName_Median @"D"
 #define kSpriteName_SDEV @"S"
 #define kSpriteName_Text @"T"
+#define kSpriteName_MidRange @"MD"
+#define kSpriteName_Mean @"MN"
