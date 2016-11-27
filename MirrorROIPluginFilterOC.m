@@ -866,13 +866,13 @@
 -(void)exportAllROIdataForType:(ROI_Type)type {
     NSMutableArray *finalString = [NSMutableArray arrayWithCapacity:4];
     NSString *dataString = [self dataStringFor3DROIdataForType:type];
-    if (dataString != nil) {[finalString addObject:@"3D data"];[finalString addObject:dataString];}
+    if (dataString != nil) {[finalString addObject:[@"3D data\n" stringByAppendingString:dataString]];}
     dataString = [self dataStringForSummaryROIdataForType:type];
-    if (dataString != nil) {[finalString addObject:@"Summary data"];[finalString addObject:dataString];}
+    if (dataString != nil) {[finalString addObject:[@"Summary data\n" stringByAppendingString:dataString]];}
     dataString = [self dataStringForROIdataForType:type];
-    if (dataString != nil) {[finalString addObject:@"ROI data"];[finalString addObject:dataString];}
+    if (dataString != nil) {[finalString addObject:[@"ROI data\n" stringByAppendingString:dataString]];}
     dataString = [self dataStringForROIpixelDataForType:type];
-    if (dataString != nil) {[finalString addObject:@"Pixel data"];[finalString addObject:dataString];}
+    if (dataString != nil) {[finalString addObject:[@"Pixel data\n" stringByAppendingString:dataString]];}
     if (finalString.count>0) {
         [self saveData:[finalString componentsJoinedByString:@"\n\n"] withName:[NSString stringWithFormat:@"%@-All-Data-%@", [self ROInameForType:type],self.viewerPET.window.title]];
     }
@@ -1262,12 +1262,14 @@
     [self selectJiggleROIwithIndex:index4ROI deselect:YES];
     NSInteger newVal = MIN(MAX(self.levelJiggleIndex.integerValue+sender.tag,self.levelJiggleIndex.minValue),self.levelJiggleIndex.maxValue);
     self.levelJiggleIndex.integerValue = newVal;
+    self.textJiggleRank.stringValue = [NSString stringWithFormat:@"%li",(long)newVal+1];
     [self selectJiggleROIwithIndex:newVal deselect:NO];
     [self refreshDisplayedDataForViewer:self.viewerCT];
 }
 -(void)resetLevelJiggleWithCount {
     self.levelJiggleIndex.maxValue = self.arrayJiggleROIvalues.count-1;
     self.levelJiggleIndex.integerValue = 0;
+    self.textJiggleRank.stringValue = @"1";
     self.levelJiggleIndex.warningValue = self.levelJiggleIndex.maxValue+1;//*2/3;//8 in d1, 16 in d2 just inactivates
     self.levelJiggleIndex.criticalValue = self.levelJiggleIndex.maxValue+1;//just inactivates;
     [self hideJiggleControlsOnCount];
@@ -1278,6 +1280,7 @@
     self.buttonJiggleWorse.hidden = hide;
     self.buttonJiggleBetter.hidden = hide;
     self.buttonJiggleSetNew.hidden = hide;
+    self.textJiggleRank.hidden = hide;
 
 }
 -(void)clearJiggleROIs {

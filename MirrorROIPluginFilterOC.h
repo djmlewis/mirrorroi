@@ -77,6 +77,7 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSTextField *labelCT;
 @property (assign) IBOutlet NSTextField *labelPET;
 @property (assign) IBOutlet NSTextField *labelWarningNoTools;
+
 @property (assign) IBOutlet NSView *viewTools;
 
 @property (assign) IBOutlet NSSlider *sliderMovevalue;
@@ -89,6 +90,7 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSButton *buttonJiggleWorse;
 @property (assign) IBOutlet NSButton *buttonJiggleBetter;
 @property (assign) IBOutlet NSButton *buttonJiggleSetNew;
+@property (assign) IBOutlet NSTextField *textJiggleRank;
 
 @property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
 
