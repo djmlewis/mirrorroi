@@ -26,21 +26,13 @@
         self.medianfloor = [NSNumber numberWithFloat:floorf(median)];
         self.distance = [NSNumber numberWithFloat:(fabs(location.x)+fabs(location.y))];//fmaxf
         self.location = location;
+        self.rank = [NSNumber numberWithInteger:0];
+
         //NSLog(@"%f -- %f - %f",[self.distance floatValue], self.location.x, self.location.y);
         self.roi = roi;
     }
     return self;
 }
-
-//+(id)roiValuesWithMean:(float)mean sdev:(float)sdev max:(float)max min:(float)min range:(float)range median:(float)median location:(NSPoint)location comparator:(ROI *)comparator {
-//    return [[ROIValues alloc] initWithMean:fabsf(comparator.mean-mean)
-//                                      sdev:fabsf(comparator.dev-sdev)
-//                                       max:fabsf(comparator.max-max)
-//                                       min:fabsf(comparator.min-min)
-//                                     range:fabsf(comparator.max-comparator.min-max-min)
-//                                    median:fabsf(((comparator.max-comparator.min)/2.0f)-((max-min)/2.0f))
-//                                  location:location];
-//}
 
 +(id)roiValuesWithComparatorROI:(ROI *)comparator andJiggleROI:(ROI *)jiggleROI location:(NSPoint)location{
     return [[ROIValues alloc] initWithMean:fabsf(comparator.mean-jiggleROI.mean)
@@ -48,16 +40,22 @@
                                        max:fabsf(comparator.max-jiggleROI.max)
                                        min:fabsf(comparator.min-jiggleROI.min)
                                      range:fabsf(comparator.max-comparator.min-jiggleROI.max-jiggleROI.min)
-                                    median:fabsf(((comparator.max-comparator.min)/2.0f)-((jiggleROI.max-jiggleROI.min)/2.0f))
+                                    median:fabsf([ROIValues midRangeForMin:comparator.min andMax:comparator.max]-[ROIValues midRangeForMin:jiggleROI.min andMax:jiggleROI.max])
                                   location:location
                                        roi:jiggleROI];
 }
 
-
-
--(NSComparisonResult)compare:(ROIValues *)otherROIValues {
-    return [self.mean compare:otherROIValues.mean];
+-(void)incrementRankWithIndex:(NSInteger)index {
+    self.rank = [NSNumber numberWithInteger:index+[self.rank integerValue]];
 }
+
++(float)midRangeForMin:(float)min andMax:(float)max {
+    return min+((max-min)/2.0f);
+}
+
+//-(NSComparisonResult)compare:(ROIValues *)otherROIValues {
+//    return [self.mean compare:otherROIValues.mean];
+//}
 
 
 

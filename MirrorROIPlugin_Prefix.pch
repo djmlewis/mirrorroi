@@ -24,6 +24,7 @@
 #define kExtendSingleTransformDefault @"kExtendSingleTransformDefault"
 #define kTransposeExportedDataDefault @"kTransposeExportedDataDefault"
 #define kIncludeOriginalInJiggleDefault @"kIncludeOriginalInJiggleDefault"
+#define kRankJiggleDefault @"kRankJiggleDefault"
 
 #define kJiggleROIName @"jiggle"
 #define kJiggleSelectedROIName @"jiggleselected"

@@ -20,14 +20,17 @@
 @property (retain) NSNumber *median;
 @property (retain) NSNumber *medianfloor;
 @property (retain) NSNumber *distance;
+@property (retain) NSNumber *rank;
 @property (retain) ROI *roi;
 @property NSPoint location;
 
--(NSComparisonResult)compare:(ROIValues *)otherROIValues;
+//-(NSComparisonResult)compare:(ROIValues *)otherROIValues;
 -(id)initWithMean:(float)mean sdev:(float)sdev max:(float)max min:(float)min range:(float)range median:(float)median location:(NSPoint)location roi:(ROI *)roi;
 //+(id)roiValuesWithMean:(float)mean sdev:(float)sdev max:(float)max min:(float)min range:(float)range median:(float)median location:(NSPoint)location comparator:(ROI *)comparator;
-+(id)roiValuesWithComparatorROI:(ROI *)comparator andJiggleROI:(ROI *)jiggleROI location:(NSPoint)location;
+-(void)incrementRankWithIndex:(NSInteger)index;
 
++(id)roiValuesWithComparatorROI:(ROI *)comparator andJiggleROI:(ROI *)jiggleROI location:(NSPoint)location;
++(float)midRangeForMin:(float)min andMax:(float)max;
 
 
 @end
