@@ -1350,26 +1350,28 @@
 }
 -(void)sortJiggleROIs {
     NSArray *sortDescriptors = [self sortDescriptorsForJiggle];
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kRankJiggleDefault]) {
-        // zero the ranks
-        for (ROIValues *rv in self.arrayJiggleROIvalues) {
-            rv.rank = [NSNumber numberWithInteger:0];
-        }
-        //get the sort descriptors
-        //run thru them sorting and updating the ranks one by ones
-        for (NSInteger sortIndex = 0; sortIndex<sortDescriptors.count; sortIndex++) {
-            //take Nth descriptor out and make into an array to sort
-            [self.arrayJiggleROIvalues sortUsingDescriptors:[NSArray arrayWithObject:[sortDescriptors objectAtIndex:sortIndex]]];
-            //update the ranks now with the new order
-            for (NSInteger index=0; index<self.arrayJiggleROIvalues.count; index++) {
-                [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] incrementRankWithIndex:index];
+    if (sortDescriptors.count>0) {
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kRankJiggleDefault]) {
+            // zero the ranks
+            for (ROIValues *rv in self.arrayJiggleROIvalues) {
+                rv.rank = [NSNumber numberWithInteger:0];
             }
+            //get the sort descriptors
+            //run thru them sorting and updating the ranks one by ones
+            for (NSInteger sortIndex = 0; sortIndex<sortDescriptors.count; sortIndex++) {
+                //take Nth descriptor out and make into an array to sort
+                [self.arrayJiggleROIvalues sortUsingDescriptors:[NSArray arrayWithObject:[sortDescriptors objectAtIndex:sortIndex]]];
+                //update the ranks now with the new order
+                for (NSInteger index=0; index<self.arrayJiggleROIvalues.count; index++) {
+                    [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] incrementRankWithIndex:index];
+                }
+            }
+            //now do the final sort by rank
+            [self.arrayJiggleROIvalues sortUsingDescriptors:[NSArray arrayWithObject:[[NSSortDescriptor alloc] initWithKey:@"rank" ascending:YES]]];
         }
-        //now do the final sort by rank
-        [self.arrayJiggleROIvalues sortUsingDescriptors:[NSArray arrayWithObject:[[NSSortDescriptor alloc] initWithKey:@"rank" ascending:YES]]];
-    }
-    else {
-        [self.arrayJiggleROIvalues sortUsingDescriptors:sortDescriptors];
+        else {
+            [self.arrayJiggleROIvalues sortUsingDescriptors:sortDescriptors];
+        }
     }
 }
 -(NSArray *)sortDescriptorsForJiggle {
