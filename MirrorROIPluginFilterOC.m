@@ -33,15 +33,16 @@
     //the sortKeys used in sorting jiggleROI are in an Array, each key a dict
     NSMutableArray *arrayOfKeys = [NSMutableArray array];
     [arrayOfKeys addObject:@{kJiggleSortKey : @"distance",kJiggleCheckKey : @"1"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"meanfloor",kJiggleCheckKey : @"1"}];
     [arrayOfKeys addObject:@{kJiggleSortKey : @"mean",kJiggleCheckKey : @"0"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"medianfloor",kJiggleCheckKey : @"1"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"meanfloor",kJiggleCheckKey : @"1"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"sdev",kJiggleCheckKey : @"0"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"sdevfloor",kJiggleCheckKey : @"1"}];
     [arrayOfKeys addObject:@{kJiggleSortKey : @"median",kJiggleCheckKey : @"0"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"sdev",kJiggleCheckKey : @"1"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"midrange",kJiggleCheckKey : @"1"}];
     [arrayOfKeys addObject:@{kJiggleSortKey : @"range",kJiggleCheckKey : @"1"}];
     [arrayOfKeys addObject:@{kJiggleSortKey : @"min",kJiggleCheckKey : @"0"}];
     [arrayOfKeys addObject:@{kJiggleSortKey : @"max",kJiggleCheckKey : @"0"}];
-    [defaults setObject:arrayOfKeys forKey:kJiggleUserDefaultsArrayName];
+    [defaults setObject:arrayOfKeys forKey:kJiggleSortsArrayName];
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
     self.arrayJiggleROIvalues = [NSMutableArray array];
@@ -1086,13 +1087,19 @@
     [self.skView presentScene:self.skScene];
     self.skView.showsFPS = NO;
     self.skView.showsNodeCount = NO;
-    [self addStatsMarkersWithName:kSpriteName_Active position:5.0];
-    [self addStatsMarkersWithName:kSpriteName_Mirror position:3.0];
+    [self addStatsMarkersWithName:kSpriteName_Active position:3.0];
+    [self addStatsMarkersWithName:kSpriteName_Mirror position:5.0];
     [self addStatsMarkersWithName:@"J" position:1.0];
 }
 -(void)addStatsMarkersWithName:(NSString *)name position:(CGFloat)position{
     CGFloat posY = self.skView.frame.size.height*position*kHeightFraction;
     CGFloat posYT = self.skView.frame.size.height*(position+1)*kHeightFraction;
+    
+    SKSpriteNode *median = [SKSpriteNode spriteNodeWithColor:[NSColor redColor] size:CGSizeMake(3, 33.0)];
+    median.name = [name stringByAppendingString:kSpriteName_Median];
+    [self.skScene addChild:median];
+    median.position = CGPointMake(0.0, posY);
+    
     SKSpriteNode *rangeA = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(0.0, 3.0)];
     rangeA.name = [name stringByAppendingString:kSpriteName_Range];
     [self.skScene addChild:rangeA];
@@ -1100,8 +1107,8 @@
 
     SKSpriteNode *midrange = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(2, 25.0)];
     midrange.name = [name stringByAppendingString:kSpriteName_MidRange];
-    [self.skScene addChild:midrange];
-    midrange.position = CGPointMake(0.0, posY);
+    [rangeA addChild:midrange];
+    //midrange moves with range
     
     SKSpriteNode *sdevA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(0.0, 15.0)];
     sdevA.name = [name stringByAppendingString:kSpriteName_SDEV];
@@ -1109,21 +1116,16 @@
     [self.skScene addChild:sdevA];
     sdevA.position = CGPointMake(0.0, posY);
     
-    SKSpriteNode *median = [SKSpriteNode spriteNodeWithColor:[NSColor redColor] size:CGSizeMake(2, 31.0)];
-    median.name = [name stringByAppendingString:kSpriteName_Median];
-    [self.skScene addChild:median];
-    median.position = CGPointMake(0.0, posY);
-
     SKSpriteNode *meanA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(2, 31.0)];
     meanA.name = [name stringByAppendingString:kSpriteName_Mean];
-    [self.skScene addChild:meanA];
-    meanA.position = CGPointMake(0.0, posY);
-
+    [sdevA addChild:meanA];
+    //mean moves with SD
+    
     SKLabelNode *statsA = [SKLabelNode labelNodeWithFontNamed:@"Helvetica"];
     statsA.verticalAlignmentMode = SKLabelVerticalAlignmentModeCenter;
     statsA.text = name;
     statsA.name = [name stringByAppendingString:kSpriteName_Text];
-    statsA.fontSize = 13;
+    statsA.fontSize = 12;
     statsA.fontColor = [NSColor blackColor];
     [self.skScene addChild:statsA];
     statsA.position = CGPointMake(CGRectGetMidX(self.skView.bounds),posYT);
@@ -1227,29 +1229,26 @@
     CGFloat midrange = [ROIValues midRangeForMin:roi.min andMax:roi.max];
     CGFloat adjmidrange = [ROIValues midRangeForMin:adjmin andMax:adjmax];
     
+    //midrange node moves with range
     SKSpriteNode *rangenode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Range]];
     if (rangenode != nil) {
-        rangenode.position = CGPointMake(adjmin+adjmidrange, rangenode.position.y);
+        rangenode.position = CGPointMake(adjmidrange, rangenode.position.y);
         rangenode.size = CGSizeMake(adjrange, rangenode.size.height);
     }
+    //mean node moves with SD
     SKSpriteNode *sdnode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_SDEV]];
     if (sdnode != nil) {
         sdnode.position = CGPointMake(adjmean, rangenode.position.y);
         sdnode.size = CGSizeMake(adjsdev*2.0, sdnode.size.height);
         [self colourNode:sdnode forName:name];
     }
-    
+    //median is alone
     SKSpriteNode *mediannode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Median]];
     if (mediannode != nil) {
         mediannode.position = CGPointMake(adjmedian, rangenode.position.y);
     }
     
-    SKSpriteNode *meannode = (SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Mean]];
-    if (meannode != nil) {
-        meannode.position = CGPointMake(adjmean, rangenode.position.y);
-    }
-    
-    //update text
+    //update, text is alone too
     NSString *distanceString = @"";
     NSString *rankString = @"";
     if ([name isEqualToString:@"J"]) {
@@ -1269,6 +1268,7 @@
     [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Range]] setHidden:hidden];
     [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_SDEV]] setHidden:hidden];
     [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setHidden:hidden];
+    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Median]] setHidden:hidden];
 
 }
 
@@ -1368,6 +1368,7 @@
 
 }
 -(void)sortJiggleROIs {
+    //get the sort descriptors
     NSArray *sortDescriptors = [self sortDescriptorsForJiggle];
     if (sortDescriptors.count>0) {
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kRankJiggleDefault]) {
@@ -1375,14 +1376,25 @@
             for (ROIValues *rv in self.arrayJiggleROIvalues) {
                 rv.rank = [NSNumber numberWithInteger:0];
             }
-            //get the sort descriptors
-            //run thru them sorting and updating the ranks one by ones
+            //run thru sort descriptors sorting and updating the ranks one by ones
             for (NSInteger sortIndex = 0; sortIndex<sortDescriptors.count; sortIndex++) {
                 //take Nth descriptor out and make into an array to sort
                 [self.arrayJiggleROIvalues sortUsingDescriptors:[NSArray arrayWithObject:[sortDescriptors objectAtIndex:sortIndex]]];
+                
                 //update the ranks now with the new order
-                for (NSInteger index=0; index<self.arrayJiggleROIvalues.count; index++) {
-                    [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] incrementRankWithIndex:index];
+                //we start with a rank of 0 and update it to index only when the value changes
+                NSInteger rank = 0;
+                NSString *currentSortKey = [[sortDescriptors objectAtIndex:sortIndex] key];
+                //the index 0 object can be skipped as we just increment its rank by 0, and we cannot compare with the one before. A 1 size array just does not change...
+               for (NSInteger index=1; index<self.arrayJiggleROIvalues.count; index++) {
+                    NSNumber *prevvalue = [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index-1] valueForKey:currentSortKey];
+                    NSNumber *currentvalue = [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] valueForKey:currentSortKey];
+                   //if the value has changed we must change rank, otherwise stay on the rank
+                    if (![prevvalue isEqualToNumber:currentvalue]) {
+                        rank = index;
+                    }
+                    [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] incrementRankWithValue:rank];
+                    NSLog(@"Sort %@ prev %@ curr %@index %li rank %li",currentSortKey,prevvalue,currentvalue,(long)index,(long)rank);
                 }
             }
             //now do the final sort by rank
@@ -1394,7 +1406,7 @@
     }
 }
 -(NSArray *)sortDescriptorsForJiggle {
-    NSArray *usersorts = [[NSUserDefaults standardUserDefaults] arrayForKey:kJiggleUserDefaultsArrayName];
+    NSArray *usersorts = [[NSUserDefaults standardUserDefaults] arrayForKey:kJiggleSortsArrayName];
     NSMutableArray *sorters = [NSMutableArray arrayWithCapacity:usersorts.count];
     if (usersorts.count>0) {
         for (int i=0; i<usersorts.count; i++) {

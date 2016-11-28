@@ -19,12 +19,12 @@
         self.mean = [NSNumber numberWithFloat:mean];
         self.meanfloor = [NSNumber numberWithFloat:floorf(mean)];
         self.sdev = [NSNumber numberWithFloat:sdev];
+        self.sdevfloor = [NSNumber numberWithFloat:floorf(sdev)];
         self.max = [NSNumber numberWithFloat:max];
         self.min = [NSNumber numberWithFloat:min];
         self.range = [NSNumber numberWithFloat:range];
         self.midrange = [NSNumber numberWithFloat:midrange];
         self.median = [NSNumber numberWithFloat:median];
-        self.medianfloor = [NSNumber numberWithFloat:floorf(median)];
         self.distance = [NSNumber numberWithFloat:(fabs(location.x)+fabs(location.y))];//fmaxf
         self.location = location;
         self.rank = [NSNumber numberWithInteger:0];
@@ -47,7 +47,7 @@
                                        roi:jiggleROI];
 }
 
--(void)incrementRankWithIndex:(NSInteger)index {
+-(void)incrementRankWithValue:(NSInteger)index {
     self.rank = [NSNumber numberWithInteger:index+[self.rank integerValue]];
 }
 
@@ -76,8 +76,8 @@
         float loV = [[roivals objectAtIndex:lower] floatValue];
         median = (upV+loV)/2.0f;
     }
-    NSLog(@"%@",roivals);
-    NSLog(@"%f",median);
+    //NSLog(@"%@",roivals);
+    //NSLog(@"%f",median);
     return median;
 }
 

@@ -28,7 +28,7 @@
 
 #define kJiggleROIName @"jiggle"
 #define kJiggleSelectedROIName @"jiggleselected"
-#define kJiggleUserDefaultsArrayName @"jiggleSorts"
+#define kJiggleSortsArrayName @"kJiggleSortsArrayName"
 #define kJiggleCheckKey @"checkKey"
 #define kJiggleSortKey @"sortKey"
 
