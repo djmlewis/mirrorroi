@@ -45,7 +45,6 @@
     [defaults setObject:arrayOfKeys forKey:kJiggleSortsArrayName];
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
-    self.arrayJiggleROIvalues = [NSMutableArray array];
 }
 
 - (long) filterImage:(NSString*) menuName {
@@ -55,10 +54,10 @@
     //essential use this with OWNER specified so it looks in OUR bundle for resource.
     NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
     [windowController showWindow:self];
-    [self smartAssignCTPETwindows];
+    //load stats first
     [self loadStatsScene];
-    [self resetLevelJiggleWithCount];
-    [self refreshDisplayedDataForViewer:self.viewerCT];
+    [self smartAssignCTPETwindows];
+    [self clearJiggleROIsAndValuesAndResetDisplayed];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixCloseViewerNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerControllerDidLoadImagesNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixDCMUpdateCurrentImageNotification object:nil];
@@ -71,15 +70,14 @@
 }
 
 -(void)handleNotification:(NSNotification *)notification {
+    //NSLog(@"%@ -- %@ -- %@ << %li",notification.name, notification.object, notification.userInfo,(long)[[self.viewerCT imageView] curImage]);
     if ([notification.name isEqualToString:OsirixViewerControllerDidLoadImagesNotification] ||
         [notification.name isEqualToString:OsirixCloseViewerNotification]) {
         [self smartAssignCTPETwindows];
     }
     if ([notification.name isEqualToString:OsirixDCMUpdateCurrentImageNotification] &&
         notification.object == self.viewerCT.imageView) {
-        //NSLog(@"%@ -- %@ -- %@",notification.name, notification.object, notification.userInfo);
-       [self refreshDisplayedDataForViewer:self.viewerCT];
-        [self resetLevelJiggleWithCount];
+        [self resetJiggleControlsAndRefresh];
     }
 }
 
@@ -94,6 +92,7 @@
         self.viewerCT = viewController;
         if (viewController != nil) {
             self.labelCT.stringValue = viewController.window.title;
+            [self clearJiggleROIsAndValuesAndResetDisplayed];
         }
         else
         {
@@ -374,8 +373,7 @@
     [self mirrorActiveROIUsingLengthROIn3D:in3D];
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
-    [self refreshDisplayedDataForViewer:self.viewerCT];
-    [self resetLevelJiggleWithCount];
+    [self resetJiggleControlsAndRefresh];
 }
 -(void)copyTransformROIsFromCT2PETIn3D:(BOOL)in3D {
     if ([self validCTandPETwindows]
@@ -442,6 +440,7 @@
         [self deleteROIsFromViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
         [self deleteROIsFromViewerController:self.viewerCT withName:self.textActiveROIname.stringValue];
         [self deleteROIsFromViewerController:self.viewerCT withName:self.textMirrorROIname.stringValue];
+        [self clearJiggleROIsAndValuesFromAllSlices];
         startSlice = 0;
         endSlice = roisInAllSlices.count;
     }
@@ -452,8 +451,8 @@
         [self deleteROIsInSlice:startSlice inViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
         [self deleteROIsInSlice:startSlice inViewerController:self.viewerCT withName:self.textActiveROIname.stringValue];
         [self deleteROIsInSlice:startSlice inViewerController:self.viewerCT withName:self.textMirrorROIname.stringValue];
-        [self deleteAllROIsFromViewerController:self.viewerCT];
-   }
+        [self clearJiggleROIsAndValuesFromSlice:startSlice];
+    }
     
     for (NSUInteger slice=startSlice; slice<endSlice; slice++) {
         NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];
@@ -631,7 +630,7 @@
     
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
-    [self refreshDisplayedDataForViewer:self.viewerCT];
+    [self refreshDisplayedDataForCT];
 }
 
 #pragma mark - Delete Rename ROIs
@@ -645,7 +644,7 @@
             [self deleteROIsFromViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
             break;
         case Jiggle_ROI:
-            [self deleteJiggleROIsFromViewer:self.viewerCT inSlice:kAllSlices];
+            [self clearJiggleROIsAndValuesAndResetDisplayed];
             break;
         case Transform_ROI_Placed:
             [self deleteROIsFromViewerController:self.viewerPET withName:self.textLengthROIname.stringValue];
@@ -671,7 +670,7 @@
         [active2Dwindow deleteSeriesROIwithName:name];
         [active2Dwindow needsDisplayUpdate];
         if (active2Dwindow == self.viewerCT) {
-            [self refreshDisplayedDataForViewer:self.viewerCT];
+            [self resetJiggleControlsAndRefresh];
         }
     }
 
@@ -691,8 +690,8 @@
             [roisInSlice removeObjectsAtIndexes:set];
         }
         [active2Dwindow needsDisplayUpdate];
-        if (active2Dwindow == self.viewerCT) {
-            [self refreshDisplayedDataForViewer:self.viewerCT];
+        if (active2Dwindow == self.viewerCT && [name isEqualToString:kJiggleROIName]) {
+            [self resetJiggleControlsAndRefresh];
         }
     }
 }
@@ -700,24 +699,9 @@
     if (active2Dwindow)
     {
         [active2Dwindow roiDeleteAll:nil];
+        if (active2Dwindow == self.viewerCT) {[self clearJiggleROIsAndValuesAndResetDisplayed];}
         [active2Dwindow needsDisplayUpdate];
-        if (active2Dwindow == self.viewerCT) {
-            [self clearJiggleROIs];
-            [self refreshDisplayedDataForViewer:self.viewerCT];
-        }
    }
-}
--(void)deleteJiggleROIsFromViewer:(ViewerController *)viewer inSlice:(NSInteger)slice {
-    if (slice == kAllSlices) {
-        [self deleteROIsFromViewerController:viewer withName:kJiggleROIName];
-        [self deleteROIsFromViewerController:viewer withName:kJiggleSelectedROIName];
-    }
-    else {
-        [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleROIName];
-        [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleSelectedROIName];
-    }
-    [self clearJiggleROIs];
-    [viewer needsDisplayUpdate];
 }
 - (void)renameROIsInSlice:(NSUInteger)slice inViewerController:(ViewerController *)active2Dwindow containingName:(NSString *)name withNewName:(NSString *)newName{
     if (active2Dwindow && slice<active2Dwindow.roiList.count)
@@ -820,7 +804,14 @@
 -(ROI *)ROIfromCurrentSliceInViewer:(ViewerController *)viewer withName:(NSString *)name {
     if (viewer != nil)
     {
-        for (ROI *roi in [[viewer roiList] objectAtIndex:[[viewer imageView] curImage]]) {
+        return [self ROIfromSlice:[[viewer imageView] curImage] inViewer:viewer withName:name];
+    }
+    return nil;
+}
+-(ROI *)ROIfromSlice:(NSInteger)slice inViewer:(ViewerController *)viewer withName:(NSString *)name {
+    if (viewer != nil && slice<viewer.roiList.count)
+    {
+        for (ROI *roi in [[viewer roiList] objectAtIndex:slice]) {
             if ([roi.name isEqualToString:name]) {
                 return roi;
             }
@@ -1146,6 +1137,9 @@
     }
 }
 - (IBAction)refreshDisplayedDataCTTapped:(NSButton *)sender {
+    [self refreshDisplayedDataForCT];
+}
+-(void)refreshDisplayedDataForCT {
     [self refreshDisplayedDataForViewer:self.viewerCT];
 }
 - (void)refreshDisplayedDataForViewer:(ViewerController *)viewer{
@@ -1166,21 +1160,21 @@
             minGrey = fminf(minGrey, activeRoi.min);
             minGrey = fminf(minGrey, activeRoi.mean-activeRoi.dev);
             maxGrey = fmaxf(maxGrey, activeRoi.mean+activeRoi.dev);
-            maxGrey = fmaxf(minGrey, activeRoi.max);
+            maxGrey = fmaxf(maxGrey, activeRoi.max);
         }
 
         if (mirroredRoi != nil) {
             minGrey = fminf(minGrey, mirroredRoi.min);
             minGrey = fminf(minGrey, mirroredRoi.mean-mirroredRoi.dev);
             maxGrey = fmaxf(maxGrey, mirroredRoi.mean+mirroredRoi.dev);
-            maxGrey = fmaxf(minGrey, mirroredRoi.max);
+            maxGrey = fmaxf(maxGrey, mirroredRoi.max);
         }
         
         if (jiggleRoi != nil) {
             minGrey = fminf(minGrey, jiggleRoi.min);
             minGrey = fminf(minGrey, jiggleRoi.mean-jiggleRoi.dev);
             maxGrey = fmaxf(maxGrey, jiggleRoi.mean+jiggleRoi.dev);
-            maxGrey = fmaxf(minGrey, jiggleRoi.max);
+            maxGrey = fmaxf(maxGrey, jiggleRoi.max);
         }
         
         float ratio = 0;
@@ -1212,11 +1206,6 @@
         [self hideNodeNamed:@"J" hidden:jiggleRoi == nil];
         
         self.skView.hidden = activeRoi == nil && mirroredRoi == nil && jiggleRoi == nil;
-//    }
-//    else
-//    {
-//        self.skView.hidden = YES;
-//    }
 }
 -(void)setLocationOfSpriteNamed:(NSString *)name forROI:(ROI *)roi minGrey:(CGFloat)minGrey ratio:(CGFloat)ratio{
     CGFloat median = [ROIValues medianForROI:roi];
@@ -1253,11 +1242,11 @@
     NSString *rankString = @"";
     if ([name isEqualToString:@"J"]) {
         NSInteger index = [self indexOfJiggleForROI:roi];
-        if (index != NSNotFound && index<self.arrayJiggleROIvalues.count) {
-            distanceString = [NSString stringWithFormat:@" ∆%li", (long)[[[self.arrayJiggleROIvalues objectAtIndex:index] distance] integerValue]];
+        if (index != NSNotFound && index<[self jiggleROIValuesArrayCountInCurrentSlice]) {
+            distanceString = [NSString stringWithFormat:@" ∆%li", (long)[[[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] distance] integerValue]];
             if ([[NSUserDefaults standardUserDefaults] boolForKey:kRankJiggleDefault])
             {
-                rankString = [NSString stringWithFormat:@" #%li", (long)[[[self.arrayJiggleROIvalues objectAtIndex:index] rank] integerValue]];
+                rankString = [NSString stringWithFormat:@" #%li", (long)[[[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] rank] integerValue]];
             }
         }
     }
@@ -1273,26 +1262,84 @@
 }
 
 #pragma mark - Jiggle
-- (IBAction)selectBestMirrorTapped:(NSButton *)sender {
-    if (sender.tag == 0) {
-        [self generateJiggleROIs];
+-(NSMutableArray *)jiggleROIValuesArrayForCurrentSlice {
+    return [self jiggleROIvaluesArrayForSlice:[[self.viewerCT imageView] curImage]];
+}
+-(NSMutableArray *)jiggleROIvaluesArrayForSlice:(NSUInteger)slice {
+    if (slice<self.arrayJiggleROIvalues.count)
+    {
+        return [self.arrayJiggleROIvalues objectAtIndex:slice];
+    }
+    return nil;
+}
+-(NSUInteger)jiggleROIvaluesArrayCountForSlice:(NSUInteger)slice {
+    if (slice<self.arrayJiggleROIvalues.count)
+    {
+        NSMutableArray *vals = [self.arrayJiggleROIvalues objectAtIndex:slice];
+        NSUInteger count = [vals count];
+        return count;
+    }
+    return 0;
+}
+-(NSUInteger)jiggleROIValuesArrayCountInCurrentSlice {
+    return [self jiggleROIvaluesArrayCountForSlice:[[self.viewerCT imageView] curImage]];
+}
+
+-(void)clearJiggleROIsAndValuesFromViewer:(ViewerController *)viewer inSlice:(NSInteger)slice {
+    if (slice == kAllSlices) {
+        [self deleteROIsFromViewerController:viewer withName:kJiggleROIName];
+        [self deleteROIsFromViewerController:viewer withName:kJiggleSelectedROIName];
+        [self clearJiggleROIvaluesArrayAllSlices];
     }
     else {
-        [self replaceMirrorWithJiggleROI];
+        [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleROIName];
+        [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleSelectedROIName];
+        [self clearJiggleROIvaluesArrayAtSlice:slice];
+    }
+    [viewer needsDisplayUpdate];
+    [self resetJiggleControlsAndRefresh];
+}
+-(void)clearJiggleROIsAndValuesFromAllSlices {
+    [self clearJiggleROIsAndValuesFromViewer:self.viewerCT inSlice:kAllSlices];
+}
+-(void)clearJiggleROIsAndValuesFromSlice:(NSInteger)slice {
+    [self clearJiggleROIsAndValuesFromViewer:self.viewerCT inSlice:slice];
+}
+-(void)clearJiggleROIsAndValuesAndResetDisplayed {
+    [self clearJiggleROIsAndValuesFromAllSlices];
+    [self resetJiggleControlsAndRefresh];
+    
+}
+
+-(void)clearJiggleROIvaluesArrayAllSlices {
+    self.arrayJiggleROIvalues = [NSMutableArray arrayWithCapacity:self.viewerCT.roiList.count];
+    for (int i=0; i<self.viewerCT.roiList.count; i++) {
+        [self.arrayJiggleROIvalues addObject:[NSMutableArray arrayWithCapacity:kNumberOfJiggleROIsPerSlice]];
     }
 }
+-(void)clearJiggleROIvaluesArrayAtSlice:(NSUInteger)slice {
+    if (slice<self.arrayJiggleROIvalues.count)
+    {
+        [self.arrayJiggleROIvalues replaceObjectAtIndex:slice withObject:[NSMutableArray arrayWithCapacity:kNumberOfJiggleROIsPerSlice]];
+    }
+}
+-(void)clearJiggleROIvaluesArrayAtCurrentSlice {
+    [self clearJiggleROIvaluesArrayAtSlice:[[self.viewerCT imageView] curImage]];
+}
+
 - (IBAction)changeJiggleROItapped:(NSButton *)sender {
     //deselect and select
     NSInteger index4ROI = [self indexOfJiggleForROI: [self ROIfromCurrentSliceInViewer:self.viewerCT withName:kJiggleSelectedROIName]];
-    [self selectJiggleROIwithIndex:index4ROI deselect:YES];
+    [self selectJiggleROIinCurrentSlicewithIndex:index4ROI deselect:YES];
     NSInteger newVal = MIN(MAX(self.levelJiggleIndex.integerValue+sender.tag,self.levelJiggleIndex.minValue),self.levelJiggleIndex.maxValue);
     self.levelJiggleIndex.integerValue = newVal;
     self.textJiggleRank.stringValue = [NSString stringWithFormat:@"%li",(long)newVal+1];
-    [self selectJiggleROIwithIndex:newVal deselect:NO];
-    [self refreshDisplayedDataForViewer:self.viewerCT];
+    [self selectJiggleROIinCurrentSlicewithIndex:newVal deselect:NO];
+    [self refreshDisplayedDataForCT];
 }
 -(void)resetLevelJiggleWithCount {
-    self.levelJiggleIndex.maxValue = self.arrayJiggleROIvalues.count-1;
+    //NSLog(@"count: %li",(long)[self jiggleROIValuesArrayCountInCurrentSlice]);
+    self.levelJiggleIndex.maxValue = [self jiggleROIValuesArrayCountInCurrentSlice]-1;
     self.levelJiggleIndex.integerValue = 0;
     self.textJiggleRank.stringValue = @"1";
     self.levelJiggleIndex.warningValue = self.levelJiggleIndex.maxValue+1;//*2/3;//8 in d1, 16 in d2 just inactivates
@@ -1300,7 +1347,7 @@
     [self hideJiggleControlsOnCount];
 }
 -(void)hideJiggleControlsOnCount {
-    BOOL hide = self.arrayJiggleROIvalues.count<=0;
+    BOOL hide = [self jiggleROIValuesArrayCountInCurrentSlice]<=0;
     self.levelJiggleIndex.hidden = hide;
     self.buttonJiggleWorse.hidden = hide;
     self.buttonJiggleBetter.hidden = hide;
@@ -1308,19 +1355,31 @@
     self.textJiggleRank.hidden = hide;
 
 }
--(void)clearJiggleROIs {
-    self.arrayJiggleROIvalues = [NSMutableArray array];
-    [self resetLevelJiggleWithCount];
-    
+- (IBAction)generateJiggleROIsTapped:(NSButton *)sender {
+    switch (sender.tag) {
+        case 0:
+            [self clearJiggleROIsAndValuesFromSlice:[[self.viewerCT imageView] curImage]];
+            [self generateJiggleROIsInSlice:[[self.viewerCT imageView] curImage]];
+            break;
+        case 1:
+            [self replaceMirrorWithJiggleROI];
+            break;
+        case 2:
+            [self clearJiggleROIsAndValuesFromAllSlices];
+            for (NSUInteger i=0; i<self.viewerCT.roiList.count; i++) {
+                [self generateJiggleROIsInSlice:i];
+            }
+            break;
+            
+        default:
+            break;
+    }
+    [self resetJiggleControlsAndRefresh];
 }
--(void)generateJiggleROIs {
-    ROI *roi2ClonePET = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];//we take the position of the MIRROR
-    ROI *roi2CloneCT = [self ROIfromCurrentSliceInViewer:self.viewerCT withName:self.textActiveROIname.stringValue];//take VALUES of the ACTIVE
+-(void)generateJiggleROIsInSlice:(NSInteger)currentSlice {
+    ROI *roi2ClonePET = [self ROIfromSlice:currentSlice inViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];//we take the position of the MIRROR
+    ROI *roi2CloneCT = [self ROIfromSlice:currentSlice inViewer:self.viewerCT withName:self.textActiveROIname.stringValue];//take VALUES of the ACTIVE
     if (roi2ClonePET != nil && roi2CloneCT != nil) {
-        //clear the decks
-        NSUInteger currentSlice = [[self.viewerCT imageView] curImage];
-        self.arrayJiggleROIvalues = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
-        [self deleteJiggleROIsFromViewer:self.viewerCT inSlice:currentSlice];
         //make the ROIS grid, dont add the zero ROI as its the already mirror unless specifically requested
         BOOL excludeOriginal = ![[NSUserDefaults standardUserDefaults] boolForKey:kIncludeOriginalInJiggleDefault];
         for (int moveX=-2; moveX<3; moveX++) {
@@ -1341,67 +1400,70 @@
                 [MirrorROIPluginFilterOC setROIcolour:createdROI forType:Jiggle_ROI];
                 [self addROI2Pix:createdROI atSlice:currentSlice inViewer:self.viewerCT hidden:YES];
                 //createdROI is now in CT, so we can use its pixels straight, alongside its mirror in CT
-                [self.arrayJiggleROIvalues addObject:[ROIValues roiValuesWithComparatorROI:roi2CloneCT andJiggleROI:createdROI location:NSMakePoint(moveX, moveY)]];
+                [[self jiggleROIvaluesArrayForSlice:currentSlice] addObject:[ROIValues roiValuesWithComparatorROI:roi2CloneCT andJiggleROI:createdROI location:NSMakePoint(moveX, moveY)]];
             }
         }
-        
         //SORT the ROIS by the criteria
-        [self sortJiggleROIs];
-        //update the controls & show ROIs
-        [self resetLevelJiggleWithCount];
-        if (self.arrayJiggleROIvalues.count>0) {
-            [self selectJiggleROIwithIndex:0 deselect:NO];
-            [self refreshDisplayedDataForViewer:self.viewerCT];
-        }
+        [self sortJiggleROIsInSlice:currentSlice];
+        //update
+        [self selectJiggleROIinSlice:currentSlice withIndex:0 deselect:NO];
+        [self resetJiggleControlsAndRefresh];
     }
 }
--(void)selectJiggleROIwithIndex:(NSUInteger)index deselect:(BOOL)deselect{
-    if (index<self.arrayJiggleROIvalues.count) {
-        [[(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] roi] setHidden:deselect];
+-(void)resetJiggleControlsAndRefresh {
+    [self resetLevelJiggleWithCount];
+    [self refreshDisplayedDataForCT];
+}
+-(void)selectJiggleROIinCurrentSlicewithIndex:(NSUInteger)index deselect:(BOOL)deselect{
+    [self selectJiggleROIinSlice:[[self.viewerCT imageView] curImage] withIndex:index deselect:deselect];
+}
+-(void)selectJiggleROIinSlice:(NSUInteger)slice withIndex:(NSUInteger)index deselect:(BOOL)deselect{
+    if (index<[self jiggleROIvaluesArrayCountForSlice:slice]) {
+        [[(ROIValues *)[[self jiggleROIvaluesArrayForSlice:slice] objectAtIndex:index] roi] setHidden:deselect];
         if (deselect) {
-            [[(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] roi] setName:kJiggleROIName];
+            [[(ROIValues *)[[self jiggleROIvaluesArrayForSlice:slice] objectAtIndex:index] roi] setName:kJiggleROIName];
         }
         else {
-            [[(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] roi] setName:kJiggleSelectedROIName];
+            [[(ROIValues *)[[self jiggleROIvaluesArrayForSlice:slice] objectAtIndex:index] roi] setName:kJiggleSelectedROIName];
         }
     }
 
 }
--(void)sortJiggleROIs {
+-(void)sortJiggleROIsInSlice:(NSUInteger)slice {
     //get the sort descriptors
     NSArray *sortDescriptors = [self sortDescriptorsForJiggle];
     if (sortDescriptors.count>0) {
         if ([[NSUserDefaults standardUserDefaults] boolForKey:kRankJiggleDefault]) {
             // zero the ranks
-            for (ROIValues *rv in self.arrayJiggleROIvalues) {
+            for (ROIValues *rv in [self jiggleROIvaluesArrayForSlice:slice]) {
                 rv.rank = [NSNumber numberWithInteger:0];
             }
             //run thru sort descriptors sorting and updating the ranks one by ones
             for (NSInteger sortIndex = 0; sortIndex<sortDescriptors.count; sortIndex++) {
                 //take Nth descriptor out and make into an array to sort
-                [self.arrayJiggleROIvalues sortUsingDescriptors:[NSArray arrayWithObject:[sortDescriptors objectAtIndex:sortIndex]]];
+                [[self jiggleROIvaluesArrayForSlice:slice] sortUsingDescriptors:[NSArray arrayWithObject:[sortDescriptors objectAtIndex:sortIndex]]];
                 
                 //update the ranks now with the new order
                 //we start with a rank of 0 and update it to index only when the value changes
                 NSInteger rank = 0;
                 NSString *currentSortKey = [[sortDescriptors objectAtIndex:sortIndex] key];
                 //the index 0 object can be skipped as we just increment its rank by 0, and we cannot compare with the one before. A 1 size array just does not change...
-               for (NSInteger index=1; index<self.arrayJiggleROIvalues.count; index++) {
-                    NSNumber *prevvalue = [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index-1] valueForKey:currentSortKey];
-                    NSNumber *currentvalue = [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] valueForKey:currentSortKey];
+               for (NSInteger index=1; index<[self jiggleROIvaluesArrayCountForSlice:slice]; index++) {
+                    NSNumber *prevvalue = [(ROIValues *)[[self jiggleROIvaluesArrayForSlice:slice] objectAtIndex:index-1] valueForKey:currentSortKey];
+                    NSNumber *currentvalue = [(ROIValues *)[[self jiggleROIvaluesArrayForSlice:slice] objectAtIndex:index] valueForKey:currentSortKey];
                    //if the value has changed we must change rank, otherwise stay on the rank
                     if (![prevvalue isEqualToNumber:currentvalue]) {
                         rank = index;
                     }
-                    [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] incrementRankWithValue:rank];
-                    NSLog(@"Sort %@ prev %@ curr %@index %li rank %li",currentSortKey,prevvalue,currentvalue,(long)index,(long)rank);
+                    [(ROIValues *)[[self jiggleROIvaluesArrayForSlice:slice] objectAtIndex:index] incrementRankWithValue:rank];
+                    //NSLog(@"Sort %@ prev %@ curr %@index %li rank %li",currentSortKey,prevvalue,currentvalue,(long)index,(long)rank);
                 }
             }
             //now do the final sort by rank
-            [self.arrayJiggleROIvalues sortUsingDescriptors:[NSArray arrayWithObject:[[NSSortDescriptor alloc] initWithKey:@"rank" ascending:YES]]];
+            [[self jiggleROIvaluesArrayForSlice:slice] sortUsingDescriptors:[NSArray arrayWithObject:[[NSSortDescriptor alloc] initWithKey:@"rank" ascending:YES]]];
         }
         else {
-            [self.arrayJiggleROIvalues sortUsingDescriptors:sortDescriptors];
+            [[self jiggleROIvaluesArrayForSlice:slice] sortUsingDescriptors:sortDescriptors];
         }
     }
 }
@@ -1426,17 +1488,16 @@
     if (mirroredROI != nil && selJiggleROI != nil) {
         NSInteger index = [self indexOfJiggleForROI:selJiggleROI];
         if (index != NSNotFound) {
-            NSPoint delta = [(ROIValues *)[self.arrayJiggleROIvalues objectAtIndex:index] location];
+            NSPoint delta = [(ROIValues *)[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] location];
             [self moveMirrorROIByAmount:delta];
-            NSUInteger currentSlice = [[self.viewerCT imageView] curImage];
-            [self deleteJiggleROIsFromViewer:self.viewerCT inSlice:currentSlice];
-            [self refreshDisplayedDataForViewer:self.viewerCT];
+            [self clearJiggleROIsAndValuesFromAllSlices];
+            [self resetJiggleControlsAndRefresh];
         }
     }
 }
 -(NSInteger)indexOfJiggleForROI:(ROI *)roi2Test {
-    for (int i=0; i<self.arrayJiggleROIvalues.count; i++) {
-        ROIValues *rv = [self.arrayJiggleROIvalues objectAtIndex:i];
+    for (int i=0; i<[self jiggleROIValuesArrayCountInCurrentSlice]; i++) {
+        ROIValues *rv = [[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:i];
         if (rv.roi == roi2Test) {
             return i;
         }

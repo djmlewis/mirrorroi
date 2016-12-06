@@ -34,7 +34,22 @@
     }
     return self;
 }
-
+/*-(void)dealloc {
+    [_mean release];
+    [_meanfloor release];
+    [_sdev release];
+    [_sdevfloor release];
+    [_max release];
+    [_min release];
+    [_range release];
+    [_midrange release];
+    [_median release];
+    [_distance release];
+    [_rank release];
+    [_roi release];
+    [super dealloc];
+}
+ */
 +(id)roiValuesWithComparatorROI:(ROI *)comparator andJiggleROI:(ROI *)jiggleROI location:(NSPoint)location{
     return [[ROIValues alloc] initWithMean:fabsf(comparator.mean-jiggleROI.mean)
                                       sdev:fabsf(comparator.dev-jiggleROI.dev)

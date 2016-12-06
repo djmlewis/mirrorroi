@@ -31,7 +31,7 @@
 #define kJiggleSortsArrayName @"kJiggleSortsArrayName"
 #define kJiggleCheckKey @"checkKey"
 #define kJiggleSortKey @"sortKey"
-
+#define kNumberOfJiggleROIsPerSlice 24
 
 #define kSpriteName_Active @"A"
 #define kSpriteName_Mirror @"M"
