@@ -7,6 +7,8 @@
 
 #import "MirrorROIPluginFilterOC.h"
 #import "ROIValues.h"
+#import "TextDisplayWindow.h"
+
 #import <OsiriXAPI/PluginFilter.h>
 #import <OsiriXAPI/Notifications.h>
 
@@ -26,7 +28,10 @@
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor purpleColor]] forKey:kColor_Jiggle];
     [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
     [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
-    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeDataDefault];
+    [defaults setValue:[NSNumber numberWithInteger:1] forKey:kMirrorMoveByPixels];
+    [defaults setValue:[NSNumber numberWithInteger:3] forKey:kJiggleBoundsPixels];
+    [defaults setValue:[NSNumber numberWithInteger:2] forKey:kExtendSingleTransformDefault];
+    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeExportedDataDefault];
     [defaults setValue:[NSNumber numberWithBool:NO] forKey:kIncludeOriginalInJiggleDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kRankJiggleDefault];
     
@@ -43,6 +48,11 @@
     [arrayOfKeys addObject:@{kJiggleSortKey : @"min",kJiggleCheckKey : @"0"}];
     [arrayOfKeys addObject:@{kJiggleSortKey : @"max",kJiggleCheckKey : @"0"}];
     [defaults setObject:arrayOfKeys forKey:kJiggleSortsArrayName];
+    
+    NSMutableArray *arrayOfjROIs = [NSMutableArray array];
+    [arrayOfjROIs addObject:@{kJiggleROIsArrayKey : @"1"}];
+    [defaults setObject:arrayOfjROIs forKey:kJiggleROIsArrayName];
+    
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
 
 }
@@ -52,8 +62,8 @@
     [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
     
     //essential use this with OWNER specified so it looks in OUR bundle for resource.
-    NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
-    [windowController showWindow:self];
+    self.windowControllerMain = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
+    [self.windowControllerMain showWindow:self];
     //load stats first
     [self loadStatsScene];
     [self smartAssignCTPETwindows];
@@ -277,18 +287,22 @@
         switch (indicesOfDCMPixWithMeasureROI.count)
         {
             case 1:
-                switch (self.segmentExtendSingleLengthHow.selectedSegment)
             {
-                case ExtendSingleLengthUp:
-                    [self extendROI:[[measureROIs firstObject] copy] withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:self.viewerCT];
-                    break;
-                case ExtendSingleLengthDown:
-                    [self extendROI:[[measureROIs firstObject] copy] withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:self.viewerCT];
-                    break;
-                case ExtendSingleLengthBoth:
-                    [self extendROI:[[measureROIs firstObject] copy] withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:self.viewerCT];
-                    [self extendROI:[[measureROIs firstObject] copy] withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:self.viewerCT];
-                    break;
+                ROI *roi = [[measureROIs firstObject] copy];
+                roi.locked = NO;
+                switch ([[NSUserDefaults standardUserDefaults] integerForKey:kExtendSingleTransformDefault])
+                {
+                    case ExtendSingleLengthUp:
+                        [self extendROI:roi withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:self.viewerCT];
+                        break;
+                    case ExtendSingleLengthDown:
+                        [self extendROI:roi withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:self.viewerCT];
+                        break;
+                    case ExtendSingleLengthBoth:
+                        [self extendROI:roi withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:self.viewerCT];
+                        [self extendROI:roi withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:self.viewerCT];
+                        break;
+                }
             }
             default:
                 //-1 as we go in pairs and so skip the last one
@@ -329,6 +343,7 @@
     for (NSUInteger nextIndex = rangeOfIndices.location; nextIndex<rangeOfIndices.location+rangeOfIndices.length; nextIndex++)
     {
         ROI *newROI = [roi1 copy];
+        newROI.locked = NO;
         [MirrorROIPluginFilterOC  setROIcolour:newROI forType:Transform_Intercalated];
         [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
         [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
@@ -346,7 +361,9 @@
     for (NSUInteger nextIndex = start; nextIndex<end; nextIndex++) {
         if (nextIndex<allROIsList.count)
         {
-            [self addROI2Pix:[roi copy] atSlice:nextIndex inViewer:active2Dwindow hidden:NO];
+            ROI *roiC = [roi copy];
+            roiC.locked = NO;
+            [self addROI2Pix:roiC atSlice:nextIndex inViewer:active2Dwindow hidden:NO];
         }
     }
 }
@@ -399,7 +416,9 @@
         for (NSUInteger pixIndex = startSlice; pixIndex<endSlice; pixIndex++) {
             for (ROI *roi in [[self.viewerCT roiList] objectAtIndex:pixIndex]) {
                 if ([roi.name isEqualToString:transformname]) {
-                    [self addROI2Pix:[roi copy] atSlice:pixIndex inViewer:self.viewerPET hidden:YES];
+                    ROI *roiC = [roi copy];
+                    roiC.locked = NO;
+                    [self addROI2Pix:roiC atSlice:pixIndex inViewer:self.viewerPET hidden:YES];
                 }
             }
         }
@@ -489,13 +508,16 @@
 -(void)addPolygonsToCTAtSlice:(NSUInteger)slice forActiveROI:(ROI *)activeROI mirroredROI:(ROI *)mirroredROI {
     if (activeROI) {
         ROI *aP = [activeROI copy];
+        aP.locked = NO;
+
         //[self.viewerPET convertBrushROItoPolygon:activeROI numPoints:50];
         //aP.name = activeROI.name;
         [self addROI2Pix:aP atSlice:slice inViewer:self.viewerCT hidden:NO];
     }
     if (mirroredROI) {
         ROI *mP = [mirroredROI copy];
-        //self.viewerPET convertBrushROItoPolygon:mirroredROI numPoints:50];
+        mP.locked = NO;
+       //self.viewerPET convertBrushROItoPolygon:mirroredROI numPoints:50];
         //mP.name = mirroredROI.name;
         [self addROI2Pix:mP atSlice:slice inViewer:self.viewerCT hidden:NO];
     }
@@ -564,34 +586,35 @@
 - (IBAction)moveMirrorROI:(NSButton *)sender {
     int moveX = 0;
     int moveY = 0;
+    int moveMirrorBy = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kMirrorMoveByPixels];
     switch (sender.tag) {
         case MoveROI_Up:
-            moveY = -self.sliderMovevalue.intValue;
+            moveY = -moveMirrorBy;
             break;
         case MoveROI_Down:
-            moveY = self.sliderMovevalue.intValue;
+            moveY = moveMirrorBy;
             break;
         case MoveROI_Right:
-            moveX = self.sliderMovevalue.intValue;
+            moveX = moveMirrorBy;
             break;
         case MoveROI_Left:
-            moveX = -self.sliderMovevalue.intValue;
+            moveX = -moveMirrorBy;
             break;
         case MoveROI_NE:
-            moveY = -self.sliderMovevalue.intValue;
-            moveX = self.sliderMovevalue.intValue;
+            moveY = -moveMirrorBy;
+            moveX = moveMirrorBy;
             break;
         case MoveROI_SE:
-            moveY = self.sliderMovevalue.intValue;
-            moveX = self.sliderMovevalue.intValue;
+            moveY = moveMirrorBy;
+            moveX = moveMirrorBy;
             break;
         case MoveROI_SW:
-            moveY = self.sliderMovevalue.intValue;
-            moveX = -self.sliderMovevalue.intValue;
+            moveY = moveMirrorBy;
+            moveX = -moveMirrorBy;
             break;
         case MoveROI_NW:
-            moveY = -self.sliderMovevalue.intValue;
-            moveX = -self.sliderMovevalue.intValue;
+            moveY = -moveMirrorBy;
+            moveX = -moveMirrorBy;
             break;
         default:
             break;
@@ -743,14 +766,6 @@
     return [NSColor blackColor];
 }
 
--(void)setColourWellsToDefaults {
-    /*
-    self.colorWellActive.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Active]];
-    self.colorWellMirrored.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Mirrored]];
-    self.colorWellTransformPlaced.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformPlaced]];
-    self.colorWellTransformIntercalated.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformIntercalated]];
-     */
-}
 +(NSColor *)colourForType:(ROI_Type)type {
     NSColor *colour = [NSColor blackColor];
     switch (type) {
@@ -1080,7 +1095,7 @@
     self.skView.showsNodeCount = NO;
     [self addStatsMarkersWithName:kSpriteName_Active position:3.0];
     [self addStatsMarkersWithName:kSpriteName_Mirror position:5.0];
-    [self addStatsMarkersWithName:@"J" position:1.0];
+    [self addStatsMarkersWithName:kSpriteName_Jiggle position:1.0];
 }
 -(void)addStatsMarkersWithName:(NSString *)name position:(CGFloat)position{
     CGFloat posY = self.skView.frame.size.height*position*kHeightFraction;
@@ -1131,7 +1146,7 @@
         else if ([name isEqualToString:kSpriteName_Mirror]){
             node.color = [MirrorROIPluginFilterOC colourForType:Mirrored_ROI];
         }
-        else if ([name isEqualToString:@"J"]){
+        else if ([name isEqualToString:kSpriteName_Jiggle]){
             node.color = [MirrorROIPluginFilterOC colourForType:Jiggle_ROI];
         }
     }
@@ -1195,7 +1210,7 @@
                                  ratio:ratio];
         }
         if (jiggleRoi != nil) {
-            [self setLocationOfSpriteNamed:@"J"
+            [self setLocationOfSpriteNamed:kSpriteName_Jiggle
                                     forROI:jiggleRoi
                                    minGrey:minGrey
                                      ratio:ratio];
@@ -1203,7 +1218,7 @@
         
         [self hideNodeNamed:kSpriteName_Active hidden:activeRoi == nil];
         [self hideNodeNamed:kSpriteName_Mirror hidden:mirroredRoi == nil];
-        [self hideNodeNamed:@"J" hidden:jiggleRoi == nil];
+        [self hideNodeNamed:kSpriteName_Jiggle hidden:jiggleRoi == nil];
         
         self.skView.hidden = activeRoi == nil && mirroredRoi == nil && jiggleRoi == nil;
 }
@@ -1215,7 +1230,7 @@
     CGFloat adjmin = (roi.min-minGrey)*ratio+kSceneMargin;
     CGFloat adjmax = (roi.max-minGrey)*ratio+kSceneMargin;
     CGFloat adjrange = (adjmax-adjmin);
-    CGFloat midrange = [ROIValues midRangeForMin:roi.min andMax:roi.max];
+    //CGFloat midrange = [ROIValues midRangeForMin:roi.min andMax:roi.max];
     CGFloat adjmidrange = [ROIValues midRangeForMin:adjmin andMax:adjmax];
     
     //midrange node moves with range
@@ -1238,9 +1253,17 @@
     }
     
     //update, text is alone too
+    NSString *text = [self summaryStringOfSpriteNamed:name forROI:roi];
+    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setText:text];
+    
+}
+
+-(NSString *)summaryStringOfSpriteNamed:(NSString *)name forROI:(ROI *)roi {
+    CGFloat midrange = [ROIValues midRangeForMin:roi.min andMax:roi.max];
+    CGFloat median = [ROIValues medianForROI:roi];
     NSString *distanceString = @"";
     NSString *rankString = @"";
-    if ([name isEqualToString:@"J"]) {
+    if ([name isEqualToString:kSpriteName_Jiggle]) {
         NSInteger index = [self indexOfJiggleForROI:roi];
         if (index != NSNotFound && index<[self jiggleROIValuesArrayCountInCurrentSlice]) {
             distanceString = [NSString stringWithFormat:@" ∆%li", (long)[[[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] distance] integerValue]];
@@ -1250,9 +1273,10 @@
             }
         }
     }
-    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setText:[NSString stringWithFormat:@"%.0f ± %.0f %.0f (%.0f—%.0f—%.0f)%@%@", roi.mean, roi.dev, median, roi.min, midrange, roi.max, distanceString,rankString]];
-    
+    NSString *text = [NSString stringWithFormat:@"%.0f ± %.0f %.0f (%.0f—%.0f—%.0f)%@%@", roi.mean, roi.dev, median, roi.min, midrange, roi.max, distanceString,rankString];
+    return text;
 }
+
 -(void)hideNodeNamed:(NSString *)name hidden:(BOOL)hidden {
     [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Range]] setHidden:hidden];
     [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_SDEV]] setHidden:hidden];
@@ -1310,17 +1334,41 @@
     [self resetJiggleControlsAndRefresh];
     
 }
+-(void)clearJiggleROIArrayForTable {
+    [[NSUserDefaults standardUserDefaults] setObject:[NSMutableArray array] forKey: kJiggleROIsArrayName];
+}
+
+-(void)rebuildJiggleROIArrayForTableOfSummaryStrings:(BOOL)addIndexNumber {
+    NSMutableArray *arrayOFStrings = [self jiggleROIArrayForTableOfSummaryStrings:addIndexNumber];
+    [[NSUserDefaults standardUserDefaults] setObject:arrayOFStrings forKey: kJiggleROIsArrayName];
+}
+
+-(NSMutableArray *)jiggleROIArrayForTableOfSummaryStrings:(BOOL)addIndexNumber {
+    NSMutableArray *arrayOfRV = [self jiggleROIValuesArrayForCurrentSlice];
+    NSMutableArray *arrayOFStrings = [NSMutableArray arrayWithCapacity:arrayOfRV.count];
+    for (int i=0; i<arrayOfRV.count; i++) {
+        ROIValues *rv = [arrayOfRV objectAtIndex:i];
+        NSString *string = [self summaryStringOfSpriteNamed:kSpriteName_Jiggle forROI:rv.roi];
+        if (addIndexNumber) {
+            string = [NSString stringWithFormat:@"%li: %@",(long)i,string];
+        }
+        [arrayOFStrings addObject:@{kJiggleROIsArrayKey : string}];
+    }
+    return arrayOFStrings;
+}
 
 -(void)clearJiggleROIvaluesArrayAllSlices {
     self.arrayJiggleROIvalues = [NSMutableArray arrayWithCapacity:self.viewerCT.roiList.count];
     for (int i=0; i<self.viewerCT.roiList.count; i++) {
-        [self.arrayJiggleROIvalues addObject:[NSMutableArray arrayWithCapacity:kNumberOfJiggleROIsPerSlice]];
+        [self.arrayJiggleROIvalues addObject:[NSMutableArray arrayWithCapacity:[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels]*8]];
     }
+    [self clearJiggleROIArrayForTable];
 }
 -(void)clearJiggleROIvaluesArrayAtSlice:(NSUInteger)slice {
     if (slice<self.arrayJiggleROIvalues.count)
     {
-        [self.arrayJiggleROIvalues replaceObjectAtIndex:slice withObject:[NSMutableArray arrayWithCapacity:kNumberOfJiggleROIsPerSlice]];
+        [self.arrayJiggleROIvalues replaceObjectAtIndex:slice withObject:[NSMutableArray arrayWithCapacity:[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels]*8]];
+        [self clearJiggleROIArrayForTable];
     }
 }
 -(void)clearJiggleROIvaluesArrayAtCurrentSlice {
@@ -1375,6 +1423,7 @@
             break;
     }
     [self resetJiggleControlsAndRefresh];
+    [self rebuildJiggleROIArrayForTableOfSummaryStrings:NO];
 }
 -(void)generateJiggleROIsInSlice:(NSInteger)currentSlice {
     ROI *roi2ClonePET = [self ROIfromSlice:currentSlice inViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];//we take the position of the MIRROR
@@ -1382,8 +1431,10 @@
     if (roi2ClonePET != nil && roi2CloneCT != nil) {
         //make the ROIS grid, dont add the zero ROI as its the already mirror unless specifically requested
         BOOL excludeOriginal = ![[NSUserDefaults standardUserDefaults] boolForKey:kIncludeOriginalInJiggleDefault];
-        for (int moveX=-2; moveX<3; moveX++) {
-            for (int moveY=-2; moveY<3; moveY++) {
+        int minBounds = -1*(int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels];
+        int maxBounds = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels]-1;
+        for (int moveX = minBounds; moveX<maxBounds; moveX++) {
+            for (int moveY = minBounds; moveY < maxBounds; moveY++) {
                 if (excludeOriginal && moveX == 0 && moveY == 0) {continue;}
                 
                 ROI *createdROI = [[ROI alloc]
@@ -1397,6 +1448,7 @@
                                    spacingY:roi2ClonePET.pixelSpacingY
                                    imageOrigin:roi2ClonePET.imageOrigin];
                 createdROI.name = kJiggleROIName;
+                createdROI.locked = NO;
                 [MirrorROIPluginFilterOC setROIcolour:createdROI forType:Jiggle_ROI];
                 [self addROI2Pix:createdROI atSlice:currentSlice inViewer:self.viewerCT hidden:YES];
                 //createdROI is now in CT, so we can use its pixels straight, alongside its mirror in CT
@@ -1508,6 +1560,21 @@
 - (IBAction)tap:(id)sender {
 }
 
+- (IBAction)showJiggleValuesInWindow:(id)sender {
+    NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"JiggleListWindow" owner:self];
+    [windowController showWindow:self];
+    NSMutableArray *arrayOFDicts = [self jiggleROIArrayForTableOfSummaryStrings:YES];
+    //arrayofstrings is array of dicts
+    NSMutableArray *arrayOFStrings = [NSMutableArray arrayWithCapacity:arrayOFDicts.count];
+    for (int i=0; i<arrayOFDicts.count; i++) {
+        [arrayOFStrings addObject:[(NSMutableDictionary*)[arrayOFDicts objectAtIndex:i] objectForKey:kJiggleROIsArrayKey]];
+    }
+    NSTextView *tv = [(TextDisplayWindow *)windowController.window textView];
+    NSString *string = [arrayOFStrings componentsJoinedByString:@"\n"];
+    [tv setString:string];
+    
+
+}
 
 
 @end

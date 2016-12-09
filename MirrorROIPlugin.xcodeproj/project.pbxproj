@@ -16,6 +16,9 @@
 		8E1D23C41DE6386800469190 /* increase.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E1D23C21DE6386800469190 /* increase.png */; };
 		8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */; };
 		8E3F944D1DDB491F0085A162 /* Marker-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E3F944C1DDB491F0085A162 /* Marker-50.png */; };
+		8E4FBD201DFB2D9D00E54D6F /* TextDisplayWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E4FBD1D1DFB2D9D00E54D6F /* TextDisplayWindowController.h */; };
+		8E4FBD211DFB2D9D00E54D6F /* TextDisplayWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4FBD1E1DFB2D9D00E54D6F /* TextDisplayWindowController.m */; };
+		8E4FBD221DFB2D9D00E54D6F /* TextDisplayWindowController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E4FBD1F1DFB2D9D00E54D6F /* TextDisplayWindowController.xib */; };
 		8E613DFE1DECCA7F0021049A /* JiggleAll.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E613DFD1DECCA7F0021049A /* JiggleAll.png */; };
 		8E8838371DDA209400AE9166 /* ROIValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E8838351DDA209400AE9166 /* ROIValues.h */; };
 		8E8838381DDA209400AE9166 /* ROIValues.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E8838361DDA209400AE9166 /* ROIValues.m */; };
@@ -27,6 +30,9 @@
 		8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */; };
 		8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF41DB80A7500D7B0CA /* growRegion.png */; };
 		8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ECAD5EF1DDA57B20079DB97 /* yingyang.png */; };
+		8ED16B201DF997A80043A74C /* JiggleListWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8ED16B1F1DF997A80043A74C /* JiggleListWindow.xib */; };
+		8ED16B231DF99F890043A74C /* TextDisplayWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 8ED16B211DF99F890043A74C /* TextDisplayWindow.h */; };
+		8ED16B241DF99F890043A74C /* TextDisplayWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 8ED16B221DF99F890043A74C /* TextDisplayWindow.m */; };
 		8ED845F81DC6295D008399F1 /* SW.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F41DC6295D008399F1 /* SW.png */; };
 		8ED845F91DC6295D008399F1 /* SE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F51DC6295D008399F1 /* SE.png */; };
 		8ED845FA1DC6295D008399F1 /* NE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F61DC6295D008399F1 /* NE.png */; };
@@ -56,6 +62,9 @@
 		8E1D23C21DE6386800469190 /* increase.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = increase.png; path = PNGs/increase.png; sourceTree = "<group>"; };
 		8E27A7BD1DA1AECD00BDC497 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MirrorWindow.xib; sourceTree = "<group>"; };
 		8E3F944C1DDB491F0085A162 /* Marker-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Marker-50.png"; path = "PNGs/Marker-50.png"; sourceTree = "<group>"; };
+		8E4FBD1D1DFB2D9D00E54D6F /* TextDisplayWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextDisplayWindowController.h; sourceTree = "<group>"; };
+		8E4FBD1E1DFB2D9D00E54D6F /* TextDisplayWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextDisplayWindowController.m; sourceTree = "<group>"; };
+		8E4FBD1F1DFB2D9D00E54D6F /* TextDisplayWindowController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TextDisplayWindowController.xib; sourceTree = "<group>"; };
 		8E613DFD1DECCA7F0021049A /* JiggleAll.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = JiggleAll.png; path = PNGs/JiggleAll.png; sourceTree = "<group>"; };
 		8E8838351DDA209400AE9166 /* ROIValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ROIValues.h; sourceTree = "<group>"; };
 		8E8838361DDA209400AE9166 /* ROIValues.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ROIValues.m; sourceTree = "<group>"; };
@@ -66,6 +75,9 @@
 		8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = Tiling2x1.pdf; path = PNGs/Tiling2x1.pdf; sourceTree = "<group>"; };
 		8EB2BDF41DB80A7500D7B0CA /* growRegion.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = growRegion.png; path = PNGs/growRegion.png; sourceTree = "<group>"; };
 		8ECAD5EF1DDA57B20079DB97 /* yingyang.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = yingyang.png; path = PNGs/yingyang.png; sourceTree = "<group>"; };
+		8ED16B1F1DF997A80043A74C /* JiggleListWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = JiggleListWindow.xib; sourceTree = "<group>"; };
+		8ED16B211DF99F890043A74C /* TextDisplayWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextDisplayWindow.h; sourceTree = "<group>"; };
+		8ED16B221DF99F890043A74C /* TextDisplayWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextDisplayWindow.m; sourceTree = "<group>"; };
 		8ED845F41DC6295D008399F1 /* SW.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = SW.png; path = PNGs/SW.png; sourceTree = "<group>"; };
 		8ED845F51DC6295D008399F1 /* SE.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = SE.png; path = PNGs/SE.png; sourceTree = "<group>"; };
 		8ED845F61DC6295D008399F1 /* NE.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NE.png; path = PNGs/NE.png; sourceTree = "<group>"; };
@@ -102,6 +114,8 @@
 			isa = PBXGroup;
 			children = (
 				8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */,
+				8ED16B1F1DF997A80043A74C /* JiggleListWindow.xib */,
+				8E4FBD1F1DFB2D9D00E54D6F /* TextDisplayWindowController.xib */,
 				8EE909791DA15C6F00AFAA00 /* unusedCode */,
 				8EDB8BDB1DAE5826007C14A9 /* PNGs */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
@@ -135,6 +149,10 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				8ED16B211DF99F890043A74C /* TextDisplayWindow.h */,
+				8ED16B221DF99F890043A74C /* TextDisplayWindow.m */,
+				8E4FBD1D1DFB2D9D00E54D6F /* TextDisplayWindowController.h */,
+				8E4FBD1E1DFB2D9D00E54D6F /* TextDisplayWindowController.m */,
 				8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */,
 				8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */,
 				8E8838351DDA209400AE9166 /* ROIValues.h */,
@@ -215,7 +233,9 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8ED16B231DF99F890043A74C /* TextDisplayWindow.h in Headers */,
 				8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */,
+				8E4FBD201DFB2D9D00E54D6F /* TextDisplayWindowController.h in Headers */,
 				8E9C42641DCE03C600E2A40C /* MirrorROIPluginFilterOC.h in Headers */,
 				8E8838371DDA209400AE9166 /* ROIValues.h in Headers */,
 			);
@@ -291,6 +311,7 @@
 				8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */,
 				8EF2964C1DC4D17200CC638E /* Erase Filled-50.png in Resources */,
 				8E1D23C41DE6386800469190 /* increase.png in Resources */,
+				8E4FBD221DFB2D9D00E54D6F /* TextDisplayWindowController.xib in Resources */,
 				8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */,
 				C52843BA1DC250BA00371742 /* aup.png in Resources */,
 				8ED845F91DC6295D008399F1 /* SE.png in Resources */,
@@ -303,6 +324,7 @@
 				8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */,
 				8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */,
 				8ED845FB1DC6295D008399F1 /* NW.png in Resources */,
+				8ED16B201DF997A80043A74C /* JiggleListWindow.xib in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
 				C52843BF1DC250C600371742 /* aleft.png in Resources */,
 				8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */,
@@ -329,8 +351,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8ED16B241DF99F890043A74C /* TextDisplayWindow.m in Sources */,
 				8E8838381DDA209400AE9166 /* ROIValues.m in Sources */,
 				8E9C42631DCE03C200E2A40C /* MirrorROIPluginFilterOC.m in Sources */,
+				8E4FBD211DFB2D9D00E54D6F /* TextDisplayWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

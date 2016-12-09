@@ -70,7 +70,7 @@ typedef enum : NSInteger {
 
 @interface MirrorROIPluginFilterOC : PluginFilter {}
 
-
+@property (nonatomic, retain) NSWindowController *windowControllerMain;
 @property (nonatomic, retain) ViewerController *viewerCT;
 @property (nonatomic, retain) ViewerController *viewerPET;
 
@@ -80,7 +80,7 @@ typedef enum : NSInteger {
 
 @property (assign) IBOutlet NSView *viewTools;
 
-@property (assign) IBOutlet NSSlider *sliderMovevalue;
+//@property (assign) IBOutlet NSSlider *sliderMovevalue;
 @property (assign) IBOutlet NSLevelIndicator *levelJiggleIndex;
 
 @property (assign) IBOutlet NSTextField *textLengthROIname;
@@ -92,7 +92,7 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSButton *buttonJiggleSetNew;
 @property (assign) IBOutlet NSTextField *textJiggleRank;
 
-@property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
+//@property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
 
 @property (assign) IBOutlet NSColorWell *colorWellActive;
 @property (assign) IBOutlet NSColorWell *colorWellMirrored;

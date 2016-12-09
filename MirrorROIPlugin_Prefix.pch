@@ -20,18 +20,22 @@
 #define kTransformROInameDefault @"kTransformROInameDefault"
 #define kMirroredROInameDefault @"kMirroredROInameDefault"
 #define kActiveROInameDefault @"kActiveROInameDefault"
-#define kTransposeDataDefault @"kTransposeDataDefault"
 #define kExtendSingleTransformDefault @"kExtendSingleTransformDefault"
 #define kTransposeExportedDataDefault @"kTransposeExportedDataDefault"
 #define kIncludeOriginalInJiggleDefault @"kIncludeOriginalInJiggleDefault"
 #define kRankJiggleDefault @"kRankJiggleDefault"
+#define kJiggleBoundsPixels @"kJiggleBoundsPixels"
+#define kMirrorMoveByPixels @"kMirrorMoveByPixels"
+
 
 #define kJiggleROIName @"jiggle"
 #define kJiggleSelectedROIName @"jiggleselected"
 #define kJiggleSortsArrayName @"kJiggleSortsArrayName"
 #define kJiggleCheckKey @"checkKey"
 #define kJiggleSortKey @"sortKey"
-#define kNumberOfJiggleROIsPerSlice 24
+//#define kNumberOfJiggleROIsPerSlice 24
+#define kJiggleROIsArrayName @"kJiggleROIsArrayName"
+#define kJiggleROIsArrayKey @"kJiggleROIsArrayKey"
 
 #define kSpriteName_Active @"A"
 #define kSpriteName_Mirror @"M"

@@ -96,6 +96,7 @@
     return median;
 }
 
+
 //-(NSComparisonResult)compare:(ROIValues *)otherROIValues {
 //    return [self.mean compare:otherROIValues.mean];
 //}

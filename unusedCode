@@ -1,3 +1,11 @@
+-(void)setColourWellsToDefaults {
+/*
+self.colorWellActive.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Active]];
+self.colorWellMirrored.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Mirrored]];
+self.colorWellTransformPlaced.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformPlaced]];
+self.colorWellTransformIntercalated.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_TransformIntercalated]];
+*/
+}
 
 -(void)setLocationOfSpriteNamed:(NSString *)name mean:(CGFloat)mean min:(CGFloat)min max:(CGFloat)max sdev:(CGFloat)sdev minGrey:(CGFloat)minGrey ratio:(CGFloat)ratio{
 
