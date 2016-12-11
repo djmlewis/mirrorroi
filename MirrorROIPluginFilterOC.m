@@ -7,7 +7,7 @@
 
 #import "MirrorROIPluginFilterOC.h"
 #import "ROIValues.h"
-#import "TextDisplayWindow.h"
+#import "TextDisplayWindowController.h"
 
 #import <OsiriXAPI/PluginFilter.h>
 #import <OsiriXAPI/Notifications.h>
@@ -1258,6 +1258,16 @@
     
 }
 
+-(NSString *)summaryStringForActiveRoiInCurrentSliceInViewer:(ViewerController *)viewer {
+    NSString *ss = @"Not Found";
+    NSString *name = self.textActiveROIname.stringValue;
+    ROI *roi = [self ROIfromCurrentSliceInViewer:viewer withName:name];//growingRegionROIName
+    if (roi != nil) {
+        ss = [NSString stringWithFormat:@"%@: %@",name,[self summaryStringOfSpriteNamed:name forROI:roi]];
+    }
+    return ss;
+}
+
 -(NSString *)summaryStringOfSpriteNamed:(NSString *)name forROI:(ROI *)roi {
     CGFloat midrange = [ROIValues midRangeForMin:roi.min andMax:roi.max];
     CGFloat median = [ROIValues medianForROI:roi];
@@ -1356,6 +1366,15 @@
     }
     return arrayOFStrings;
 }
+-(NSString *)jiggleROIArrayFinalSummaryString {
+    NSMutableArray *arrayOFDicts = [self jiggleROIArrayForTableOfSummaryStrings:YES];
+    //arrayofstrings is array of dicts
+    NSMutableArray *arrayOFStrings = [NSMutableArray arrayWithCapacity:arrayOFDicts.count];
+    for (int i=0; i<arrayOFDicts.count; i++) {
+        [arrayOFStrings addObject:[(NSMutableDictionary*)[arrayOFDicts objectAtIndex:i] objectForKey:kJiggleROIsArrayKey]];
+    }
+    return [arrayOFStrings componentsJoinedByString:@"\n"];
+}
 
 -(void)clearJiggleROIvaluesArrayAllSlices {
     self.arrayJiggleROIvalues = [NSMutableArray arrayWithCapacity:self.viewerCT.roiList.count];
@@ -1400,6 +1419,7 @@
     self.buttonJiggleWorse.hidden = hide;
     self.buttonJiggleBetter.hidden = hide;
     self.buttonJiggleSetNew.hidden = hide;
+    self.buttonJiggleShowSummaryWindow.hidden = hide;
     self.textJiggleRank.hidden = hide;
 
 }
@@ -1432,9 +1452,9 @@
         //make the ROIS grid, dont add the zero ROI as its the already mirror unless specifically requested
         BOOL excludeOriginal = ![[NSUserDefaults standardUserDefaults] boolForKey:kIncludeOriginalInJiggleDefault];
         int minBounds = -1*(int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels];
-        int maxBounds = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels]-1;
-        for (int moveX = minBounds; moveX<maxBounds; moveX++) {
-            for (int moveY = minBounds; moveY < maxBounds; moveY++) {
+        int maxBounds = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels];
+        for (int moveX = minBounds; moveX<=maxBounds; moveX++) {
+            for (int moveY = minBounds; moveY <= maxBounds; moveY++) {
                 if (excludeOriginal && moveX == 0 && moveY == 0) {continue;}
                 
                 ROI *createdROI = [[ROI alloc]
@@ -1561,19 +1581,12 @@
 }
 
 - (IBAction)showJiggleValuesInWindow:(id)sender {
-    NSWindowController *windowController = [[NSWindowController alloc] initWithWindowNibName:@"JiggleListWindow" owner:self];
+    //do not use withOwner in initWithWindowNibName, so it uses the links in the nib file to connect window with the TextDisplayWindowController
+    TextDisplayWindowController *windowController = [[TextDisplayWindowController alloc] initWithWindowNibName:@"TextDisplayWindowController"];
+    NSString *string = [NSString stringWithFormat:@"%@\n\n%@",[self summaryStringForActiveRoiInCurrentSliceInViewer:self.viewerCT],[self jiggleROIArrayFinalSummaryString]];
+    [windowController setDisplayedText:string];
     [windowController showWindow:self];
-    NSMutableArray *arrayOFDicts = [self jiggleROIArrayForTableOfSummaryStrings:YES];
-    //arrayofstrings is array of dicts
-    NSMutableArray *arrayOFStrings = [NSMutableArray arrayWithCapacity:arrayOFDicts.count];
-    for (int i=0; i<arrayOFDicts.count; i++) {
-        [arrayOFStrings addObject:[(NSMutableDictionary*)[arrayOFDicts objectAtIndex:i] objectForKey:kJiggleROIsArrayKey]];
-    }
-    NSTextView *tv = [(TextDisplayWindow *)windowController.window textView];
-    NSString *string = [arrayOFStrings componentsJoinedByString:@"\n"];
-    [tv setString:string];
     
-
 }
 
 

@@ -90,6 +90,7 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSButton *buttonJiggleWorse;
 @property (assign) IBOutlet NSButton *buttonJiggleBetter;
 @property (assign) IBOutlet NSButton *buttonJiggleSetNew;
+@property (assign) IBOutlet NSButton *buttonJiggleShowSummaryWindow;
 @property (assign) IBOutlet NSTextField *textJiggleRank;
 
 //@property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;

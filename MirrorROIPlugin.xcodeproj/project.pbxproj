@@ -30,7 +30,6 @@
 		8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */; };
 		8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF41DB80A7500D7B0CA /* growRegion.png */; };
 		8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ECAD5EF1DDA57B20079DB97 /* yingyang.png */; };
-		8ED16B201DF997A80043A74C /* JiggleListWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8ED16B1F1DF997A80043A74C /* JiggleListWindow.xib */; };
 		8ED16B231DF99F890043A74C /* TextDisplayWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 8ED16B211DF99F890043A74C /* TextDisplayWindow.h */; };
 		8ED16B241DF99F890043A74C /* TextDisplayWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 8ED16B221DF99F890043A74C /* TextDisplayWindow.m */; };
 		8ED845F81DC6295D008399F1 /* SW.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F41DC6295D008399F1 /* SW.png */; };
@@ -75,7 +74,6 @@
 		8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = Tiling2x1.pdf; path = PNGs/Tiling2x1.pdf; sourceTree = "<group>"; };
 		8EB2BDF41DB80A7500D7B0CA /* growRegion.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = growRegion.png; path = PNGs/growRegion.png; sourceTree = "<group>"; };
 		8ECAD5EF1DDA57B20079DB97 /* yingyang.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = yingyang.png; path = PNGs/yingyang.png; sourceTree = "<group>"; };
-		8ED16B1F1DF997A80043A74C /* JiggleListWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = JiggleListWindow.xib; sourceTree = "<group>"; };
 		8ED16B211DF99F890043A74C /* TextDisplayWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextDisplayWindow.h; sourceTree = "<group>"; };
 		8ED16B221DF99F890043A74C /* TextDisplayWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextDisplayWindow.m; sourceTree = "<group>"; };
 		8ED845F41DC6295D008399F1 /* SW.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = SW.png; path = PNGs/SW.png; sourceTree = "<group>"; };
@@ -114,7 +112,6 @@
 			isa = PBXGroup;
 			children = (
 				8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */,
-				8ED16B1F1DF997A80043A74C /* JiggleListWindow.xib */,
 				8E4FBD1F1DFB2D9D00E54D6F /* TextDisplayWindowController.xib */,
 				8EE909791DA15C6F00AFAA00 /* unusedCode */,
 				8EDB8BDB1DAE5826007C14A9 /* PNGs */,
@@ -324,7 +321,6 @@
 				8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */,
 				8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */,
 				8ED845FB1DC6295D008399F1 /* NW.png in Resources */,
-				8ED16B201DF997A80043A74C /* JiggleListWindow.xib in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
 				C52843BF1DC250C600371742 /* aleft.png in Resources */,
 				8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */,

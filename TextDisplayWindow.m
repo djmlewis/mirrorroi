@@ -10,4 +10,9 @@
 
 @implementation TextDisplayWindow
 
+
+-(void)setDisplayedText:(NSString *)displayedText {
+    self.textView.string = displayedText;
+}
+
 @end

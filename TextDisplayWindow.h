@@ -13,7 +13,6 @@
 
 @property (assign) IBOutlet NSTextView *textView;
 
-
-
+-(void)setDisplayedText:(NSString *)displayedText;
 
 @end

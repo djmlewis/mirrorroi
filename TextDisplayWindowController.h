@@ -10,4 +10,6 @@
 
 @interface TextDisplayWindowController : NSWindowController
 
+@property (retain) NSString *displayedText;
+
 @end
