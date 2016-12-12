@@ -65,6 +65,10 @@ typedef enum : NSInteger {
     SetPixels_AllPixels = 2
 } SetROIpixel_Options;
 
+typedef enum : NSInteger {
+    UseFusedWindows = 0,
+    UsePETWindowAlone = 1
+} FusedOrPetAloneWindowSetting;
 
 
 

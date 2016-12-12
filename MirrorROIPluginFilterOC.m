@@ -28,6 +28,8 @@
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor purpleColor]] forKey:kColor_Jiggle];
     [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
     [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
+    
+    [defaults setValue:[NSNumber numberWithInteger:0] forKey:kSegmentFusedOrPETSegmentDefault];
     [defaults setValue:[NSNumber numberWithInteger:1] forKey:kMirrorMoveByPixels];
     [defaults setValue:[NSNumber numberWithInteger:3] forKey:kJiggleBoundsPixels];
     [defaults setValue:[NSNumber numberWithInteger:2] forKey:kExtendSingleTransformDefault];
@@ -165,12 +167,41 @@
     return true;
 }
 -(BOOL)validCTandPETwindows {
-    return ([self valid2DViewer:self.viewerCT] && [self valid2DViewer:self.viewerPET]);
+    switch ([MirrorROIPluginFilterOC useFusedOrPetAloneWindow]) {
+        case UseFusedWindows:
+            return ([self valid2DViewer:self.viewerCT] && [self valid2DViewer:self.viewerPET]);
+            break;
+        case UsePETWindowAlone:
+            return [self valid2DViewer:self.viewerPET];
+            break;
+        default:
+            return false;
+            break;
+    }
 }
 - (IBAction)fuseDefusetapped:(NSButton *)sender {
     [self.viewerCT blendWindows:[[NSMenuItem alloc] init]];
 }
-
++(FusedOrPetAloneWindowSetting)useFusedOrPetAloneWindow {
+    return [[NSUserDefaults standardUserDefaults] integerForKey:kSegmentFusedOrPETSegmentDefault];
+}
+-(ViewerController *)viewerForTransformsAccordingToFusedOrPetAloneWindowSetting {
+    switch ([MirrorROIPluginFilterOC useFusedOrPetAloneWindow]) {
+        case UsePETWindowAlone:
+            return self.viewerPET;
+            break;
+        case UseFusedWindows:
+            return self.viewerCT;
+            break;
+        default:
+            return nil;
+            break;
+    }
+}
+- (IBAction)segmentUseCTPETorPETaloneTapped:(NSSegmentedControl *)sender {
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    [self showHideControlsIfViewersValid];
+}
 
 #pragma mark - Create Active
 - (IBAction)growRegionClicked:(id)sender {
@@ -187,46 +218,50 @@
     [self addBoundingTransformROIS];
 }
 -(void)addBoundingTransformROIS {
-    [self.viewerCT setROIToolTag:tMesure];
-    [self.viewerCT deleteSeriesROIwithName:self.textLengthROIname.stringValue];
-    
-    //find the first and last pixIndex with an ACTIVE ROI
-    NSMutableIndexSet *indexesWithROI= [[NSMutableIndexSet alloc]init];
-    NSString *activeROIname = self.textActiveROIname.stringValue;
-    for (NSUInteger pixIndex = 0; pixIndex < [[self.viewerPET pixList] count]; pixIndex++)
+    ViewerController *viewerToAdd = [self viewerForTransformsAccordingToFusedOrPetAloneWindowSetting];
+    if (viewerToAdd != nil)
     {
-        for(ROI	*curROI in [[self.viewerPET roiList] objectAtIndex: pixIndex])
+        [viewerToAdd setROIToolTag:tMesure];
+        [viewerToAdd deleteSeriesROIwithName:self.textLengthROIname.stringValue];
+        
+        //find the first and last pixIndex with an ACTIVE ROI
+        NSMutableIndexSet *indexesWithROI= [[NSMutableIndexSet alloc]init];
+        NSString *activeROIname = self.textActiveROIname.stringValue;
+        for (NSUInteger pixIndex = 0; pixIndex < [[self.viewerPET pixList] count]; pixIndex++)
         {
-            if ([curROI.name isEqualToString:activeROIname])
+            for(ROI	*curROI in [[self.viewerPET roiList] objectAtIndex: pixIndex])
             {
-                [indexesWithROI addIndex:pixIndex];
-                break;
+                if ([curROI.name isEqualToString:activeROIname])
+                {
+                    [indexesWithROI addIndex:pixIndex];
+                    break;
+                }
             }
         }
-    }
-    if (indexesWithROI.count==1) {
-        [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:YES]
-                             andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:NO]
-                 toViewerController:self.viewerCT
-                            atIndex:indexesWithROI.firstIndex
-                         withType:Transform_ROI_Placed];
-        [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
-        
-    }
-    else if(indexesWithROI.count>1) {
-        [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:YES]
-                             andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:NO]
-                 toViewerController:self.viewerCT
-                            atIndex:indexesWithROI.firstIndex
-                         withType:Transform_ROI_Placed];
-        
-        [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:YES]
-                             andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:self.viewerCT start:NO]
-                 toViewerController:self.viewerCT
-                            atIndex:indexesWithROI.lastIndex
-                         withType:Transform_ROI_Placed];
-        
-        [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
+        if (indexesWithROI.count==1) {
+            [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:viewerToAdd start:YES]
+                                 andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:viewerToAdd start:NO]
+                     toViewerController:viewerToAdd
+                                atIndex:indexesWithROI.firstIndex
+                               withType:Transform_ROI_Placed];
+            [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
+            
+        }
+        else if(indexesWithROI.count>1) {
+            [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:viewerToAdd start:YES]
+                                 andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:viewerToAdd start:NO]
+                     toViewerController:viewerToAdd
+                                atIndex:indexesWithROI.firstIndex
+                               withType:Transform_ROI_Placed];
+            
+            [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:viewerToAdd start:YES]
+                                 andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:viewerToAdd start:NO]
+                     toViewerController:viewerToAdd
+                                atIndex:indexesWithROI.lastIndex
+                               withType:Transform_ROI_Placed];
+            
+            [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
+        }
     }
 }
 -(void)displayImageInCTandPETviewersWithIndex:(short)index {
@@ -261,12 +296,14 @@
     return point;
 }
 - (IBAction)completeTransformSeries:(NSButton *)sender {
-    [self completeLengthROIseriesInCTWindow];
+    [self completeLengthROIseries];
 }
--(void)completeLengthROIseriesInCTWindow {
-    if ([self valid2DViewer:self.viewerCT])
+-(void)completeLengthROIseries {
+    ViewerController *viewerToAdd = [self viewerForTransformsAccordingToFusedOrPetAloneWindowSetting];
+
+    if ([self valid2DViewer:viewerToAdd])
     {
-        NSMutableArray  *allROIsList = [self.viewerCT roiList];
+        NSMutableArray  *allROIsList = [viewerToAdd roiList];
         NSMutableArray *indicesOfDCMPixWithMeasureROI = [NSMutableArray arrayWithCapacity:allROIsList.count];
         NSMutableArray *measureROIs = [NSMutableArray arrayWithCapacity:allROIsList.count];
         NSString *measureROIname;
@@ -293,14 +330,14 @@
                 switch ([[NSUserDefaults standardUserDefaults] integerForKey:kExtendSingleTransformDefault])
                 {
                     case ExtendSingleLengthUp:
-                        [self extendROI:roi withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:self.viewerCT];
+                        [self extendROI:roi withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:viewerToAdd];
                         break;
                     case ExtendSingleLengthDown:
-                        [self extendROI:roi withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:self.viewerCT];
+                        [self extendROI:roi withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:viewerToAdd];
                         break;
                     case ExtendSingleLengthBoth:
-                        [self extendROI:roi withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:self.viewerCT];
-                        [self extendROI:roi withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:self.viewerCT];
+                        [self extendROI:roi withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:viewerToAdd];
+                        [self extendROI:roi withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:viewerToAdd];
                         break;
                 }
             }
@@ -308,7 +345,7 @@
                 //-1 as we go in pairs and so skip the last one
                 for (int roiNumber=0; roiNumber<indicesOfDCMPixWithMeasureROI.count-1; roiNumber++)
                 {
-                    [self completeLengthROIseriesForViewerController:self.viewerCT
+                    [self completeLengthROIseriesForViewerController:viewerToAdd
                     betweenROI1:[measureROIs objectAtIndex:roiNumber]
                     andROI2:[measureROIs objectAtIndex:roiNumber+1]
                     inThisRange:NSMakeRange(
@@ -321,7 +358,7 @@
                 }
                 break;
         }
-        [self.viewerCT needsDisplayUpdate];
+        [viewerToAdd needsDisplayUpdate];
     }
 }
 -(void)completeLengthROIseriesForViewerController:(ViewerController *)active2Dwindow betweenROI1:(ROI *)roi1 andROI2:(ROI *)roi2 inThisRange:(NSRange)rangeOfIndices{
@@ -368,7 +405,8 @@
     }
 }
 - (IBAction)jumpToFirstLastTransform:(NSButton *)sender {
-    NSMutableIndexSet *set = [MirrorROIPluginFilterOC indicesInViewer:self.viewerCT withROIofType:tMesure];
+    ViewerController *viewerToAdd = [self viewerForTransformsAccordingToFusedOrPetAloneWindowSetting];
+    NSMutableIndexSet *set = [MirrorROIPluginFilterOC indicesInViewer:viewerToAdd withROIofType:tMesure];
     if (set.count>0) {
         if (sender.tag>1)
         {
@@ -393,7 +431,8 @@
     [self resetJiggleControlsAndRefresh];
 }
 -(void)copyTransformROIsFromCT2PETIn3D:(BOOL)in3D {
-    if ([self validCTandPETwindows]
+    if ([MirrorROIPluginFilterOC useFusedOrPetAloneWindow] == UseFusedWindows
+        && [self validCTandPETwindows]
         && ([[self.viewerCT pixList] count] == [[self.viewerPET pixList] count])
         && ([[self.viewerCT roiList] count] == [[self.viewerCT pixList] count])
         && ([[self.viewerPET roiList] count] == [[self.viewerPET pixList] count]))
@@ -496,7 +535,7 @@
                                    imageOrigin:roi2Clone.imageOrigin];
                 [MirrorROIPluginFilterOC  setROIcolour:createdROI forType:Mirrored_ROI];
                [roisInThisSlice addObject:createdROI];
-                [self addPolygonsToCTAtSlice:slice forActiveROI:roi2Clone mirroredROI:createdROI];
+                [self addROItoCTAtSlice:slice forActiveROI:roi2Clone mirroredROI:createdROI];
             }
         }
     }
@@ -505,23 +544,25 @@
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
 }
--(void)addPolygonsToCTAtSlice:(NSUInteger)slice forActiveROI:(ROI *)activeROI mirroredROI:(ROI *)mirroredROI {
-    if (activeROI) {
-        ROI *aP = [activeROI copy];
-        aP.locked = NO;
-
-        //[self.viewerPET convertBrushROItoPolygon:activeROI numPoints:50];
-        //aP.name = activeROI.name;
-        [self addROI2Pix:aP atSlice:slice inViewer:self.viewerCT hidden:NO];
+-(void)addROItoCTAtSlice:(NSUInteger)slice forActiveROI:(ROI *)activeROI mirroredROI:(ROI *)mirroredROI {
+    if ([self valid2DViewer:self.viewerCT])
+    {
+        if (activeROI) {
+            ROI *aP = [activeROI copy];
+            aP.locked = NO;
+            
+            //[self.viewerPET convertBrushROItoPolygon:activeROI numPoints:50];
+            //aP.name = activeROI.name;
+            [self addROI2Pix:aP atSlice:slice inViewer:self.viewerCT hidden:NO];
+        }
+        if (mirroredROI) {
+            ROI *mP = [mirroredROI copy];
+            mP.locked = NO;
+            //self.viewerPET convertBrushROItoPolygon:mirroredROI numPoints:50];
+            //mP.name = mirroredROI.name;
+            [self addROI2Pix:mP atSlice:slice inViewer:self.viewerCT hidden:NO];
+        }
     }
-    if (mirroredROI) {
-        ROI *mP = [mirroredROI copy];
-        mP.locked = NO;
-       //self.viewerPET convertBrushROItoPolygon:mirroredROI numPoints:50];
-        //mP.name = mirroredROI.name;
-        [self addROI2Pix:mP atSlice:slice inViewer:self.viewerCT hidden:NO];
-    }
-
 }
 +(NSPoint)deltaXYFromROI:(ROI*)roi2Clone usingLengthROI:(ROI*)lengthROI {
     NSPoint deltaPoint = [self anInvalidDeltaPoint];
@@ -576,9 +617,11 @@
     for (NSUInteger roiIndex =0; roiIndex<viewer.roiList.count;roiIndex++) {
         NSMutableArray *roisInSlice = [viewer.roiList objectAtIndex:roiIndex];
         for (ROI *roi in roisInSlice) {
-            if (roi.type == type2Find){
-                [set addIndex:roiIndex];}
-            break;
+            if (roi.type == type2Find)
+            {
+                [set addIndex:roiIndex];
+                break;
+            }
         }
     }
     return set;
@@ -644,7 +687,7 @@
             [MirrorROIPluginFilterOC forceRecomputeDataForROI:createdROI];
             //move the polygon
             [self deleteROIsInSlice:activeSlice inViewerController:self.viewerCT withName:createdROI.name];
-            [self addPolygonsToCTAtSlice:activeSlice forActiveROI:nil mirroredROI:createdROI];
+            [self addROItoCTAtSlice:activeSlice forActiveROI:nil mirroredROI:createdROI];
             
             //we found the mirror skip rest
             break;
@@ -858,12 +901,15 @@
             [self exportROIpixelDataForType:Mirrored_ROI];
             break;
         case 2:
-            [self exportROIsummaryDataForType:Active_ROI];
-            [self exportROIsummaryDataForType:Mirrored_ROI];
+            [self exportROIsummaryDataForType:MirroredAndActive_ROI];
             break;
         case 3:
             [self exportROI3DdataForType:Active_ROI];
             [self exportROI3DdataForType:Mirrored_ROI];
+            break;
+        case 4:
+            [self exportROIsummaryDataForType:Active_ROI];
+            [self exportROIsummaryDataForType:Mirrored_ROI];
             break;
         case -1:
             [self exportAllROIdataForType:Active_ROI];
@@ -886,9 +932,20 @@
     }
 }
 -(void)exportROIsummaryDataForType:(ROI_Type)type {
-    NSString *dataString = [self dataStringForSummaryROIdataForType:type];
+    NSString *dataString = nil;
+    NSString *nameStr = @"";
+    switch (type) {
+        case MirroredAndActive_ROI:
+            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self dataStringForSummaryROIdataForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self dataStringForSummaryROIdataForType:Mirrored_ROI]];
+            nameStr = [NSString stringWithFormat:@"%@&%@",[self ROInameForType:Active_ROI],[self ROInameForType:Mirrored_ROI]];
+            break;
+        default:
+            dataString = [self dataStringForSummaryROIdataForType:type];
+            nameStr = [self ROInameForType:type];
+            break;
+    }
     if (dataString != nil) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Summary-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Summary-%@", nameStr,self.viewerPET.window.title]];
     }
 
 }
@@ -1096,6 +1153,10 @@
     [self addStatsMarkersWithName:kSpriteName_Active position:3.0];
     [self addStatsMarkersWithName:kSpriteName_Mirror position:5.0];
     [self addStatsMarkersWithName:kSpriteName_Jiggle position:1.0];
+    [self hideNodeNamed:kSpriteName_Active hidden:YES];
+    [self hideNodeNamed:kSpriteName_Mirror hidden:YES];
+    [self hideNodeNamed:kSpriteName_Jiggle hidden:YES];
+
 }
 -(void)addStatsMarkersWithName:(NSString *)name position:(CGFloat)position{
     CGFloat posY = self.skView.frame.size.height*position*kHeightFraction;
@@ -1158,15 +1219,16 @@
     [self refreshDisplayedDataForViewer:self.viewerCT];
 }
 - (void)refreshDisplayedDataForViewer:(ViewerController *)viewer{
-
-    ROI *activeRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textActiveROIname.stringValue];
-    ROI *mirroredRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textMirrorROIname.stringValue];
-    ROI *jiggleRoi = [self ROIfromCurrentSliceInViewer:viewer withName:kJiggleSelectedROIName];
-    //if (activeRoi != nil && mirroredRoi != nil) {
-    [MirrorROIPluginFilterOC forceRecomputeDataForROI:activeRoi];
-    [MirrorROIPluginFilterOC forceRecomputeDataForROI:mirroredRoi];
-    [MirrorROIPluginFilterOC forceRecomputeDataForROI:jiggleRoi];
-    
+    if ([self valid2DViewer:viewer])
+    {
+        ROI *activeRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textActiveROIname.stringValue];
+        ROI *mirroredRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textMirrorROIname.stringValue];
+        ROI *jiggleRoi = [self ROIfromCurrentSliceInViewer:viewer withName:kJiggleSelectedROIName];
+        //if (activeRoi != nil && mirroredRoi != nil) {
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:activeRoi];
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:mirroredRoi];
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:jiggleRoi];
+        
         //draw the boxes
         float minGrey = INT_MAX;
         float maxGrey = -INT_MAX;
@@ -1177,7 +1239,7 @@
             maxGrey = fmaxf(maxGrey, activeRoi.mean+activeRoi.dev);
             maxGrey = fmaxf(maxGrey, activeRoi.max);
         }
-
+        
         if (mirroredRoi != nil) {
             minGrey = fminf(minGrey, mirroredRoi.min);
             minGrey = fminf(minGrey, mirroredRoi.mean-mirroredRoi.dev);
@@ -1198,16 +1260,16 @@
         }
         
         if (activeRoi != nil) {
-        [self setLocationOfSpriteNamed:kSpriteName_Active
-                                forROI:activeRoi
-                               minGrey:minGrey
-                                 ratio:ratio];
+            [self setLocationOfSpriteNamed:kSpriteName_Active
+                                    forROI:activeRoi
+                                   minGrey:minGrey
+                                     ratio:ratio];
         }
         if (mirroredRoi != nil) {
-        [self setLocationOfSpriteNamed:kSpriteName_Mirror
-                                forROI:mirroredRoi
-                               minGrey:minGrey
-                                 ratio:ratio];
+            [self setLocationOfSpriteNamed:kSpriteName_Mirror
+                                    forROI:mirroredRoi
+                                   minGrey:minGrey
+                                     ratio:ratio];
         }
         if (jiggleRoi != nil) {
             [self setLocationOfSpriteNamed:kSpriteName_Jiggle
@@ -1221,6 +1283,7 @@
         [self hideNodeNamed:kSpriteName_Jiggle hidden:jiggleRoi == nil];
         
         self.skView.hidden = activeRoi == nil && mirroredRoi == nil && jiggleRoi == nil;
+    }
 }
 -(void)setLocationOfSpriteNamed:(NSString *)name forROI:(ROI *)roi minGrey:(CGFloat)minGrey ratio:(CGFloat)ratio{
     CGFloat median = [ROIValues medianForROI:roi];
@@ -1257,6 +1320,14 @@
     [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setText:text];
     
 }
+-(void)hideNodeNamed:(NSString *)name hidden:(BOOL)hidden {
+    [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Range]] setHidden:hidden];
+    [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_SDEV]] setHidden:hidden];
+    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setHidden:hidden];
+    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Median]] setHidden:hidden];
+    
+}
+
 
 -(NSString *)summaryStringForActiveRoiInCurrentSliceInViewer:(ViewerController *)viewer {
     NSString *ss = @"Not Found";
@@ -1287,14 +1358,6 @@
     return text;
 }
 
--(void)hideNodeNamed:(NSString *)name hidden:(BOOL)hidden {
-    [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Range]] setHidden:hidden];
-    [(SKSpriteNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_SDEV]] setHidden:hidden];
-    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Text]] setHidden:hidden];
-    [(SKLabelNode *)[self.skScene childNodeWithName:[name stringByAppendingString:kSpriteName_Median]] setHidden:hidden];
-
-}
-
 #pragma mark - Jiggle
 -(NSMutableArray *)jiggleROIValuesArrayForCurrentSlice {
     return [self jiggleROIvaluesArrayForSlice:[[self.viewerCT imageView] curImage]];
@@ -1320,18 +1383,21 @@
 }
 
 -(void)clearJiggleROIsAndValuesFromViewer:(ViewerController *)viewer inSlice:(NSInteger)slice {
-    if (slice == kAllSlices) {
-        [self deleteROIsFromViewerController:viewer withName:kJiggleROIName];
-        [self deleteROIsFromViewerController:viewer withName:kJiggleSelectedROIName];
-        [self clearJiggleROIvaluesArrayAllSlices];
+    if ([self valid2DViewer:viewer])
+    {
+        if (slice == kAllSlices) {
+            [self deleteROIsFromViewerController:viewer withName:kJiggleROIName];
+            [self deleteROIsFromViewerController:viewer withName:kJiggleSelectedROIName];
+            [self clearJiggleROIvaluesArrayAllSlices];
+        }
+        else {
+            [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleROIName];
+            [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleSelectedROIName];
+            [self clearJiggleROIvaluesArrayAtSlice:slice];
+        }
+        [viewer needsDisplayUpdate];
+        [self resetJiggleControlsAndRefresh];
     }
-    else {
-        [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleROIName];
-        [self deleteROIsInSlice:slice inViewerController:viewer withName:kJiggleSelectedROIName];
-        [self clearJiggleROIvaluesArrayAtSlice:slice];
-    }
-    [viewer needsDisplayUpdate];
-    [self resetJiggleControlsAndRefresh];
 }
 -(void)clearJiggleROIsAndValuesFromAllSlices {
     [self clearJiggleROIsAndValuesFromViewer:self.viewerCT inSlice:kAllSlices];
@@ -1414,7 +1480,7 @@
     [self hideJiggleControlsOnCount];
 }
 -(void)hideJiggleControlsOnCount {
-    BOOL hide = [self jiggleROIValuesArrayCountInCurrentSlice]<=0;
+    BOOL hide = ([self jiggleROIValuesArrayCountInCurrentSlice]<=0 || ![self valid2DViewer:self.viewerCT]);
     self.levelJiggleIndex.hidden = hide;
     self.buttonJiggleWorse.hidden = hide;
     self.buttonJiggleBetter.hidden = hide;
@@ -1424,26 +1490,28 @@
 
 }
 - (IBAction)generateJiggleROIsTapped:(NSButton *)sender {
-    switch (sender.tag) {
-        case 0:
-            [self clearJiggleROIsAndValuesFromSlice:[[self.viewerCT imageView] curImage]];
-            [self generateJiggleROIsInSlice:[[self.viewerCT imageView] curImage]];
-            break;
-        case 1:
-            [self replaceMirrorWithJiggleROI];
-            break;
-        case 2:
-            [self clearJiggleROIsAndValuesFromAllSlices];
-            for (NSUInteger i=0; i<self.viewerCT.roiList.count; i++) {
-                [self generateJiggleROIsInSlice:i];
-            }
-            break;
-            
-        default:
-            break;
+    if ([self valid2DViewer:self.viewerCT])
+    {
+        switch (sender.tag) {
+            case 0:
+                [self clearJiggleROIsAndValuesFromSlice:[[self.viewerCT imageView] curImage]];
+                [self generateJiggleROIsInSlice:[[self.viewerCT imageView] curImage]];
+                break;
+            case 1:
+                [self replaceMirrorWithJiggleROI];
+                break;
+            case 2:
+                [self clearJiggleROIsAndValuesFromAllSlices];
+                for (NSUInteger i=0; i<self.viewerCT.roiList.count; i++) {
+                    [self generateJiggleROIsInSlice:i];
+                }
+                break;
+            default:
+                break;
+        }
+        [self resetJiggleControlsAndRefresh];
+        [self rebuildJiggleROIArrayForTableOfSummaryStrings:NO];
     }
-    [self resetJiggleControlsAndRefresh];
-    [self rebuildJiggleROIArrayForTableOfSummaryStrings:NO];
 }
 -(void)generateJiggleROIsInSlice:(NSInteger)currentSlice {
     ROI *roi2ClonePET = [self ROIfromSlice:currentSlice inViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];//we take the position of the MIRROR
@@ -1577,9 +1645,6 @@
     return NSNotFound;
 }
 
-- (IBAction)tap:(id)sender {
-}
-
 - (IBAction)showJiggleValuesInWindow:(id)sender {
     //do not use withOwner in initWithWindowNibName, so it uses the links in the nib file to connect window with the TextDisplayWindowController
     TextDisplayWindowController *windowController = [[TextDisplayWindowController alloc] initWithWindowNibName:@"TextDisplayWindowController"];
@@ -1589,5 +1654,8 @@
     
 }
 
+
+- (IBAction)tap:(id)sender {
+}
 
 @end

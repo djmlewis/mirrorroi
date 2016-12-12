@@ -26,6 +26,7 @@
 #define kRankJiggleDefault @"kRankJiggleDefault"
 #define kJiggleBoundsPixels @"kJiggleBoundsPixels"
 #define kMirrorMoveByPixels @"kMirrorMoveByPixels"
+#define kSegmentFusedOrPETSegmentDefault @"kSegmentFusedOrPETSegmentDefault"
 
 
 #define kJiggleROIName @"jiggle"
