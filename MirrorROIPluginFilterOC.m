@@ -33,6 +33,8 @@
     [defaults setValue:[NSNumber numberWithInteger:1] forKey:kMirrorMoveByPixels];
     [defaults setValue:[NSNumber numberWithInteger:3] forKey:kJiggleBoundsPixels];
     [defaults setValue:[NSNumber numberWithInteger:2] forKey:kExtendSingleTransformDefault];
+    
+    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kCombineExportsOneFileDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeExportedDataDefault];
     [defaults setValue:[NSNumber numberWithBool:NO] forKey:kIncludeOriginalInJiggleDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kRankJiggleDefault];
@@ -222,11 +224,11 @@
     if (viewerToAdd != nil)
     {
         [viewerToAdd setROIToolTag:tMesure];
-        [viewerToAdd deleteSeriesROIwithName:self.textLengthROIname.stringValue];
+        [viewerToAdd deleteSeriesROIwithName:[self ROInameForType:Transform_ROI_Placed]];
         
         //find the first and last pixIndex with an ACTIVE ROI
         NSMutableIndexSet *indexesWithROI= [[NSMutableIndexSet alloc]init];
-        NSString *activeROIname = self.textActiveROIname.stringValue;
+        NSString *activeROIname = [self ROInameForType:Active_ROI];
         for (NSUInteger pixIndex = 0; pixIndex < [[self.viewerPET pixList] count]; pixIndex++)
         {
             for(ROI	*curROI in [[self.viewerPET roiList] objectAtIndex: pixIndex])
@@ -277,6 +279,7 @@
 }
 -(void)addLengthROIWithStart:(NSPoint)startPoint andEnd:(NSPoint)endPoint toViewerController:(ViewerController *)active2Dwindow atIndex:(NSUInteger)index withType:(ROI_Type)type {
     ROI *newR = [active2Dwindow newROI:tMesure];
+    newR.name = [self ROInameForType:type];
     [MirrorROIPluginFilterOC  setROIcolour:newR forType:type];
     [newR.points addObject:[active2Dwindow newPoint:startPoint.x :startPoint.y]];
     [newR.points addObject:[active2Dwindow newPoint:endPoint.x :endPoint.y]];
@@ -307,7 +310,7 @@
         NSMutableArray *indicesOfDCMPixWithMeasureROI = [NSMutableArray arrayWithCapacity:allROIsList.count];
         NSMutableArray *measureROIs = [NSMutableArray arrayWithCapacity:allROIsList.count];
         NSString *measureROIname;
-        measureROIname = self.textLengthROIname.stringValue;
+        measureROIname = [self ROInameForType:Transform_ROI_Placed];
         
         //collect up the ROIs
         for (int index = 0;index<allROIsList.count; index++) {
@@ -439,7 +442,7 @@
     {
         NSUInteger startSlice = 0;
         NSUInteger endSlice = 0;
-        NSString *transformname = self.textLengthROIname.stringValue;
+        NSString *transformname = [self ROInameForType:Transform_ROI_Placed];
         if (in3D) {
             [self deleteROIsFromViewerController:self.viewerPET withName:transformname];
             startSlice = 0;
@@ -495,9 +498,9 @@
     NSUInteger startSlice = 0;
     NSUInteger endSlice = 0;
     if (in3D) {
-        [self deleteROIsFromViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
-        [self deleteROIsFromViewerController:self.viewerCT withName:self.textActiveROIname.stringValue];
-        [self deleteROIsFromViewerController:self.viewerCT withName:self.textMirrorROIname.stringValue];
+        [self deleteROIsFromViewerController:self.viewerPET withName:[self ROInameForType:Mirrored_ROI]];
+        [self deleteROIsFromViewerController:self.viewerCT withName:[self ROInameForType:Active_ROI]];
+        [self deleteROIsFromViewerController:self.viewerCT withName:[self ROInameForType:Mirrored_ROI]];
         [self clearJiggleROIsAndValuesFromAllSlices];
         startSlice = 0;
         endSlice = roisInAllSlices.count;
@@ -506,9 +509,9 @@
     {
         startSlice = [[self.viewerPET imageView] curImage];
         endSlice = startSlice+1;
-        [self deleteROIsInSlice:startSlice inViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
-        [self deleteROIsInSlice:startSlice inViewerController:self.viewerCT withName:self.textActiveROIname.stringValue];
-        [self deleteROIsInSlice:startSlice inViewerController:self.viewerCT withName:self.textMirrorROIname.stringValue];
+        [self deleteROIsInSlice:startSlice inViewerController:self.viewerPET withName:[self ROInameForType:Mirrored_ROI]];
+        [self deleteROIsInSlice:startSlice inViewerController:self.viewerCT withName:[self ROInameForType:Active_ROI]];
+        [self deleteROIsInSlice:startSlice inViewerController:self.viewerCT withName:[self ROInameForType:Mirrored_ROI]];
         [self clearJiggleROIsAndValuesFromSlice:startSlice];
     }
     
@@ -517,7 +520,7 @@
         ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tPlain];
         if (roi2Clone != nil) {
             //rename to keep in sync
-            roi2Clone.name = self.textActiveROIname.stringValue;
+            roi2Clone.name = [self ROInameForType:Active_ROI];
             [MirrorROIPluginFilterOC  setROIcolour:roi2Clone forType:Active_ROI];
 
             NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
@@ -527,7 +530,7 @@
                                    initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
                                    textWidth:roi2Clone.textureWidth
                                    textHeight:roi2Clone.textureHeight
-                                   textName:self.textMirrorROIname.stringValue
+                                   textName:[self ROInameForType:Mirrored_ROI]
                                    positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
                                    positionY:roi2Clone.textureUpLeftCornerY-deltaXY.y
                                    spacingX:roi2Clone.pixelSpacingX
@@ -671,7 +674,7 @@
     NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:activeSlice];
     for (int i=0; i<roisInThisSlice.count;i++) {
         ROI *roi2Clone = [roisInThisSlice objectAtIndex:i];
-        if ([roi2Clone.name isEqualToString:self.textMirrorROIname.stringValue]) {
+        if ([roi2Clone.name isEqualToString:[self ROInameForType:Mirrored_ROI]]) {
             ROI *createdROI = [[ROI alloc]
                                initWithTexture:roi2Clone.textureBuffer
                                textWidth:roi2Clone.textureWidth
@@ -704,17 +707,17 @@
     
     switch (sender.tag) {
         case Mirrored_ROI:
-            [self deleteROIsFromViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
+            [self deleteROIsFromViewerController:self.viewerPET withName:[self ROInameForType:Mirrored_ROI]];
             break;
         case Active_ROI:
-            [self deleteROIsFromViewerController:self.viewerPET withName:self.textMirrorROIname.stringValue];
+            [self deleteROIsFromViewerController:self.viewerPET withName:[self ROInameForType:Mirrored_ROI]];
             break;
         case Jiggle_ROI:
             [self clearJiggleROIsAndValuesAndResetDisplayed];
             break;
         case Transform_ROI_Placed:
-            [self deleteROIsFromViewerController:self.viewerPET withName:self.textLengthROIname.stringValue];
-            [self deleteROIsFromViewerController:self.viewerCT withName:self.textLengthROIname.stringValue];
+            [self deleteROIsFromViewerController:self.viewerPET withName:[self ROInameForType:Transform_ROI_Placed]];
+            [self deleteROIsFromViewerController:self.viewerCT withName:[self ROInameForType:Transform_ROI_Placed]];
         case AllROI_CT:
             [self deleteAllROIsFromViewerController:self.viewerCT];
             break;
@@ -835,10 +838,17 @@
 -(NSString *)ROInameForType:(ROI_Type)type {
     switch (type) {
         case Active_ROI:
-            return self.textActiveROIname.stringValue;
+            return [[NSUserDefaults standardUserDefaults] objectForKey:kActiveROInameDefault];
             break;
         case Mirrored_ROI:
-            return self.textMirrorROIname.stringValue;
+            return [[NSUserDefaults standardUserDefaults] objectForKey:kMirroredROInameDefault];
+            break;
+        case Transform_ROI_Placed:
+        case Transform_Intercalated:
+            return [[NSUserDefaults standardUserDefaults] objectForKey:kTransformROInameDefault];
+            break;
+        case MirroredAndActive_ROI:
+            return [NSString stringWithFormat:@"%@_%@",[self ROInameForType:Active_ROI],[self ROInameForType:Mirrored_ROI]];
             break;
         default:
             return @"";
@@ -901,7 +911,13 @@
             [self exportROIpixelDataForType:Mirrored_ROI];
             break;
         case 2:
-            [self exportROIsummaryDataForType:MirroredAndActive_ROI];
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
+            {
+                [self exportROIsummaryDataForType:MirroredAndActive_ROI];
+                break;
+            }
+            [self exportROIsummaryDataForType:Active_ROI];
+            [self exportROIsummaryDataForType:Mirrored_ROI];
             break;
         case 3:
             [self exportROI3DdataForType:Active_ROI];
@@ -912,12 +928,37 @@
             [self exportROIsummaryDataForType:Mirrored_ROI];
             break;
         case -1:
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
+            {
+                [self exportAllROIdataForType:MirroredAndActive_ROI];
+                break;
+            }
             [self exportAllROIdataForType:Active_ROI];
             [self exportAllROIdataForType:Mirrored_ROI];
             break;
     }
 }
 -(void)exportAllROIdataForType:(ROI_Type)type {
+    NSString *dataString = nil;
+    switch (type) {
+        case MirroredAndActive_ROI:
+        {
+            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self exportAllROIdataStringForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self exportAllROIdataStringForType:Mirrored_ROI]];
+        }
+            break;
+        case Active_ROI:
+        case Mirrored_ROI:
+            dataString = [self exportAllROIdataStringForType:type];
+            break;
+        default:
+            break;
+    }
+    
+    if (dataString.length>0) {
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-All-Data-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+    }
+}
+-(NSString *)exportAllROIdataStringForType:(ROI_Type)type {
     NSMutableArray *finalString = [NSMutableArray arrayWithCapacity:4];
     NSString *dataString = [self dataStringFor3DROIdataForType:type];
     if (dataString != nil) {[finalString addObject:[@"3D data\n" stringByAppendingString:dataString]];}
@@ -928,26 +969,31 @@
     dataString = [self dataStringForROIpixelDataForType:type];
     if (dataString != nil) {[finalString addObject:[@"Pixel data\n" stringByAppendingString:dataString]];}
     if (finalString.count>0) {
-        [self saveData:[finalString componentsJoinedByString:@"\n\n"] withName:[NSString stringWithFormat:@"%@-All-Data-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+        return [finalString componentsJoinedByString:@"\n\n"];
     }
+    return @"";
 }
+
 -(void)exportROIsummaryDataForType:(ROI_Type)type {
     NSString *dataString = nil;
-    NSString *nameStr = @"";
     switch (type) {
         case MirroredAndActive_ROI:
+        {
             dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self dataStringForSummaryROIdataForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self dataStringForSummaryROIdataForType:Mirrored_ROI]];
-            nameStr = [NSString stringWithFormat:@"%@&%@",[self ROInameForType:Active_ROI],[self ROInameForType:Mirrored_ROI]];
+        }
+            break;
+        case Active_ROI:
+        case Mirrored_ROI:
+            dataString = [self dataStringForSummaryROIdataForType:type];
             break;
         default:
-            dataString = [self dataStringForSummaryROIdataForType:type];
-            nameStr = [self ROInameForType:type];
             break;
     }
-    if (dataString != nil) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Summary-%@", nameStr,self.viewerPET.window.title]];
-    }
 
+    if (dataString != nil) {
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Summary-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+    }
+    
 }
 -(NSString *)dataStringForSummaryROIdataForType:(ROI_Type)type {
     NSUInteger capacity = self.viewerPET.roiList.count;
@@ -1221,8 +1267,8 @@
 - (void)refreshDisplayedDataForViewer:(ViewerController *)viewer{
     if ([self valid2DViewer:viewer])
     {
-        ROI *activeRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textActiveROIname.stringValue];
-        ROI *mirroredRoi = [self ROIfromCurrentSliceInViewer:viewer withName:self.textMirrorROIname.stringValue];
+        ROI *activeRoi = [self ROIfromCurrentSliceInViewer:viewer withName:[self ROInameForType:Active_ROI]];
+        ROI *mirroredRoi = [self ROIfromCurrentSliceInViewer:viewer withName:[self ROInameForType:Mirrored_ROI]];
         ROI *jiggleRoi = [self ROIfromCurrentSliceInViewer:viewer withName:kJiggleSelectedROIName];
         //if (activeRoi != nil && mirroredRoi != nil) {
         [MirrorROIPluginFilterOC forceRecomputeDataForROI:activeRoi];
@@ -1331,7 +1377,7 @@
 
 -(NSString *)summaryStringForActiveRoiInCurrentSliceInViewer:(ViewerController *)viewer {
     NSString *ss = @"Not Found";
-    NSString *name = self.textActiveROIname.stringValue;
+    NSString *name = [self ROInameForType:Active_ROI];
     ROI *roi = [self ROIfromCurrentSliceInViewer:viewer withName:name];//growingRegionROIName
     if (roi != nil) {
         ss = [NSString stringWithFormat:@"%@: %@",name,[self summaryStringOfSpriteNamed:name forROI:roi]];
@@ -1514,8 +1560,8 @@
     }
 }
 -(void)generateJiggleROIsInSlice:(NSInteger)currentSlice {
-    ROI *roi2ClonePET = [self ROIfromSlice:currentSlice inViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];//we take the position of the MIRROR
-    ROI *roi2CloneCT = [self ROIfromSlice:currentSlice inViewer:self.viewerCT withName:self.textActiveROIname.stringValue];//take VALUES of the ACTIVE
+    ROI *roi2ClonePET = [self ROIfromSlice:currentSlice inViewer:self.viewerPET withName:[self ROInameForType:Mirrored_ROI]];//we take the position of the MIRROR
+    ROI *roi2CloneCT = [self ROIfromSlice:currentSlice inViewer:self.viewerCT withName:[self ROInameForType:Active_ROI]];//take VALUES of the ACTIVE
     if (roi2ClonePET != nil && roi2CloneCT != nil) {
         //make the ROIS grid, dont add the zero ROI as its the already mirror unless specifically requested
         BOOL excludeOriginal = ![[NSUserDefaults standardUserDefaults] boolForKey:kIncludeOriginalInJiggleDefault];
@@ -1623,7 +1669,7 @@
     return sorters;
 }
 -(void)replaceMirrorWithJiggleROI {
-    ROI *mirroredROI = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:self.textMirrorROIname.stringValue];
+    ROI *mirroredROI = [self ROIfromCurrentSliceInViewer:self.viewerPET withName:[self ROInameForType:Mirrored_ROI]];
     ROI *selJiggleROI = [self ROIfromCurrentSliceInViewer:self.viewerCT withName:kJiggleSelectedROIName];
     if (mirroredROI != nil && selJiggleROI != nil) {
         NSInteger index = [self indexOfJiggleForROI:selJiggleROI];

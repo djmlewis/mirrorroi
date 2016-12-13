@@ -87,9 +87,9 @@ typedef enum : NSInteger {
 //@property (assign) IBOutlet NSSlider *sliderMovevalue;
 @property (assign) IBOutlet NSLevelIndicator *levelJiggleIndex;
 
-@property (assign) IBOutlet NSTextField *textLengthROIname;
-@property (assign) IBOutlet NSTextField *textMirrorROIname;
-@property (assign) IBOutlet NSTextField *textActiveROIname;
+//@property (assign) IBOutlet NSTextField *textLengthROIname;
+//@property (assign) IBOutlet NSTextField *textMirrorROIname;
+//@property (assign) IBOutlet NSTextField *textActiveROIname;
 
 @property (assign) IBOutlet NSButton *buttonJiggleWorse;
 @property (assign) IBOutlet NSButton *buttonJiggleBetter;

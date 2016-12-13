@@ -19,7 +19,7 @@
 #define kColor_Jiggle @"kColor_Jiggle"
 #define kTransformROInameDefault @"kTransformROInameDefault"
 #define kMirroredROInameDefault @"kMirroredROInameDefault"
-#define kActiveROInameDefault @"kActiveROInameDefault"
+#define kActiveROInameDefault @"growingRegionROIName" // this is set by OsiriX
 #define kExtendSingleTransformDefault @"kExtendSingleTransformDefault"
 #define kTransposeExportedDataDefault @"kTransposeExportedDataDefault"
 #define kIncludeOriginalInJiggleDefault @"kIncludeOriginalInJiggleDefault"
@@ -27,6 +27,7 @@
 #define kJiggleBoundsPixels @"kJiggleBoundsPixels"
 #define kMirrorMoveByPixels @"kMirrorMoveByPixels"
 #define kSegmentFusedOrPETSegmentDefault @"kSegmentFusedOrPETSegmentDefault"
+#define kCombineExportsOneFileDefault @"kCombineExportsOneFileDefault"
 
 
 #define kJiggleROIName @"jiggle"
