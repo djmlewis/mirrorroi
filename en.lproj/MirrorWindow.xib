@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="16B2555" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
-        <capability name="box content view" minToolsVersion="7.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
         <capability name="system font weights other than Regular or Bold" minToolsVersion="7.0"/>
     </dependencies>
@@ -442,77 +441,6 @@
                                                         <action selector="deleteActiveViewerROIsOfType:" target="-2" id="7Mb-bK-Pfg"/>
                                                     </connections>
                                                 </button>
-                                                <box fixedFrame="YES" title="Box" titlePosition="noTitle" translatesAutoresizingMaskIntoConstraints="NO" id="TO0-wq-TvK">
-                                                    <rect key="frame" x="11" y="4" width="202" height="97"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <view key="contentView" ambiguous="YES" id="skb-wY-Irb">
-                                                        <rect key="frame" x="2" y="2" width="198" height="93"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                        <subviews>
-                                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="M8O-7V-yR8">
-                                                                <rect key="frame" x="197" y="28" width="95" height="32"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <buttonCell key="cell" type="push" title="ROI Data" bezelStyle="rounded" image="NSShareTemplate" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="YtN-pD-zfX">
-                                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                                    <font key="font" metaFont="system"/>
-                                                                </buttonCell>
-                                                                <connections>
-                                                                    <action selector="exportROIdataTapped:" target="-2" id="e1P-yG-oWh"/>
-                                                                </connections>
-                                                            </button>
-                                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Kgj-pk-hBu">
-                                                                <rect key="frame" x="52" y="22" width="95" height="32"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <buttonCell key="cell" type="push" title="PET" bezelStyle="rounded" image="Flip Vertical Filled-50" imagePosition="left" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Gkp-Wc-plb">
-                                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                                    <font key="font" metaFont="system"/>
-                                                                </buttonCell>
-                                                                <connections>
-                                                                    <action selector="exportAMTroiTapped:" target="-2" id="Htj-7V-eXY"/>
-                                                                </connections>
-                                                            </button>
-                                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Tnv-cH-oP7">
-                                                                <rect key="frame" x="166" y="59" width="24" height="24"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <buttonCell key="cell" type="square" title="All Data" bezelStyle="shadowlessSquare" image="NSShareTemplate" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="X3m-ev-Acu">
-                                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                                    <font key="font" metaFont="system"/>
-                                                                </buttonCell>
-                                                                <connections>
-                                                                    <action selector="exportROIdataTapped:" target="-2" id="Xun-Kf-rFf"/>
-                                                                </connections>
-                                                            </button>
-                                                            <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2WW-0Z-eyM">
-                                                                <rect key="frame" x="6" y="56" width="155" height="26"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <popUpButtonCell key="cell" type="push" title="All Data" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="0zZ-1G-Hdq" id="U3Q-6T-gQd">
-                                                                    <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                                    <font key="font" metaFont="menu"/>
-                                                                    <menu key="menu" id="36f-1i-LQk">
-                                                                        <items>
-                                                                            <menuItem title="All Data" state="on" id="0zZ-1G-Hdq">
-                                                                                <modifierMask key="keyEquivalentModifierMask"/>
-                                                                            </menuItem>
-                                                                            <menuItem title="Summary" id="Aew-t1-Cs9"/>
-                                                                            <menuItem title="3D" id="DRB-3b-0ek"/>
-                                                                            <menuItem title="Pixels" id="hpz-zi-zUV"/>
-                                                                            <menuItem title="ROI data" id="A2Z-yV-9vC">
-                                                                                <modifierMask key="keyEquivalentModifierMask"/>
-                                                                            </menuItem>
-                                                                            <menuItem isSeparatorItem="YES" id="Kck-6h-i1b"/>
-                                                                            <menuItem title="PET" image="Flip Vertical Filled-24" id="Zbx-mG-TY2">
-                                                                                <modifierMask key="keyEquivalentModifierMask"/>
-                                                                            </menuItem>
-                                                                        </items>
-                                                                    </menu>
-                                                                    <connections>
-                                                                        <binding destination="fUA-5u-y3G" name="selectedIndex" keyPath="values.kExportMenuSelectedIndexDefault" id="HLH-Zk-cs4"/>
-                                                                    </connections>
-                                                                </popUpButtonCell>
-                                                            </popUpButton>
-                                                        </subviews>
-                                                    </view>
-                                                </box>
                                                 <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="iZE-Kd-keZ">
                                                     <rect key="frame" x="157" y="346" width="31" height="22"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -685,6 +613,45 @@
                                                         <action selector="showJiggleValuesInWindow:" target="-2" id="E4k-xy-ojD"/>
                                                     </connections>
                                                 </button>
+                                                <button verticalHuggingPriority="750" fixedFrame="YES" tag="-1" translatesAutoresizingMaskIntoConstraints="NO" id="Tnv-cH-oP7">
+                                                    <rect key="frame" x="182" y="80" width="24" height="24"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="square" title="All Data" bezelStyle="shadowlessSquare" image="NSShareTemplate" imagePosition="only" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="X3m-ev-Acu">
+                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="exportROIdataTapped:" target="-2" id="Xun-Kf-rFf"/>
+                                                    </connections>
+                                                </button>
+                                                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2WW-0Z-eyM">
+                                                    <rect key="frame" x="18" y="78" width="159" height="26"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <popUpButtonCell key="cell" type="push" title="All Data" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="0zZ-1G-Hdq" id="U3Q-6T-gQd">
+                                                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                                                        <font key="font" metaFont="menu"/>
+                                                        <menu key="menu" id="36f-1i-LQk">
+                                                            <items>
+                                                                <menuItem title="All Data" state="on" id="0zZ-1G-Hdq">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                </menuItem>
+                                                                <menuItem title="Summary" id="Aew-t1-Cs9"/>
+                                                                <menuItem title="3D" id="DRB-3b-0ek"/>
+                                                                <menuItem title="Pixels" id="hpz-zi-zUV"/>
+                                                                <menuItem title="ROI data" id="A2Z-yV-9vC">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                </menuItem>
+                                                                <menuItem isSeparatorItem="YES" id="Kck-6h-i1b"/>
+                                                                <menuItem title="PET" image="Flip Vertical Filled-24" id="Zbx-mG-TY2">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                </menuItem>
+                                                            </items>
+                                                        </menu>
+                                                        <connections>
+                                                            <binding destination="fUA-5u-y3G" name="selectedIndex" keyPath="values.kExportMenuSelectedIndexDefault" id="HLH-Zk-cs4"/>
+                                                        </connections>
+                                                    </popUpButtonCell>
+                                                </popUpButton>
                                             </subviews>
                                         </customView>
                                     </subviews>

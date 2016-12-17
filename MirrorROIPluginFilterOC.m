@@ -29,7 +29,7 @@
     [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
     [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
     
-    [defaults setValue:[NSNumber numberWithInteger:3] forKey:kExportMenuSelectedIndexDefault];
+    [defaults setValue:[NSNumber numberWithInteger:0] forKey:kExportMenuSelectedIndexDefault];
     [defaults setValue:[NSNumber numberWithInteger:0] forKey:kSegmentFusedOrPETSegmentDefault];
     [defaults setValue:[NSNumber numberWithInteger:1] forKey:kMirrorMoveByPixels];
     [defaults setValue:[NSNumber numberWithInteger:3] forKey:kJiggleBoundsPixels];
@@ -903,62 +903,81 @@
 }
 
 #pragma mark - ROI Export
-
-- (IBAction)exportROIdataTapped:(NSButton *)sender {
-    NSInteger exportOption = [[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
-    if (exportOption == PETRois) {
-        
++(NSString *)fileNameForExportType:(ExportDataType)type {
+switch (type) {
+    case Roi:
+        return @"RoiData";
+        break;
+    case Pixels:
+        return @"PixelsData";
+        break;
+    case Summary:
+        return @"SummaryData";
+        break;
+    case ThreeD:
+        return @"3DData";
+        break;
+    case AllData:
+        return @"AllData";
+        break;
+    case PETRois:
+        return @"PETROIs";
+        break;
+    default:
+        return @"?";
+        break;
+}
+}
+- (IBAction)exportROIdataTapped:(id)sender {
+    [self exportROIdata];
+}
+-(void)exportROIdata {
+    NSInteger exportType = [[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
+    NSString *dataStringA = nil;
+    NSString *dataStringM = nil;
+    NSString *fileTypeName = [MirrorROIPluginFilterOC fileNameForExportType:exportType];
+    switch (exportType) {
+        case Roi:
+            dataStringA = [self dataStringForROIdataForType:Active_ROI];
+            dataStringM = [self dataStringForROIdataForType:Mirrored_ROI];
+            break;
+        case Pixels:
+            dataStringA = [self dataStringForROIpixelDataForType:Active_ROI];
+            dataStringM = [self dataStringForROIpixelDataForType:Mirrored_ROI];
+            break;
+        case Summary:
+            dataStringA = [self dataStringForSummaryROIdataForType:Active_ROI];
+            dataStringM = [self dataStringForSummaryROIdataForType:Mirrored_ROI];
+            break;
+        case ThreeD:
+            dataStringA = [self dataStringFor3DROIdataForType:Active_ROI];
+            dataStringM = [self dataStringFor3DROIdataForType:Mirrored_ROI];
+            break;
+        case AllData:
+            dataStringA = [self exportAllROIdataStringForType:Active_ROI];
+            dataStringM = [self exportAllROIdataStringForType:Mirrored_ROI];
+            break;
+        case PETRois:
+            [self exportAMTroi];
+            return;
+            break;
+        default:
+            break;
+    }
+    
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
+    {
+        if (dataStringA.length>0 && dataStringM.length>0) {
+            [self saveData:[NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],dataStringA,[self ROInameForType:Mirrored_ROI],dataStringM] withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+        }
     }
     else
     {
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
-        {
-            switch (exportOption) {
-                case Roi:
-                    [self exportROIdataForType:MirroredAndActive_ROI];
-                    break;
-                case Pixels:
-                    [self exportROIpixelDataForType:MirroredAndActive_ROI];
-                    break;
-                case Summary:
-                    [self exportROIsummaryDataForType:MirroredAndActive_ROI];
-                    break;
-                case ThreeD:
-                    [self exportROI3DdataForType:MirroredAndActive_ROI];
-                    break;
-                case AllData:
-                    [self exportAllROIdataForType:MirroredAndActive_ROI];
-                    break;
-                default:
-                    break;
-            }
+        if (dataStringA.length>0) {
+            [self saveData:dataStringA withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
         }
-        else
-        {
-            switch (exportOption) {
-                case Roi:
-                    [self exportROIdataForType:Active_ROI];
-                    [self exportROIdataForType:Mirrored_ROI];
-                    break;
-                case Pixels:
-                    [self exportROIpixelDataForType:Active_ROI];
-                    [self exportROIpixelDataForType:Mirrored_ROI];
-                    break;
-                case Summary:
-                    [self exportROIsummaryDataForType:Active_ROI];
-                    [self exportROIsummaryDataForType:Mirrored_ROI];
-                    break;
-                case ThreeD:
-                    [self exportROI3DdataForType:Active_ROI];
-                    [self exportROI3DdataForType:Mirrored_ROI];
-                    break;
-                case AllData:
-                    [self exportAllROIdataForType:Active_ROI];
-                    [self exportAllROIdataForType:Mirrored_ROI];
-                    break;
-                default:
-                    break;
-            }
+        if (dataStringM.length>0) {
+            [self saveData:dataStringM withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
         }
     }
 }
@@ -1255,7 +1274,7 @@
     }
 }
 
-- (IBAction) exportAMTroiTapped:(id)sender {
+-(void)exportAMTroi {
     if ([self valid2DViewer:self.viewerPET]) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
