@@ -70,6 +70,10 @@ typedef enum : NSInteger {
     UsePETWindowAlone = 1
 } FusedOrPetAloneWindowSetting;
 
+typedef enum : NSInteger {
+    AllData, Summary, ThreeD, Pixels, Roi, PETRois = 6
+} ExportDataType;
+
 
 
 @interface MirrorROIPluginFilterOC : PluginFilter {}

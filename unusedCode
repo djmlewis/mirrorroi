@@ -1,3 +1,42 @@
+- (void) exportAMTroiInViewer:(ViewerController *)viewer {
+if ([self valid2DViewer:viewer])
+{
+NSMutableArray  *roisPerSeries = [NSMutableArray  array];
+BOOL rois = NO;
+//retain the structure of the arrays, but pick only AMT
+for( int x = 0; x < [viewer.roiList count]; x++)
+{
+NSMutableArray  *roisPerImages = [NSMutableArray  array];
+for( int i = 0; i < [[viewer.roiList objectAtIndex: x] count]; i++)
+{
+ROI	*curROI = [[viewer.roiList objectAtIndex: x] objectAtIndex: i];
+if ([self roiIsActiveMirrorOrTransform:curROI])
+{
+[roisPerImages addObject: curROI];
+rois = YES;
+}
+}
+
+[roisPerSeries addObject: roisPerImages];
+}
+
+if(rois == YES)
+{
+NSSavePanel *panel = [NSSavePanel savePanel];
+[panel setCanSelectHiddenExtension:NO];
+//[panel setRequiredFileType:@"rois_series"];
+panel.allowedFileTypes = [NSArray arrayWithObject:@"rois_series"];
+panel.nameFieldStringValue = viewer.window.title;
+if( [panel runModal] == NSFileHandlingPanelOKButton)
+{
+[NSArchiver archiveRootObject: roisPerSeries toFile :[panel filename]];
+}
+}
+}
+}
+
+
+
 -(void)setColourWellsToDefaults {
 /*
 self.colorWellActive.color = [MirrorROIPluginFilterOC colourFromData:[[NSUserDefaults standardUserDefaults] dataForKey:kColor_Active]];

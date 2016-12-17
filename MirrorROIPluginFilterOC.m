@@ -29,6 +29,7 @@
     [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
     [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
     
+    [defaults setValue:[NSNumber numberWithInteger:3] forKey:kExportMenuSelectedIndexDefault];
     [defaults setValue:[NSNumber numberWithInteger:0] forKey:kSegmentFusedOrPETSegmentDefault];
     [defaults setValue:[NSNumber numberWithInteger:1] forKey:kMirrorMoveByPixels];
     [defaults setValue:[NSNumber numberWithInteger:3] forKey:kJiggleBoundsPixels];
@@ -900,44 +901,69 @@
     }
     return nil;
 }
+
+#pragma mark - ROI Export
+
 - (IBAction)exportROIdataTapped:(NSButton *)sender {
-    switch (sender.tag) {
-        case 0:
-            [self exportROIdataForType:Active_ROI];
-            [self exportROIdataForType:Mirrored_ROI];
-            break;
-        case 1:
-            [self exportROIpixelDataForType:Active_ROI];
-            [self exportROIpixelDataForType:Mirrored_ROI];
-            break;
-        case 2:
-            if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
-            {
-                [self exportROIsummaryDataForType:MirroredAndActive_ROI];
-                break;
+    NSInteger exportOption = [[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
+    if (exportOption == PETRois) {
+        
+    }
+    else
+    {
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
+        {
+            switch (exportOption) {
+                case Roi:
+                    [self exportROIdataForType:MirroredAndActive_ROI];
+                    break;
+                case Pixels:
+                    [self exportROIpixelDataForType:MirroredAndActive_ROI];
+                    break;
+                case Summary:
+                    [self exportROIsummaryDataForType:MirroredAndActive_ROI];
+                    break;
+                case ThreeD:
+                    [self exportROI3DdataForType:MirroredAndActive_ROI];
+                    break;
+                case AllData:
+                    [self exportAllROIdataForType:MirroredAndActive_ROI];
+                    break;
+                default:
+                    break;
             }
-            [self exportROIsummaryDataForType:Active_ROI];
-            [self exportROIsummaryDataForType:Mirrored_ROI];
-            break;
-        case 3:
-            [self exportROI3DdataForType:Active_ROI];
-            [self exportROI3DdataForType:Mirrored_ROI];
-            break;
-        case 4:
-            [self exportROIsummaryDataForType:Active_ROI];
-            [self exportROIsummaryDataForType:Mirrored_ROI];
-            break;
-        case -1:
-            if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
-            {
-                [self exportAllROIdataForType:MirroredAndActive_ROI];
-                break;
+        }
+        else
+        {
+            switch (exportOption) {
+                case Roi:
+                    [self exportROIdataForType:Active_ROI];
+                    [self exportROIdataForType:Mirrored_ROI];
+                    break;
+                case Pixels:
+                    [self exportROIpixelDataForType:Active_ROI];
+                    [self exportROIpixelDataForType:Mirrored_ROI];
+                    break;
+                case Summary:
+                    [self exportROIsummaryDataForType:Active_ROI];
+                    [self exportROIsummaryDataForType:Mirrored_ROI];
+                    break;
+                case ThreeD:
+                    [self exportROI3DdataForType:Active_ROI];
+                    [self exportROI3DdataForType:Mirrored_ROI];
+                    break;
+                case AllData:
+                    [self exportAllROIdataForType:Active_ROI];
+                    [self exportAllROIdataForType:Mirrored_ROI];
+                    break;
+                default:
+                    break;
             }
-            [self exportAllROIdataForType:Active_ROI];
-            [self exportAllROIdataForType:Mirrored_ROI];
-            break;
+        }
     }
 }
+
+
 -(void)exportAllROIdataForType:(ROI_Type)type {
     NSString *dataString = nil;
     switch (type) {
@@ -1041,10 +1067,25 @@
     return nil;
 }
 -(void)exportROI3DdataForType:(ROI_Type)type {
-    NSString *dataString = [self dataStringFor3DROIdataForType:type];
+    NSString *dataString = nil;
+    switch (type) {
+        case MirroredAndActive_ROI:
+        {
+            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self dataStringFor3DROIdataForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self dataStringFor3DROIdataForType:Mirrored_ROI]];
+        }
+            break;
+        case Active_ROI:
+        case Mirrored_ROI:
+            dataString = [self dataStringFor3DROIdataForType:type];
+            break;
+        default:
+            break;
+    }
+    
     if (dataString != nil) {
         [self saveData:dataString withName:[NSString stringWithFormat:@"%@-3D-%@", [self ROInameForType:type],self.viewerPET.window.title]];
     }
+
 }
 -(NSString *)dataStringFor3DROIdataForType:(ROI_Type)type {
     [self.viewerPET roiSelectDeselectAll: nil];
@@ -1069,7 +1110,21 @@
     return nil;
 }
 -(void)exportROIdataForType:(ROI_Type)type {
-    NSString *dataString = [self dataStringForROIdataForType:type];
+    NSString *dataString = nil;
+    switch (type) {
+        case MirroredAndActive_ROI:
+        {
+            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self dataStringForROIdataForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self dataStringForROIdataForType:Mirrored_ROI]];
+        }
+            break;
+        case Active_ROI:
+        case Mirrored_ROI:
+            dataString = [self dataStringForROIdataForType:type];
+            break;
+        default:
+            break;
+    }
+    
     if (dataString != nil) {
         [self saveData:dataString withName:[NSString stringWithFormat:@"%@-ROIdata-%@", [self ROInameForType:type],self.viewerPET.window.title]];
     }
@@ -1104,10 +1159,25 @@
     return nil;
 }
 -(void)exportROIpixelDataForType:(ROI_Type)type {
-    NSString *dataString = [self dataStringForROIpixelDataForType:type];
-    if (dataString != nil) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-ROIdata-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+    NSString *dataString = nil;
+    switch (type) {
+        case MirroredAndActive_ROI:
+        {
+            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self dataStringForROIpixelDataForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self dataStringForROIpixelDataForType:Mirrored_ROI]];
+        }
+            break;
+        case Active_ROI:
+        case Mirrored_ROI:
+            dataString = [self dataStringForROIpixelDataForType:type];
+            break;
+        default:
+            break;
     }
+    
+    if (dataString != nil) {
+        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-PixelData-%@", [self ROInameForType:type],self.viewerPET.window.title]];
+    }
+
 }
 -(NSString *)dataStringForROIpixelDataForType:(ROI_Type)type {
     NSString *roiname = [self ROInameForType:type];
@@ -1184,6 +1254,20 @@
         [dataString writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
     }
 }
+
+- (IBAction) exportAMTroiTapped:(id)sender {
+    if ([self valid2DViewer:self.viewerPET]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+        [[NSApplication sharedApplication] sendAction:@selector(roiSaveSeries:) to:self.viewerPET from:self.viewerPET];
+#pragma clang diagnostic pop
+    }
+}
+
+-(BOOL)roiIsActiveMirrorOrTransform:(ROI *)roi {
+    return [roi.name isEqualToString:[self ROInameForType:Active_ROI]] || [roi.name isEqualToString:[self ROInameForType:Mirrored_ROI]] || [roi.name isEqualToString:[self ROInameForType:Transform_ROI_Placed]];
+}
+
 
 #pragma mark - Plot Data
 -(void)loadStatsScene {

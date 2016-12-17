@@ -29,6 +29,7 @@
 		8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */; };
 		8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */; };
 		8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF41DB80A7500D7B0CA /* growRegion.png */; };
+		8EC532661E05A2A6006B74E5 /* Flip Vertical Filled-24.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */; };
 		8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ECAD5EF1DDA57B20079DB97 /* yingyang.png */; };
 		8ED16B231DF99F890043A74C /* TextDisplayWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 8ED16B211DF99F890043A74C /* TextDisplayWindow.h */; };
 		8ED16B241DF99F890043A74C /* TextDisplayWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 8ED16B221DF99F890043A74C /* TextDisplayWindow.m */; };
@@ -73,6 +74,7 @@
 		8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length +.png"; path = "PNGs/Length +.png"; sourceTree = "<group>"; };
 		8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = Tiling2x1.pdf; path = PNGs/Tiling2x1.pdf; sourceTree = "<group>"; };
 		8EB2BDF41DB80A7500D7B0CA /* growRegion.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = growRegion.png; path = PNGs/growRegion.png; sourceTree = "<group>"; };
+		8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled-24.png"; path = "PNGs/Flip Vertical Filled-24.png"; sourceTree = "<group>"; };
 		8ECAD5EF1DDA57B20079DB97 /* yingyang.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = yingyang.png; path = PNGs/yingyang.png; sourceTree = "<group>"; };
 		8ED16B211DF99F890043A74C /* TextDisplayWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextDisplayWindow.h; sourceTree = "<group>"; };
 		8ED16B221DF99F890043A74C /* TextDisplayWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextDisplayWindow.m; sourceTree = "<group>"; };
@@ -194,6 +196,7 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */,
 				8E613DFD1DECCA7F0021049A /* JiggleAll.png */,
 				8E1D23C11DE6386800469190 /* decrease.png */,
 				8E1D23C21DE6386800469190 /* increase.png */,
@@ -325,6 +328,7 @@
 				C52843BF1DC250C600371742 /* aleft.png in Resources */,
 				8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */,
 				8E172CFE1DDD03F100F33DE5 /* JiggleSelect.png in Resources */,
+				8EC532661E05A2A6006B74E5 /* Flip Vertical Filled-24.png in Resources */,
 				C52843C01DC250C600371742 /* aright.png in Resources */,
 				8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */,
 			);

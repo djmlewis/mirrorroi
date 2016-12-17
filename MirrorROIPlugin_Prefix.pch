@@ -28,6 +28,7 @@
 #define kMirrorMoveByPixels @"kMirrorMoveByPixels"
 #define kSegmentFusedOrPETSegmentDefault @"kSegmentFusedOrPETSegmentDefault"
 #define kCombineExportsOneFileDefault @"kCombineExportsOneFileDefault"
+#define kExportMenuSelectedIndexDefault @"kExportMenuSelectedIndexDefault"
 
 
 #define kJiggleROIName @"jiggle"
