@@ -983,26 +983,6 @@ switch (type) {
 }
 
 
--(void)exportAllROIdataForType:(ROI_Type)type {
-    NSString *dataString = nil;
-    switch (type) {
-        case MirroredAndActive_ROI:
-        {
-            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self exportAllROIdataStringForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self exportAllROIdataStringForType:Mirrored_ROI]];
-        }
-            break;
-        case Active_ROI:
-        case Mirrored_ROI:
-            dataString = [self exportAllROIdataStringForType:type];
-            break;
-        default:
-            break;
-    }
-    
-    if (dataString.length>0) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-All-Data-%@", [self ROInameForType:type],self.viewerPET.window.title]];
-    }
-}
 -(NSString *)exportAllROIdataStringForType:(ROI_Type)type {
     NSMutableArray *finalString = [NSMutableArray arrayWithCapacity:4];
     NSString *dataString = [self dataStringFor3DROIdataForType:type];
@@ -1019,27 +999,6 @@ switch (type) {
     return @"";
 }
 
--(void)exportROIsummaryDataForType:(ROI_Type)type {
-    NSString *dataString = nil;
-    switch (type) {
-        case MirroredAndActive_ROI:
-        {
-            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self dataStringForSummaryROIdataForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self dataStringForSummaryROIdataForType:Mirrored_ROI]];
-        }
-            break;
-        case Active_ROI:
-        case Mirrored_ROI:
-            dataString = [self dataStringForSummaryROIdataForType:type];
-            break;
-        default:
-            break;
-    }
-
-    if (dataString != nil) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-Summary-%@", [self ROInameForType:type],self.viewerPET.window.title]];
-    }
-    
-}
 -(NSString *)dataStringForSummaryROIdataForType:(ROI_Type)type {
     NSUInteger capacity = self.viewerPET.roiList.count;
     NSMutableDictionary *dictOfRows = [NSMutableDictionary dictionaryWithCapacity:capacity];
@@ -1085,27 +1044,6 @@ switch (type) {
     }
     return nil;
 }
--(void)exportROI3DdataForType:(ROI_Type)type {
-    NSString *dataString = nil;
-    switch (type) {
-        case MirroredAndActive_ROI:
-        {
-            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self dataStringFor3DROIdataForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self dataStringFor3DROIdataForType:Mirrored_ROI]];
-        }
-            break;
-        case Active_ROI:
-        case Mirrored_ROI:
-            dataString = [self dataStringFor3DROIdataForType:type];
-            break;
-        default:
-            break;
-    }
-    
-    if (dataString != nil) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-3D-%@", [self ROInameForType:type],self.viewerPET.window.title]];
-    }
-
-}
 -(NSString *)dataStringFor3DROIdataForType:(ROI_Type)type {
     [self.viewerPET roiSelectDeselectAll: nil];
     NSString *roiname = [self ROInameForType:type];
@@ -1127,26 +1065,6 @@ switch (type) {
         }
     }
     return nil;
-}
--(void)exportROIdataForType:(ROI_Type)type {
-    NSString *dataString = nil;
-    switch (type) {
-        case MirroredAndActive_ROI:
-        {
-            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self dataStringForROIdataForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self dataStringForROIdataForType:Mirrored_ROI]];
-        }
-            break;
-        case Active_ROI:
-        case Mirrored_ROI:
-            dataString = [self dataStringForROIdataForType:type];
-            break;
-        default:
-            break;
-    }
-    
-    if (dataString != nil) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-ROIdata-%@", [self ROInameForType:type],self.viewerPET.window.title]];
-    }
 }
 -(NSString *)dataStringForROIdataForType:(ROI_Type)type {
     NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
@@ -1176,27 +1094,6 @@ switch (type) {
         return [arrayOfRows componentsJoinedByString:@"\n"];
     }
     return nil;
-}
--(void)exportROIpixelDataForType:(ROI_Type)type {
-    NSString *dataString = nil;
-    switch (type) {
-        case MirroredAndActive_ROI:
-        {
-            dataString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],[self dataStringForROIpixelDataForType:Active_ROI],[self ROInameForType:Mirrored_ROI],[self dataStringForROIpixelDataForType:Mirrored_ROI]];
-        }
-            break;
-        case Active_ROI:
-        case Mirrored_ROI:
-            dataString = [self dataStringForROIpixelDataForType:type];
-            break;
-        default:
-            break;
-    }
-    
-    if (dataString != nil) {
-        [self saveData:dataString withName:[NSString stringWithFormat:@"%@-PixelData-%@", [self ROInameForType:type],self.viewerPET.window.title]];
-    }
-
 }
 -(NSString *)dataStringForROIpixelDataForType:(ROI_Type)type {
     NSString *roiname = [self ROInameForType:type];
