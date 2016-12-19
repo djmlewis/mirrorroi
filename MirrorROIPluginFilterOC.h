@@ -71,7 +71,7 @@ typedef enum : NSInteger {
 } FusedOrPetAloneWindowSetting;
 
 typedef enum : NSInteger {
-    AllData, Summary, ThreeD, Pixels, Roi, PETRois = 6
+    AllData, Summary, Roi,ThreeD, Pixels, Delta, PETRois, JiggleRoi
 } ExportDataType;
 
 
@@ -88,20 +88,14 @@ typedef enum : NSInteger {
 
 @property (assign) IBOutlet NSView *viewTools;
 
-//@property (assign) IBOutlet NSSlider *sliderMovevalue;
 @property (assign) IBOutlet NSLevelIndicator *levelJiggleIndex;
-
-//@property (assign) IBOutlet NSTextField *textLengthROIname;
-//@property (assign) IBOutlet NSTextField *textMirrorROIname;
-//@property (assign) IBOutlet NSTextField *textActiveROIname;
 
 @property (assign) IBOutlet NSButton *buttonJiggleWorse;
 @property (assign) IBOutlet NSButton *buttonJiggleBetter;
 @property (assign) IBOutlet NSButton *buttonJiggleSetNew;
-@property (assign) IBOutlet NSButton *buttonJiggleShowSummaryWindow;
 @property (assign) IBOutlet NSTextField *textJiggleRank;
 
-//@property (assign) IBOutlet NSSegmentedControl *segmentExtendSingleLengthHow;
+@property (assign) IBOutlet NSPopUpButton *popupExportData;
 
 @property (assign) IBOutlet NSColorWell *colorWellActive;
 @property (assign) IBOutlet NSColorWell *colorWellMirrored;

@@ -40,6 +40,17 @@
 #define kJiggleROIsArrayName @"kJiggleROIsArrayName"
 #define kJiggleROIsArrayKey @"kJiggleROIsArrayKey"
 
+#define kDeltaNameSubtracted @"Subtracted Pixels"
+#define kDeltaNameDivided @"Divided Pixels"
+#define kDeltaNameCount @"Count Of Pixels"
+#define kDeltaNameSubtractedMean @"Subtracted Mean"
+#define kDeltaNameSubtractedSD @"Subtracted SD"
+#define kDeltaNameSubtractedSEM @"Subtracted SEM"
+#define kDeltaNameDividedMean @"Divided Mean"
+#define kDeltaNameDividedSD @"Divided SD"
+#define kDeltaNameDividedSEM @"Divided SEM"
+
+
 #define kSpriteName_Active @"A"
 #define kSpriteName_Mirror @"M"
 #define kSpriteName_Jiggle @"J"
