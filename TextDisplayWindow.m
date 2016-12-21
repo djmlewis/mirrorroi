@@ -12,6 +12,7 @@
 
 
 -(void)setDisplayedText:(NSString *)displayedText {
+
     self.textView.string = displayedText;
 }
 

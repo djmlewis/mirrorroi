@@ -11,5 +11,6 @@
 @interface TextDisplayWindowController : NSWindowController
 
 @property (retain) NSString *displayedText;
+@property (retain) NSString *title;
 
 @end

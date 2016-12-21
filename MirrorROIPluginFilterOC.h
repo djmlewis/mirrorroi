@@ -71,8 +71,13 @@ typedef enum : NSInteger {
 } FusedOrPetAloneWindowSetting;
 
 typedef enum : NSInteger {
-    AllData, Summary, Roi,ThreeD, Pixels, Delta, PETRois, JiggleRoi
+    AllData, Summary, Roi,ThreeD, Pixels, Delta, JiggleRoi, PETRois = 8
 } ExportDataType;
+
+typedef enum : NSInteger {
+    ExportAsFile = -1,
+    ViewInWindow = 0
+} ExportDataHow;
 
 
 

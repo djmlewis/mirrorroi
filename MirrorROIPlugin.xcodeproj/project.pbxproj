@@ -116,6 +116,7 @@
 			isa = PBXGroup;
 			children = (
 				8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */,
+				8E4FBD1F1DFB2D9D00E54D6F /* TextDisplayWindowController.xib */,
 				8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */,
 				8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */,
 				8EE909791DA15C6F00AFAA00 /* unusedCode */,
@@ -151,7 +152,6 @@
 		08FB77AFFE84173DC02AAC07 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
-				8E4FBD1F1DFB2D9D00E54D6F /* TextDisplayWindowController.xib */,
 				8ED16B211DF99F890043A74C /* TextDisplayWindow.h */,
 				8ED16B221DF99F890043A74C /* TextDisplayWindow.m */,
 				8E4FBD1D1DFB2D9D00E54D6F /* TextDisplayWindowController.h */,

@@ -20,7 +20,12 @@
     
     // Implement this method to handle any initialization after your window controller's window has been loaded from its nib file.
     [(TextDisplayWindow *)self.window setDisplayedText:self.displayedText];
+    self.window.title = self.title;
 }
 
+- (NSString *)windowTitleForDocumentDisplayName:(NSString *)displayName
+{
+    return self.title;
+}
 
 @end

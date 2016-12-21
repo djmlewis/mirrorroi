@@ -107,11 +107,13 @@
         self.viewerCT = viewController;
         if (viewController != nil) {
             self.labelCT.stringValue = viewController.window.title;
+            self.labelCT.toolTip = viewController.window.title;
             [self clearJiggleROIsAndValuesAndResetDisplayed];
         }
         else
         {
             self.labelCT.stringValue = @"Not Assigned";
+            self.labelPET.toolTip = nil;
         }
     }
     if (type == PET_Window || type == CTandPET_Windows)
@@ -119,10 +121,12 @@
         self.viewerPET = viewController;
         if (viewController != nil) {
             self.labelPET.stringValue = viewController.window.title;
-        }
+            self.labelPET.toolTip = viewController.window.title;
+       }
         else
         {
             self.labelPET.stringValue = @"Not Assigned";
+            self.labelPET.toolTip = nil;
         }
     }
     [self showHideControlsIfViewersValid];
@@ -206,6 +210,15 @@
     [self showHideControlsIfViewersValid];
 }
 
+#pragma mark - TextDisplayWindowController
++ (void)showStringInWindow:(NSString *)string withTitle:(NSString *)title{
+    //do not use withOwner in initWithWindowNibName, so it uses the links in the nib file to connect window with the TextDisplayWindowController
+    TextDisplayWindowController *windowController = [[TextDisplayWindowController alloc] initWithWindowNibName:@"TextDisplayWindowController"];
+    [windowController setDisplayedText:string];
+    [windowController setTitle:title];
+    [windowController showWindow:self];
+}
+
 #pragma mark - Create Active
 - (IBAction)growRegionClicked:(id)sender {
     [self.viewerPET.window makeKeyAndOrderFront:nil];
@@ -284,7 +297,8 @@
     [MirrorROIPluginFilterOC  setROIcolour:newR forType:type];
     [newR.points addObject:[active2Dwindow newPoint:startPoint.x :startPoint.y]];
     [newR.points addObject:[active2Dwindow newPoint:endPoint.x :endPoint.y]];
-    [[[active2Dwindow roiList] objectAtIndex:index] addObject:newR];
+    // wrong way [[[active2Dwindow roiList] objectAtIndex:index] addObject:newR];
+    [self addROI2Pix:newR atSlice:index inViewer:active2Dwindow hidden:NO];
 }
 
 -(NSPoint)pointForImageIndex:(short)index inWindow:(ViewerController *)vc start:(BOOL)start {
@@ -366,7 +380,7 @@
     }
 }
 -(void)completeLengthROIseriesForViewerController:(ViewerController *)active2Dwindow betweenROI1:(ROI *)roi1 andROI2:(ROI *)roi2 inThisRange:(NSRange)rangeOfIndices{
-    NSMutableArray  *allROIsList = [active2Dwindow roiList];
+    //not needed right way NSMutableArray  *allROIsList = [active2Dwindow roiList];
     MyPoint *roi1_Point1 = [roi1.points objectAtIndex:0];
     MyPoint *roi1_Point2 = [roi1.points objectAtIndex:1];
     MyPoint *roi2_Point1 = [roi2.points objectAtIndex:0];
@@ -388,7 +402,8 @@
         [MirrorROIPluginFilterOC  setROIcolour:newROI forType:Transform_Intercalated];
         [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
         [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
-        [[allROIsList objectAtIndex:nextIndex] addObject:newROI];
+        //wrong way[[allROIsList objectAtIndex:nextIndex] addObject:newROI];
+        [self addROI2Pix:newROI atSlice:nextIndex inViewer:active2Dwindow hidden:NO];
 
         newROI.offsetTextBox_x = 10000.0;
         XincrementCurrent1 += Xincrement1;
@@ -689,8 +704,10 @@
                                spacingY:roi2Clone.pixelSpacingY
                                imageOrigin:roi2Clone.imageOrigin];
             [createdROI setNSColor:roi2Clone.NSColor globally:NO];
-            [roisInThisSlice replaceObjectAtIndex:i withObject:createdROI];
-            [MirrorROIPluginFilterOC forceRecomputeDataForROI:createdROI];
+            //[roisInThisSlice replaceObjectAtIndex:i withObject:createdROI];
+            //[MirrorROIPluginFilterOC forceRecomputeDataForROI:createdROI];
+            [roisInThisSlice removeObjectAtIndex:i];
+            [self addROI2Pix:createdROI atSlice:activeSlice inViewer:self.viewerPET hidden:NO];
             //move the polygon
             [self deleteROIsInSlice:activeSlice inViewerController:self.viewerCT withName:createdROI.name];
             [self addROItoCTAtSlice:activeSlice forActiveROI:nil mirroredROI:createdROI];
@@ -933,7 +950,7 @@ switch (type) {
         break;
 }
 }
-- (IBAction)exportDataTapped:(id)sender {
+- (IBAction)exportDataTapped:(NSButton *)sender {
     NSInteger exportType = self.popupExportData.indexOfSelectedItem;
     //[[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
     switch (exportType) {
@@ -942,23 +959,39 @@ switch (type) {
         case Summary:
         case ThreeD:
         case AllData:
-            [self exportROIdata];
+            [self exportROIdata:sender.tag];
             break;
         case PETRois:
             [self exportAMTroi];
             break;
         case Delta:
-            [self exportDeltaROI];
+            [self exportDeltaROI:sender.tag];
             break;
         case JiggleRoi:
-            [self showJiggleValuesInWindow];
+            [self exportJiggleValues:sender.tag];
             break;
         default:
             break;
     }
 }
+- (void)exportJiggleValues:(ExportDataHow)exportHow {
+    NSString *name = [NSString stringWithFormat:@"🌸-%@",self.viewerPET.window.title];
+    switch (exportHow) {
+        case ExportAsFile:
+                [self saveData:[NSString stringWithFormat:@"%@\n\n%@",[self summaryStringForActiveRoiInCurrentSliceInViewer:self.viewerCT],[self jiggleROIArrayFinalSummaryString]]
+                      withName:name];
+            break;
+        case ViewInWindow:
+            [MirrorROIPluginFilterOC showStringInWindow:[NSString stringWithFormat:@"%@\n\n%@",[self summaryStringForActiveRoiInCurrentSliceInViewer:self.viewerCT],[self jiggleROIArrayFinalSummaryString]] withTitle:name];
+            break;
+        default:
+            break;
+    }
 
--(void)exportDeltaROI {
+}
+
+
+-(void)exportDeltaROI:(ExportDataHow)exportHow {
     NSMutableDictionary *dict = [self deltaData];
     NSMutableArray *dataArrayS = [dict objectForKey:kDeltaNameSubtracted];
     NSMutableArray *dataArrayD = [dict objectForKey:kDeltaNameDivided];
@@ -971,17 +1004,32 @@ switch (type) {
             stats = [stats stringByAppendingString:[NSString stringWithFormat:@"%@\t%@\n",currkey,dict[currkey]]];
         }
     }
-    
-    if (dataArrayS.count>0 && dataArrayD.count>0) {
-        [self saveData:[NSString stringWithFormat:@"%@\n\n%@\n%@\n\n%@\n%@",
-                        stats,
-                        kDeltaNameSubtracted,
-                        [self stringForDataArray:dataArrayS forceTranspose:NO],
-                        kDeltaNameDivided,
-                        [self stringForDataArray:dataArrayD forceTranspose:NO]]
-              withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+    switch (exportHow) {
+        case ExportAsFile:
+            if (dataArrayS.count>0 && dataArrayD.count>0) {
+                [self saveData:[NSString stringWithFormat:@"%@\n\n%@\n%@\n\n%@\n%@",
+                                stats,
+                                kDeltaNameSubtracted,
+                                [self stringForDataArray:dataArrayS forceTranspose:NO],
+                                kDeltaNameDivided,
+                                [self stringForDataArray:dataArrayD forceTranspose:NO]]
+                      withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+            }
+            break;
+        case ViewInWindow:
+        {
+            NSString *displayString = [NSString stringWithFormat:@"%@\n\n%@\n%@\n\n%@\n%@",
+                                       stats,
+                                       kDeltaNameSubtracted,
+                                       [self stringForDataArray:dataArrayS forceTranspose:NO],
+                                       kDeltaNameDivided,
+                                       [self stringForDataArray:dataArrayD forceTranspose:NO]];
+            [MirrorROIPluginFilterOC showStringInWindow:displayString withTitle:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+        }
+            break;
+        default:
+            break;
     }
-
 }
 
 
@@ -1043,7 +1091,7 @@ switch (type) {
     return sqrtf(variance/countF);
 }
 
--(void)exportROIdata {
+-(void)exportROIdata:(ExportDataHow)exportHow {
     NSInteger exportType = [[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
     NSString *dataStringA = nil;
     NSString *dataStringM = nil;
@@ -1072,21 +1120,47 @@ switch (type) {
         default:
             break;
     }
-    
-    if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
-    {
-        if (dataStringA.length>0 && dataStringM.length>0) {
-            [self saveData:[NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],dataStringA,[self ROInameForType:Mirrored_ROI],dataStringM] withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+    switch (exportHow) {
+        case ExportAsFile:
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
+            {
+                if (dataStringA.length>0 && dataStringM.length>0) {
+                    [self saveData:[NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],dataStringA,[self ROInameForType:Mirrored_ROI],dataStringM] withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+                }
+            }
+            else
+            {
+                if (dataStringA.length>0) {
+                    [self saveData:dataStringA withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
+                }
+                if (dataStringM.length>0) {
+                    [self saveData:dataStringM withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
+                }
+            }
+            break;
+        case ViewInWindow:
+        {
+            NSString *displayString = nil;
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
+            {
+                if (dataStringA.length>0 && dataStringM.length>0) {
+                    displayString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],dataStringA,[self ROInameForType:Mirrored_ROI],dataStringM];
+                    [MirrorROIPluginFilterOC showStringInWindow:displayString withTitle:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+                }
+            }
+            else
+            {
+                if (dataStringA.length>0) {
+                    [MirrorROIPluginFilterOC showStringInWindow:dataStringA withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
+                }
+                if (dataStringM.length>0) {
+                    [MirrorROIPluginFilterOC showStringInWindow:dataStringM withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
+                }
+            }
         }
-    }
-    else
-    {
-        if (dataStringA.length>0) {
-            [self saveData:dataStringA withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
-        }
-        if (dataStringM.length>0) {
-            [self saveData:dataStringM withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
-        }
+            break;
+        default:
+            break;
     }
 }
 
@@ -1206,23 +1280,19 @@ switch (type) {
 
 -(NSMutableArray *)dataArrayForROIpixelDataForType:(ROI_Type)type addHeader:(BOOL)addHeader{
     NSString *roiname = [self ROInameForType:type];
-    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+    NSMutableArray *arrayOfRows = [NSMutableArray array];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
-        NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
-        NSLog(@"%li <<<<<<<<<< slice pix",(long)pix);
-        for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
-            ROI *roi = [roiList objectAtIndex:roiIndex];
-            NSLog(@"%li < roiIndex %@  roi>>%@",(long)pix, roiname,roi.name);
+        BOOL foundROI = NO;
+        for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
             if ([roi.name isEqualToString:roiname]) {
-                //[MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
                 NSMutableArray *roiData = roi.dataValues;
-                NSLog(@"%li < roiIndex %@  roi>>%@ PIX>>%@  data %@ ",(long)pix, roiname,roi.name, roi.pix, roiData);
-
-                if (addHeader) {
-                    [roiData insertObject:[NSNumber numberWithInteger:pix] atIndex:0];
+                if (!foundROI) {
+                    if (addHeader) {
+                        [roiData insertObject:[NSNumber numberWithInteger:pix] atIndex:0];
+                    }
+                    [arrayOfRows addObject:roiData];
                 }
-                [arrayOfRows addObject:roiData];
-                break;
+                foundROI = YES;
             }
         }
     }
@@ -1285,7 +1355,7 @@ switch (type) {
     savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
     savePanel.nameFieldStringValue = name;
     if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
-        NSError *error = [[NSError alloc] init];
+        NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:nil];
         [dataString writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
     }
 }
@@ -1807,15 +1877,6 @@ switch (type) {
         }
     }
     return NSNotFound;
-}
-
-- (void)showJiggleValuesInWindow {
-    //do not use withOwner in initWithWindowNibName, so it uses the links in the nib file to connect window with the TextDisplayWindowController
-    TextDisplayWindowController *windowController = [[TextDisplayWindowController alloc] initWithWindowNibName:@"TextDisplayWindowController"];
-    NSString *string = [NSString stringWithFormat:@"%@\n\n%@",[self summaryStringForActiveRoiInCurrentSliceInViewer:self.viewerCT],[self jiggleROIArrayFinalSummaryString]];
-    [windowController setDisplayedText:string];
-    [windowController showWindow:self];
-    
 }
 
 
