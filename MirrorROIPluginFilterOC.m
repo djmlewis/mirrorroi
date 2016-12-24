@@ -32,7 +32,7 @@
     [defaults setValue:[NSNumber numberWithInteger:0] forKey:kExportMenuSelectedIndexDefault];
     [defaults setValue:[NSNumber numberWithInteger:0] forKey:kSegmentFusedOrPETSegmentDefault];
     [defaults setValue:[NSNumber numberWithInteger:1] forKey:kMirrorMoveByPixels];
-    [defaults setValue:[NSNumber numberWithInteger:3] forKey:kJiggleBoundsPixels];
+    [defaults setValue:[NSNumber numberWithInteger:1] forKey:kJiggleBoundsPixels];
     [defaults setValue:[NSNumber numberWithInteger:2] forKey:kExtendSingleTransformDefault];
     
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kCombineExportsOneFileDefault];
