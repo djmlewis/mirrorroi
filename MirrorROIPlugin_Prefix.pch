@@ -40,8 +40,6 @@
 #define kJiggleROIsArrayName @"kJiggleROIsArrayName"
 #define kJiggleROIsArrayKey @"kJiggleROIsArrayKey"
 
-#define kDeltaNameSubtracted @"Subtracted Pixels"
-#define kDeltaNameDivided @"Divided Pixels"
 #define kDeltaNameCount @"Count Of Pixels"
 #define kDeltaNameSubtractedMean @"Subtracted Mean"
 #define kDeltaNameSubtractedSD @"Subtracted SD"
@@ -49,6 +47,27 @@
 #define kDeltaNameDividedMean @"Divided Mean"
 #define kDeltaNameDividedSD @"Divided SD"
 #define kDeltaNameDividedSEM @"Divided SEM"
+#define kDeltaNameActiveMean @" Active Mean"
+#define kDeltaNameActiveSD @" Active SD"
+#define kDeltaNameActiveSEM @" Active SEM"
+#define kDeltaNameActiveMax @" Active Max"
+#define kDeltaNameActiveMin @" Active Min"
+#define kDeltaNameActiveSum @" Active Sum"
+
+#define kDeltaNameMirroredMean @" Mirrored Mean"
+#define kDeltaNameMirroredSD @" Mirrored SD"
+#define kDeltaNameMirroredSEM @" Mirrored SEM"
+#define kDeltaNameMirroredMax @" Mirrored Max"
+#define kDeltaNameMirroredMin @" Mirrored Min"
+#define kDeltaNameMirroredSum @" Mirrored Sum"
+
+#define kDeltaNameGridDataTag @"⊞"
+#define kDeltaNameSubtractedPix @"⊞ Subtracted Pixels"
+#define kDeltaNameDividedPix @"⊞ Divided Pixels"
+#define kDeltaNameActivePixFlat @"⊞ Active Pixels 1D"
+#define kDeltaNameActivePixGrid @"⊞ Active Pixels 2D"
+#define kDeltaNameMirroredPixFlat @"⊞ Mirrored Pixels 1D"
+#define kDeltaNameMirroredPixGrid @"⊞ Mirrored Pixels 2D"
 
 
 #define kSpriteName_Active @"A"

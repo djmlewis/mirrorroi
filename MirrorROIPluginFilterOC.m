@@ -213,7 +213,7 @@
 #pragma mark - TextDisplayWindowController
 + (void)showStringInWindow:(NSString *)string withTitle:(NSString *)title{
     //do not use withOwner in initWithWindowNibName, so it uses the links in the nib file to connect window with the TextDisplayWindowController
-    TextDisplayWindowController *windowController = [[TextDisplayWindowController alloc] initWithWindowNibName:@"TextDisplayWindowController"];
+    TextDisplayWindowController *windowController = [[TextDisplayWindowController alloc] initWithWindowNibName:@"TDWindow"];
     [windowController setDisplayedText:string];
     [windowController setTitle:title];
     [windowController showWindow:self];
@@ -927,8 +927,11 @@ switch (type) {
     case Roi:
         return @"RoiData";
         break;
+    case PixelsFlat:
+        return @"PixelsFlatData";
+        break;
     case Pixels:
-        return @"PixelsData";
+        return @"PixelsGridData";
         break;
     case Summary:
         return @"SummaryData";
@@ -942,9 +945,9 @@ switch (type) {
     case PETRois:
         return @"PETROIs";
         break;
-    case Delta:
-        return @"Delta";
-        break;
+//    case Delta:
+//        return @"Delta";
+//        break;
     default:
         return @"?";
         break;
@@ -955,16 +958,16 @@ switch (type) {
     //[[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
     switch (exportType) {
         case Roi:
-        case Pixels:
         case Summary:
         case ThreeD:
         case AllData:
+        case PixelsFlat:
             [self exportROIdata:sender.tag];
             break;
         case PETRois:
             [self exportAMTroi];
             break;
-        case Delta:
+        case Pixels:
             [self exportDeltaROI:sender.tag];
             break;
         case JiggleRoi:
@@ -990,101 +993,198 @@ switch (type) {
 
 }
 
-
--(void)exportDeltaROI:(ExportDataHow)exportHow {
+-(NSString *)pixelStatsString {
     NSMutableDictionary *dict = [self deltaData];
-    NSMutableArray *dataArrayS = [dict objectForKey:kDeltaNameSubtracted];
-    NSMutableArray *dataArrayD = [dict objectForKey:kDeltaNameDivided];
-    NSString *fileTypeName = [MirrorROIPluginFilterOC fileNameForExportType:Delta];
     NSString *stats = @"";
     NSArray *keys = [dict.allKeys sortedArrayUsingSelector:@selector(compare:)];
     for (int k=0;k<keys.count;k++) {
         NSString *currkey = keys[k];
-        if (![currkey isEqualToString:kDeltaNameSubtracted] && ![currkey isEqualToString:kDeltaNameDivided]) {
+        if (![currkey containsString:kDeltaNameGridDataTag]) {
             stats = [stats stringByAppendingString:[NSString stringWithFormat:@"%@\t%@\n",currkey,dict[currkey]]];
         }
     }
+    return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n",
+            stats,
+            kDeltaNameActivePixFlat,
+            [[self arrayOfIndexesOfSlicesWithROIofType:Active_ROI] componentsJoinedByString:@"\t"],
+            [self stringForDataArray:[dict objectForKey:kDeltaNameActivePixFlat] forceTranspose:NO],
+            kDeltaNameMirroredPixFlat,
+            [self stringForDataArray:[dict objectForKey:kDeltaNameMirroredPixFlat] forceTranspose:NO],
+            kDeltaNameSubtractedPix,
+            [self stringForDataArray:[dict objectForKey:kDeltaNameSubtractedPix] forceTranspose:NO],
+            kDeltaNameDividedPix,
+            [self stringForDataArray:[dict objectForKey:kDeltaNameDividedPix] forceTranspose:NO],
+            kDeltaNameActivePixGrid,
+            [self dataStringFor2DpixelDataForROIType:Active_ROI],
+            kDeltaNameMirroredPixGrid,
+            [self dataStringFor2DpixelDataForROIType:Mirrored_ROI]
+            ];
+    
+}
+-(void)exportDeltaROI:(ExportDataHow)exportHow {
+    NSString *fileTypeName = [MirrorROIPluginFilterOC fileNameForExportType:Pixels];
+    NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
     switch (exportHow) {
         case ExportAsFile:
-            if (dataArrayS.count>0 && dataArrayD.count>0) {
-                [self saveData:[NSString stringWithFormat:@"%@\n\n%@\n%@\n\n%@\n%@",
-                                stats,
-                                kDeltaNameSubtracted,
-                                [self stringForDataArray:dataArrayS forceTranspose:NO],
-                                kDeltaNameDivided,
-                                [self stringForDataArray:dataArrayD forceTranspose:NO]]
-                      withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
-            }
+            [self saveData:[self pixelStatsString] withName:fileName];
             break;
         case ViewInWindow:
-        {
-            NSString *displayString = [NSString stringWithFormat:@"%@\n\n%@\n%@\n\n%@\n%@",
-                                       stats,
-                                       kDeltaNameSubtracted,
-                                       [self stringForDataArray:dataArrayS forceTranspose:NO],
-                                       kDeltaNameDivided,
-                                       [self stringForDataArray:dataArrayD forceTranspose:NO]];
-            [MirrorROIPluginFilterOC showStringInWindow:displayString withTitle:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
-        }
+            [MirrorROIPluginFilterOC showStringInWindow:[self pixelStatsString] withTitle:fileName];
             break;
         default:
             break;
     }
 }
 
+-(NSMutableArray *)pixelsForROI:(ROI *)roi{
+    NSMutableArray *arrayOfPixelsRows = [NSMutableArray array];
+    if (roi.pix != nil) {
+        long height = roi.pix.pheight, width = roi.pix.pwidth;
+        
+        float *computedfImage = [roi.pix computefImage];
+        long textWidth = roi.textureWidth, textHeight = roi.textureHeight;
+        long textureUpLeftCornerX = roi.textureUpLeftCornerX, textureUpLeftCornerY = roi.textureUpLeftCornerY;
+        unsigned char *buf = roi.textureBuffer;
+        
+        for( long y = 0; y < textHeight; y++)
+        {
+            NSMutableArray *rowPixels = [NSMutableArray array];
+            for( long x = 0; x < textWidth; x++)
+            {
+                if( buf [ x + y * textWidth] != 0)
+                {
+                    long xx = (x + textureUpLeftCornerX);
+                    long yy = (y + textureUpLeftCornerY);
+                    
+                    if( xx >= 0 && xx < width && yy >= 0 && yy < height)
+                    {
+                        {
+                            [rowPixels addObject:[NSNumber numberWithFloat: computedfImage[ (yy * width) + xx]]];
+                        }
+                    }
+                }
+            }
+            if (rowPixels.count > 0) {
+                //this needs to be watched - here NO Y MIRROR is assumed, so we can skip empty rows as the Y are the same in both ROIs
+                //if Y mirroring then we woudl have to account for that
+                [arrayOfPixelsRows addObject:rowPixels];
+            }
+        }
+    }
+    return arrayOfPixelsRows;
+}
 
 -(NSMutableDictionary *)deltaData {
-    NSMutableArray *dataA = [self dataArrayForROIpixelDataForType:Active_ROI addHeader:NO];
-    NSMutableArray *dataM = [self dataArrayForROIpixelDataForType:Mirrored_ROI addHeader:NO];
-    NSMutableArray *subtracted = [NSMutableArray arrayWithCapacity:dataA.count];
-    NSMutableArray *divided = [NSMutableArray arrayWithCapacity:dataA.count];
+    NSMutableArray *dataAflat = [NSMutableArray array];//[self pixelDataFromROIasFlatArrayForType:Active_ROI addHeader:NO];
+    NSMutableArray *dataMflat = [NSMutableArray array];//[self pixelDataFromROIasFlatArrayForType:Mirrored_ROI addHeader:NO];
+    
+    NSMutableArray *dataA2D = [self pixelBufferValuesAs2DArrayForType:Active_ROI];
+    NSMutableArray *dataM2D = [self pixelBufferValuesAs2DArrayForType:Mirrored_ROI];
+
+    NSMutableArray *subtracted = [NSMutableArray array];
+    NSMutableArray *divided = [NSMutableArray array];
     NSUInteger countOfPixels = 0;
     CGFloat sumOfSubtract = 0.0;
     CGFloat sumOfDivide = 0.0;
+    CGFloat sumOfA = 0.0;
+    CGFloat maxOfA = -INT_MAX;
+    CGFloat minOfA = INT_MAX;
+    CGFloat sumOfM = 0.0;
+    CGFloat maxOfM = -INT_MAX;
+    CGFloat minOfM = INT_MAX;
     
-    //M is transposed so work back
-    if (dataA.count>0 && dataA.count == dataM.count) {
-        for (int row=0; row<dataA.count; row++) {
-            NSMutableArray *rowA = [dataA objectAtIndex:row];
-            NSMutableArray *rowM = [dataM objectAtIndex:row];
-            NSMutableArray *rowSubtract = [NSMutableArray arrayWithCapacity:rowA.count];
-            NSMutableArray *rowDivide = [NSMutableArray arrayWithCapacity:rowA.count];
-            countOfPixels += rowA.count;
-            for (int col=0; col<rowA.count; col++) {
-                CGFloat subtraction = [[rowA objectAtIndex:col] floatValue]-[[rowM objectAtIndex:rowA.count-col-1] floatValue];
-                CGFloat division = [[rowA objectAtIndex:col] floatValue]/[[rowM objectAtIndex:rowA.count-col-1] floatValue];
-                sumOfSubtract += subtraction;
-                sumOfDivide += division;
-                [rowSubtract addObject:[NSNumber numberWithFloat:subtraction]];
-                [rowDivide addObject:[NSNumber numberWithFloat:division]];
-            }
-            [subtracted addObject:rowSubtract];
-            [divided addObject:rowDivide];
-        }
+    if (dataA2D.count>0 && dataA2D.count == dataM2D.count) {
+        //each roiIndex has a 2D array of Y axis rows of pixels for that roi in a 2D grid
+        //so we have to unpack those and mirror the final Y rows for the mirrored roi
+        for (int roiIndex=0; roiIndex<dataA2D.count; roiIndex++) {
+            //these are our 2D arrays of rows with pixels, y = row index on Y axis
+            NSMutableArray *pixelsGridA = [dataA2D objectAtIndex:roiIndex];
+            NSMutableArray *pixelsGridM = [dataM2D objectAtIndex:roiIndex];
+            //we make flat arrays to hold the same pixels but in a flat 1D row for that ROI
+            NSMutableArray *dataForROIflatA = [NSMutableArray array];
+            NSMutableArray *dataForROIflatM = [NSMutableArray array];
+            NSMutableArray *roiSubtract = [NSMutableArray array];
+            NSMutableArray *roiDivide = [NSMutableArray array];
+            for (int y=0; y<pixelsGridA.count;y++) {
+                NSMutableArray *rowAatY = [pixelsGridA objectAtIndex:y];
+                NSMutableArray *rowMatY = [pixelsGridM objectAtIndex:y];
+                countOfPixels += rowAatY.count;
+                for (int col=0; col<rowAatY.count; col++) {
+                    //Do the maths on the actual floats
+                    CGFloat A = [[rowAatY objectAtIndex:col] floatValue];
+                    CGFloat M = [[rowMatY objectAtIndex:rowMatY.count-col-1] floatValue];//reversed
+                    sumOfA += A;
+                    maxOfA = fmaxf(maxOfA, A);
+                    minOfA = fminf(minOfA, A);
+                    sumOfM += M;
+                    maxOfM = fmaxf(maxOfM, M);
+                    minOfM = fminf(minOfM, M);
+                    
+                    CGFloat subtraction = A-M;
+                    CGFloat division = A/M;
+                    sumOfSubtract += subtraction;
+                    sumOfDivide += division;
+                    //add the results to our 1D rows
+                    [roiSubtract addObject:[NSNumber numberWithFloat:subtraction]];
+                    [roiDivide addObject:[NSNumber numberWithFloat:division]];
+                    
+                    //add the NSNumbers to our flat 1D row, we note the reversal
+                    [dataForROIflatA addObject:[rowAatY objectAtIndex:col]];
+                    [dataForROIflatM addObject:[rowMatY objectAtIndex:rowMatY.count-col-1]];//reversed for mirrored ROI
+                }//end of row at Y
+            }//end of Pixels grid for ROI
+            //we finished all the pixels in this grid for this ROI so update the flat arrays
+            [subtracted addObject:roiSubtract];
+            [divided addObject:roiDivide];
+            [dataAflat addObject:dataForROIflatA];
+            [dataMflat addObject:dataForROIflatM];
+        }//end of all the ROIs
     }
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-    [dict setObject:subtracted forKey:kDeltaNameSubtracted];
-    [dict setObject:divided forKey:kDeltaNameDivided];
-    [dict setObject:[NSNumber numberWithFloat:countOfPixels] forKey:kDeltaNameCount];
+    CGFloat sd;
     CGFloat countOfPixelsF = [[NSNumber numberWithUnsignedInteger:countOfPixels] floatValue];
+    
+    [dict setObject:dataAflat forKey:kDeltaNameActivePixFlat];
+    [dict setObject:dataA2D forKey:kDeltaNameActivePixGrid];
+    [dict setObject:[NSNumber numberWithFloat:sumOfA] forKey:kDeltaNameActiveSum];
+    [dict setObject:[NSNumber numberWithFloat:sumOfA/countOfPixelsF] forKey:kDeltaNameActiveMean];
+    [dict setObject:[NSNumber numberWithFloat:maxOfA] forKey:kDeltaNameActiveMax];
+    [dict setObject:[NSNumber numberWithFloat:minOfA] forKey:kDeltaNameActiveMin];
+    sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:dataAflat withMean:sumOfA/countOfPixelsF andCountF:countOfPixelsF startingAtRow:0];
+    [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameActiveSD];
+    [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameActiveSEM];
+
+    [dict setObject:dataMflat forKey:kDeltaNameMirroredPixFlat];
+    [dict setObject:dataM2D forKey:kDeltaNameMirroredPixGrid];
+    [dict setObject:[NSNumber numberWithFloat:sumOfM] forKey:kDeltaNameMirroredSum];
+    [dict setObject:[NSNumber numberWithFloat:sumOfM/countOfPixelsF] forKey:kDeltaNameMirroredMean];
+    [dict setObject:[NSNumber numberWithFloat:maxOfM] forKey:kDeltaNameMirroredMax];
+    [dict setObject:[NSNumber numberWithFloat:minOfM] forKey:kDeltaNameMirroredMin];
+    sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:dataMflat withMean:sumOfM/countOfPixelsF andCountF:countOfPixelsF startingAtRow:0];
+    [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameMirroredSD];
+    [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameMirroredSEM];
+
+    [dict setObject:subtracted forKey:kDeltaNameSubtractedPix];
+    [dict setObject:divided forKey:kDeltaNameDividedPix];
+    [dict setObject:[NSNumber numberWithUnsignedInteger:countOfPixels] forKey:kDeltaNameCount];
     CGFloat subtractedMean = sumOfSubtract/countOfPixelsF;
     [dict setObject:[NSNumber numberWithFloat:subtractedMean] forKey:kDeltaNameSubtractedMean];
     CGFloat dividedMean = sumOfDivide/countOfPixelsF;
     [dict setObject:[NSNumber numberWithFloat:dividedMean] forKey:kDeltaNameDividedMean];
     // SDEVs
-    CGFloat sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:subtracted withMean:subtractedMean andCountF:countOfPixelsF];
+    sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:subtracted withMean:subtractedMean andCountF:countOfPixelsF startingAtRow:0];
     [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameSubtractedSD];
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameSubtractedSEM];
-    sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:divided withMean:dividedMean andCountF:countOfPixelsF];
+    sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:divided withMean:dividedMean andCountF:countOfPixelsF startingAtRow:0];
     [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameDividedSD];
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameDividedSEM];
 
     return dict;
 }
 
-+(CGFloat)stDevForArrayOfRows:(NSMutableArray *)array withMean:(CGFloat)mean andCountF:(CGFloat)countF {
++(CGFloat)stDevForArrayOfRows:(NSMutableArray *)array withMean:(CGFloat)mean andCountF:(CGFloat)countF startingAtRow:(int)startingRow {
     CGFloat variance = 0.0;
-    for (int row=0; row<array.count; row++)
+    for (int row=startingRow; row<array.count; row++)
         for (int col = 0; col<[[array objectAtIndex:row] count]; col++ ) {
             variance += powf([[[array objectAtIndex:row] objectAtIndex:col] floatValue] - mean, 2.0);
         }
@@ -1101,10 +1201,6 @@ switch (type) {
             dataStringA = [self dataStringForROIdataForType:Active_ROI];
             dataStringM = [self dataStringForROIdataForType:Mirrored_ROI];
             break;
-        case Pixels:
-            dataStringA = [self dataStringForROIpixelDataForType:Active_ROI];
-            dataStringM = [self dataStringForROIpixelDataForType:Mirrored_ROI];
-            break;
         case Summary:
             dataStringA = [self dataStringForSummaryROIdataForType:Active_ROI];
             dataStringM = [self dataStringForSummaryROIdataForType:Mirrored_ROI];
@@ -1112,6 +1208,10 @@ switch (type) {
         case ThreeD:
             dataStringA = [self dataStringFor3DROIdataForType:Active_ROI];
             dataStringM = [self dataStringFor3DROIdataForType:Mirrored_ROI];
+            break;
+        case PixelsFlat:
+            dataStringA = [self dataStringForFlatPixelDataForROIType:Active_ROI];
+            dataStringM = [self dataStringForFlatPixelDataForROIType:Mirrored_ROI];
             break;
         case AllData:
             dataStringA = [self exportAllROIdataStringForType:Active_ROI];
@@ -1173,8 +1273,8 @@ switch (type) {
     if (dataString != nil) {[finalString addObject:[@"Summary data\n" stringByAppendingString:dataString]];}
     dataString = [self dataStringForROIdataForType:type];
     if (dataString != nil) {[finalString addObject:[@"ROI data\n" stringByAppendingString:dataString]];}
-    dataString = [self dataStringForROIpixelDataForType:type];
-    if (dataString != nil) {[finalString addObject:[@"Pixel data\n" stringByAppendingString:dataString]];}
+    dataString = [self dataStringForFlatPixelDataForROIType:type];
+    if (dataString != nil) {[finalString addObject:[@"Flat Pixel data\n" stringByAppendingString:dataString]];}
     if (finalString.count>0) {
         return [finalString componentsJoinedByString:@"\n\n"];
     }
@@ -1278,7 +1378,24 @@ switch (type) {
     return nil;
 }
 
--(NSMutableArray *)dataArrayForROIpixelDataForType:(ROI_Type)type addHeader:(BOOL)addHeader{
+-(NSMutableArray *)arrayOfIndexesOfSlicesWithROIofType:(ROI_Type)type{
+    NSString *roiname = [self ROInameForType:type];
+    NSMutableArray *arrayOfSlicesIndexes = [NSMutableArray array];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        BOOL foundROI = NO;
+        for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
+            if ([roi.name isEqualToString:roiname]) {
+                if (!foundROI) {
+                    [arrayOfSlicesIndexes addObject:[NSNumber numberWithInteger:pix]];
+                }
+                foundROI = YES;
+            }
+        }
+    }
+    return arrayOfSlicesIndexes;
+}
+
+-(NSMutableArray *)pixelDataFromROIasFlatArrayForType:(ROI_Type)type addHeader:(BOOL)addHeader{
     NSString *roiname = [self ROInameForType:type];
     NSMutableArray *arrayOfRows = [NSMutableArray array];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
@@ -1298,13 +1415,77 @@ switch (type) {
     }
     return arrayOfRows;
 }
--(NSString *)dataStringForROIpixelDataForType:(ROI_Type)type {
-    NSMutableArray *arrayOfRows = [self dataArrayForROIpixelDataForType:type addHeader:YES];
+
+
+-(NSMutableDictionary *)dictOfPixelBufferValuesAs2DArrayForType:(ROI_Type)type{
+    NSString *roiname = [self ROInameForType:type];
+    NSMutableDictionary *dictOfROIgrids = [NSMutableDictionary dictionary];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        BOOL foundROI = NO;
+        for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
+            if ([roi.name isEqualToString:roiname]) {
+                NSMutableArray *roiData = [self pixelsForROI:roi];
+                if (!foundROI) {
+                    [dictOfROIgrids setObject:roiData forKey:[NSString stringWithFormat:@"_%03li",(long)pix]];
+                }
+                foundROI = YES;
+            }
+        }
+    }
+    return dictOfROIgrids;
+}
+
+-(NSMutableArray *)pixelBufferValuesAs2DArrayForType:(ROI_Type)type{
+    NSString *roiname = [self ROInameForType:type];
+    NSMutableArray *arrayOfROIgrids = [NSMutableArray array];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        BOOL foundROI = NO;
+        for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
+            if ([roi.name isEqualToString:roiname]) {
+                NSMutableArray *roiData = [self pixelsForROI:roi];
+                if (!foundROI) {
+                    [arrayOfROIgrids addObject:roiData];
+                }
+                foundROI = YES;
+            }
+        }
+    }
+    return arrayOfROIgrids;
+}
+
+
+
+-(NSString *)dataStringForFlatPixelDataForROIType:(ROI_Type)type {
+    NSMutableArray *arrayOfRows = [self pixelDataFromROIasFlatArrayForType:type addHeader:YES];
     if (arrayOfRows.count>0) {
         return [self stringForDataArray:arrayOfRows forceTranspose:NO];
     }
     return nil;
 }
+
+-(NSString *)dataStringFor2DpixelDataForROIType:(ROI_Type)type {
+    NSMutableDictionary *dictOfRoiGrids = [self dictOfPixelBufferValuesAs2DArrayForType:type];
+    NSMutableArray *arrayOfRows = [NSMutableArray array];
+    [arrayOfRows addObject:[NSString stringWithFormat:@"2D grids of Pixel Data For %@ withput mirroring",[self ROInameForType:type]]];
+    if (dictOfRoiGrids.count>0) {
+        NSArray *keys = [dictOfRoiGrids.allKeys sortedArrayUsingSelector:@selector(compare:)];
+        for (int k=0; k<keys.count; k++) {
+            //each key holds a 2D grid of Y rows
+            //add the ROI index
+            [arrayOfRows addObject:keys[k]];
+            //extract the rows from grid
+            NSMutableArray *gridForKey = [dictOfRoiGrids objectForKey:keys[k]];
+            for (int y=0; y<gridForKey.count; y++) {
+                //make a tab delim string for each grid row
+                [arrayOfRows addObject:[[gridForKey objectAtIndex:y] componentsJoinedByString:@"\t"]];
+            }
+            //add a newline
+            [arrayOfRows addObject:@"\n"];
+        }
+    }
+    return [arrayOfRows componentsJoinedByString:@"\n"];
+}
+
 -(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
     if (arrayOfData.count>0) {
         NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];

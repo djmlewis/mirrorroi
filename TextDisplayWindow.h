@@ -8,7 +8,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface TextDisplayWindow : NSWindow
+@interface TextDisplayWindow : NSPanel
 
 
 @property (assign) IBOutlet NSTextView *textView;
