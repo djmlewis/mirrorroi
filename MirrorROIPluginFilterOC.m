@@ -283,11 +283,11 @@
 -(void)displayImageInCTandPETviewersWithIndex:(short)index {
     //do it in ImageView for correct order
     [self.viewerPET.imageView setIndexWithReset:index :YES];
-    //[self.viewerPET adjustSlider];
+    [self.viewerPET adjustSlider];
     [self.viewerPET needsDisplayUpdate];
 
     [self.viewerCT.imageView setIndexWithReset:index :YES];
-    //[self.viewerCT adjustSlider];
+    [self.viewerCT adjustSlider];
     [self.viewerCT needsDisplayUpdate];
     
 }
@@ -425,16 +425,31 @@
 }
 - (IBAction)jumpToFirstLastTransform:(NSButton *)sender {
     ViewerController *viewerToAdd = [self viewerForTransformsAccordingToFusedOrPetAloneWindowSetting];
-    NSMutableIndexSet *set = [MirrorROIPluginFilterOC indicesInViewer:viewerToAdd withROIofType:tMesure];
-    if (set.count>0) {
-        if (sender.tag>1)
+    switch (sender.tag) {
+        case JumpIncrease:
+            [self displayImageInCTandPETviewersWithIndex:MIN(self.viewerPET.imageView.curImage+1, self.viewerPET.imageView.dcmPixList.count-1)];
+            break;
+        case JumpDecrease:
+            [self displayImageInCTandPETviewersWithIndex:MAX(self.viewerPET.imageView.curImage-1, 0)];
+            break;
+        case JumpFirst:
+        case JumpLast:
         {
-            [self displayImageInCTandPETviewersWithIndex:set.firstIndex];
+            NSMutableIndexSet *set = [MirrorROIPluginFilterOC indicesInViewer:viewerToAdd withROIofType:tMesure];
+            if (set.count>0) {
+                if (sender.tag == JumpFirst)
+                {
+                    [self displayImageInCTandPETviewersWithIndex:set.firstIndex];
+                }
+                else
+                {
+                    [self displayImageInCTandPETviewersWithIndex:set.lastIndex];
+                }
+            }
+            break;
         }
-        else
-        {
-            [self displayImageInCTandPETviewersWithIndex:set.lastIndex];
-        }
+        default:
+            break;
     }
 }
 

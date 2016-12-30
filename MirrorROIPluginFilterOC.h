@@ -79,6 +79,9 @@ typedef enum : NSInteger {
     ViewInWindow = 0
 } ExportDataHow;
 
+typedef enum : NSInteger {
+    JumpUndefined,JumpFirst,JumpDecrease,JumpIncrease,JumpLast
+} JumpToIndexValue;
 
 
 @interface MirrorROIPluginFilterOC : PluginFilter {}
