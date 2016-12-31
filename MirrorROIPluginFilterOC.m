@@ -161,7 +161,7 @@
 +(void)deselectROIforViewer:(ViewerController *)viewController {
     if (viewController != nil) {
         //make a dummy just for the tag == 0 for deselect
-        NSMenuItem *dummy = [[NSMenuItem alloc] init];
+        NSMenuItem *dummy = [[[NSMenuItem alloc] init] autorelease];
         dummy.tag = 0;
         [viewController roiSelectDeselectAll:dummy];
         [viewController needsDisplayUpdate];
@@ -212,7 +212,8 @@
     }
 }
 - (IBAction)fuseDefusetapped:(NSButton *)sender {
-    [self.viewerCT blendWindows:[[NSMenuItem alloc] init]];
+    NSMenuItem *dummy = [[[NSMenuItem alloc] init] autorelease];
+    [self.viewerCT blendWindows:dummy];
 }
 +(FusedOrPetAloneWindowSetting)useFusedOrPetAloneWindow {
     return [[NSUserDefaults standardUserDefaults] integerForKey:kSegmentFusedOrPETSegmentDefault];
@@ -2055,7 +2056,8 @@ switch (type) {
                 }
             }
             //now do the final sort by rank
-            [[self jiggleROIvaluesArrayForSlice:slice] sortUsingDescriptors:[NSArray arrayWithObject:[[NSSortDescriptor alloc] initWithKey:@"rank" ascending:YES]]];
+            NSSortDescriptor *sd = [[[NSSortDescriptor alloc] initWithKey:@"rank" ascending:YES] autorelease];
+            [[self jiggleROIvaluesArrayForSlice:slice] sortUsingDescriptors:[NSArray arrayWithObject:sd]];
         }
         else {
             [[self jiggleROIvaluesArrayForSlice:slice] sortUsingDescriptors:sortDescriptors];
@@ -2069,7 +2071,8 @@ switch (type) {
         for (int i=0; i<usersorts.count; i++) {
             NSMutableDictionary *dict = [usersorts objectAtIndex:i];
             if ([[dict objectForKey:kJiggleCheckKey] boolValue] == YES) {
-                [sorters addObject:[[NSSortDescriptor alloc] initWithKey:[dict objectForKey:kJiggleSortKey] ascending:YES]];
+                NSSortDescriptor *sd = [[[NSSortDescriptor alloc] initWithKey:[dict objectForKey:kJiggleSortKey] ascending:YES] autorelease];
+                [sorters addObject:sd];
             }
         }
     }
