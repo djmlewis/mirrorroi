@@ -28,4 +28,11 @@
     return self.title;
 }
 
+-(void)dealloc {
+    //[self.displayedText release];
+    //[self.title release];
+
+    [super dealloc];
+}
+
 @end

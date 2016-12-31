@@ -73,6 +73,16 @@
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Jiggle options:NSKeyValueObservingOptionNew context:nil];
 
 }
+
+-(void)dealloc {
+    //[self.skScene release];
+    //[self.windowControllerMain release];
+    //[self.viewerCT release];
+    //[self.viewerPET release];
+    //[self.arrayJiggleROIvalues release];
+    [super dealloc];
+}
+
 - (void) willUnload {
     
     [super willUnload];
