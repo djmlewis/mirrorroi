@@ -59,12 +59,25 @@
     [defaults setObject:arrayOfjROIs forKey:kJiggleROIsArrayName];
     
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
+    
+    [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixCloseViewerNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerControllerDidLoadImagesNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixDCMUpdateCurrentImageNotification object:nil];
+    
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Active options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Mirrored options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformPlaced options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformIntercalated options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Jiggle options:NSKeyValueObservingOptionNew context:nil];
 
 }
-
+- (void) willUnload {
+    
+    [super willUnload];
+}
 - (long) filterImage:(NSString*) menuName {
-    //Some defaults
-    [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
     
     //essential use this with OWNER specified so it looks in OUR bundle for resource.
     self.windowControllerMain = [[NSWindowController alloc] initWithWindowNibName:@"MirrorWindow" owner:self];
@@ -73,11 +86,7 @@
     [self loadStatsScene];
     [self smartAssignCTPETwindows];
     [self clearJiggleROIsAndValuesAndResetDisplayed];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixCloseViewerNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerControllerDidLoadImagesNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixDCMUpdateCurrentImageNotification object:nil];
 
-    
     BOOL completedOK = YES;
     
     if(completedOK) return 0; // No Errors
@@ -93,6 +102,12 @@
     if ([notification.name isEqualToString:OsirixDCMUpdateCurrentImageNotification] &&
         notification.object == self.viewerCT.imageView) {
         [self resetJiggleControlsAndRefresh];
+    }
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if ([keyPath containsString:kColor_Stem]) {
+        [self refreshDisplayedDataForCT];
     }
 }
 
@@ -1593,28 +1608,28 @@ switch (type) {
     CGFloat posY = self.skView.frame.size.height*position*kHeightFraction;
     CGFloat posYT = self.skView.frame.size.height*(position+1)*kHeightFraction;
     
-    SKSpriteNode *median = [SKSpriteNode spriteNodeWithColor:[NSColor redColor] size:CGSizeMake(3, 33.0)];
+    SKSpriteNode *median = [SKSpriteNode spriteNodeWithColor:[NSColor redColor] size:CGSizeMake(kSpriteWidthMedian, kSpriteHeightMedian)];
     median.name = [name stringByAppendingString:kSpriteName_Median];
     [self.skScene addChild:median];
     median.position = CGPointMake(0.0, posY);
     
-    SKSpriteNode *rangeA = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(0.0, 3.0)];
+    SKSpriteNode *rangeA = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(0.0, kSpriteHeightRange)];
     rangeA.name = [name stringByAppendingString:kSpriteName_Range];
     [self.skScene addChild:rangeA];
     rangeA.position = CGPointMake(0.0, posY);
 
-    SKSpriteNode *midrange = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(2, 25.0)];
+    SKSpriteNode *midrange = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(kSpriteWidthMidRange, kSpriteHeightMidRange)];
     midrange.name = [name stringByAppendingString:kSpriteName_MidRange];
     [rangeA addChild:midrange];
     //midrange moves with range
     
-    SKSpriteNode *sdevA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(0.0, 15.0)];
+    SKSpriteNode *sdevA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(0.0, kSpriteHeightSD)];
     sdevA.name = [name stringByAppendingString:kSpriteName_SDEV];
     [self colourNode:sdevA forName:name];
     [self.skScene addChild:sdevA];
     sdevA.position = CGPointMake(0.0, posY);
     
-    SKSpriteNode *meanA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(2, 31.0)];
+    SKSpriteNode *meanA = [SKSpriteNode spriteNodeWithColor:[NSColor blackColor] size:CGSizeMake(kSpriteWidthMean, kSpriteHeightMean)];
     meanA.name = [name stringByAppendingString:kSpriteName_Mean];
     [sdevA addChild:meanA];
     //mean moves with SD

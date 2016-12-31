@@ -12,11 +12,12 @@
 
 #define kAllSlices -1
 
-#define kColor_Active @"kColor_Active"
-#define kColor_Mirrored @"kColor_Mirrored"
-#define kColor_TransformPlaced @"kColor_TransformPlaced"
-#define kColor_TransformIntercalated @"kColor_TransformIntercalated"
-#define kColor_Jiggle @"kColor_Jiggle"
+#define kColor_Stem @"kColour_"
+#define kColor_Active @"kColour_Active"
+#define kColor_Mirrored @"kColour_Mirrored"
+#define kColor_TransformPlaced @"kColour_TransformPlaced"
+#define kColor_TransformIntercalated @"kColour_TransformIntercalated"
+#define kColor_Jiggle @"kColour_Jiggle"
 #define kTransformROInameDefault @"kTransformROInameDefault"
 #define kMirroredROInameDefault @"kMirroredROInameDefault"
 #define kActiveROInameDefault @"growingRegionROIName" // this is set by OsiriX
@@ -69,6 +70,14 @@
 #define kDeltaNameMirroredPixFlat @"⊞ Mirrored Pixels 1D"
 #define kDeltaNameMirroredPixGrid @"⊞ Mirrored Pixels 2D"
 
+#define kSpriteWidthMedian 3.0
+#define kSpriteHeightMedian 29.0
+#define kSpriteHeightRange 3.0
+#define kSpriteWidthMidRange 2.0
+#define kSpriteHeightMidRange 25.0
+#define kSpriteHeightSD 15.0
+#define kSpriteHeightMean kSpriteHeightSD
+#define kSpriteWidthMean 2.0
 
 #define kSpriteName_Active @"A"
 #define kSpriteName_Mirror @"M"
