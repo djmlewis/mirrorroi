@@ -71,7 +71,7 @@ typedef enum : NSInteger {
 } FusedOrPetAloneWindowSetting;
 
 typedef enum : NSInteger {
-    AllData, Summary, Roi,ThreeD, PixelsFlat, sep1, Pixels, sep2, JiggleRoi, sep3, PETRois
+    AllData, Summary, Roi,ThreeD, PixelsFlat, sep1, PixelsSummary,PixelsAll, sep2, JiggleRoi, sep3, PETRois
 } ExportDataType;
 
 typedef enum : NSInteger {
@@ -104,6 +104,7 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSTextField *textJiggleRank;
 
 @property (assign) IBOutlet NSPopUpButton *popupExportData;
+@property (assign) IBOutlet NSComboBox *comboAnatomicalSite;
 
 @property (assign) IBOutlet NSColorWell *colorWellActive;
 @property (assign) IBOutlet NSColorWell *colorWellMirrored;

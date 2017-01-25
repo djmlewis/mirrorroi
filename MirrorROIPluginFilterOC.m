@@ -122,6 +122,10 @@
 }
 
 #pragma mark - Windows
++(void)alertWithMessage:(NSString *)message andTitle:(NSString *)title
+{
+    NSRunCriticalAlertPanel(NSLocalizedString(title,nil), NSLocalizedString(message,nil) , NSLocalizedString(@"Close",nil), nil, nil);
+}
 -(IBAction)assignWindowClicked:(NSButton *)sender {
     [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:sender.tag];
 }
@@ -211,6 +215,19 @@
             break;
     }
 }
+-(BOOL)validSliceCountInCTandPETwindows {
+    if (([[self.viewerCT pixList] count] == [[self.viewerPET pixList] count])
+    && ([[self.viewerCT roiList] count] == [[self.viewerCT pixList] count])
+    && ([[self.viewerPET roiList] count] == [[self.viewerPET pixList] count]))
+    {
+        return YES;
+    }
+    else
+    {
+        [MirrorROIPluginFilterOC alertWithMessage:@"PET and CT windows have mismatched number of slices" andTitle:@"Unable To Proceed"];
+        return NO;
+    }
+}
 - (IBAction)fuseDefusetapped:(NSButton *)sender {
     NSMenuItem *dummy = [[[NSMenuItem alloc] init] autorelease];
     [self.viewerCT blendWindows:dummy];
@@ -257,7 +274,10 @@
 
 #pragma mark - Create Transforms
 -(IBAction)addTransformROIs:(NSButton *)sender {
-    [self addBoundingTransformROIS];
+    if ([self validSliceCountInCTandPETwindows])
+    {
+        [self addBoundingTransformROIS];
+    }
 }
 -(void)addBoundingTransformROIS {
     ViewerController *viewerToAdd = [self viewerForTransformsAccordingToFusedOrPetAloneWindowSetting];
@@ -280,7 +300,10 @@
                 }
             }
         }
-        if (indexesWithROI.count==1) {
+        if(indexesWithROI.count==0) {
+            [MirrorROIPluginFilterOC alertWithMessage:@"No PET slices have ROIs" andTitle:@"Creating transforms"];
+        }
+        else if (indexesWithROI.count==1) {
             [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:viewerToAdd start:YES]
                                  andEnd:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:viewerToAdd start:NO]
                      toViewerController:viewerToAdd
@@ -304,6 +327,10 @@
             
             [self displayImageInCTandPETviewersWithIndex:indexesWithROI.firstIndex];
         }
+    }
+    else
+    {
+        [MirrorROIPluginFilterOC alertWithMessage:@"Unable to add bounding transforms as no valid viewer" andTitle:@"Creating transforms"];
     }
 }
 -(void)displayImageInCTandPETviewersWithIndex:(short)index {
@@ -367,6 +394,9 @@
         }
         switch (indicesOfDCMPixWithMeasureROI.count)
         {
+            case 0:
+                [MirrorROIPluginFilterOC alertWithMessage:@"No bounding transforms detected" andTitle:@"Completing transform series"];
+                break;
             case 1:
             {
                 ROI *roi = [[measureROIs firstObject] copy];
@@ -403,6 +433,10 @@
                 break;
         }
         [viewerToAdd needsDisplayUpdate];
+    }
+    else
+    {
+        [MirrorROIPluginFilterOC alertWithMessage:@"Invalid viewer" andTitle:@"Completing transform series"];
     }
 }
 -(void)completeLengthROIseriesForViewerController:(ViewerController *)active2Dwindow betweenROI1:(ROI *)roi1 andROI2:(ROI *)roi2 inThisRange:(NSRange)rangeOfIndices{
@@ -484,19 +518,20 @@
     [self copyTransformsAndMirrorActivesIn3D:sender.tag];
 }
 -(void)copyTransformsAndMirrorActivesIn3D:(BOOL)in3D {
-    [self copyTransformROIsFromCT2PETIn3D:in3D];
-    [self mirrorActiveROIUsingLengthROIn3D:in3D];
-    [self.viewerPET needsDisplayUpdate];
-    [self.viewerCT needsDisplayUpdate];
-    [self resetJiggleControlsAndRefresh];
+    if ([self copyTransformROIsFromCT2PETIn3D:in3D])
+    {
+        [self mirrorActiveROIUsingLengthROIn3D:in3D];
+        [self.viewerPET needsDisplayUpdate];
+        [self.viewerCT needsDisplayUpdate];
+        [self resetJiggleControlsAndRefresh];
+    }
 }
--(void)copyTransformROIsFromCT2PETIn3D:(BOOL)in3D {
+-(BOOL)copyTransformROIsFromCT2PETIn3D:(BOOL)in3D {
     if ([MirrorROIPluginFilterOC useFusedOrPetAloneWindow] == UseFusedWindows
         && [self validCTandPETwindows]
-        && ([[self.viewerCT pixList] count] == [[self.viewerPET pixList] count])
-        && ([[self.viewerCT roiList] count] == [[self.viewerCT pixList] count])
-        && ([[self.viewerPET roiList] count] == [[self.viewerPET pixList] count]))
+        && [self validSliceCountInCTandPETwindows])
     {
+        BOOL copiedSomething = NO;
         NSUInteger startSlice = 0;
         NSUInteger endSlice = 0;
         NSString *transformname = [self ROInameForType:Transform_ROI_Placed];
@@ -514,13 +549,28 @@
         
         for (NSUInteger pixIndex = startSlice; pixIndex<endSlice; pixIndex++) {
             for (ROI *roi in [[self.viewerCT roiList] objectAtIndex:pixIndex]) {
-                if ([roi.name isEqualToString:transformname]) {
+                if ([roi.name isEqualToString:transformname])//(roi.type == tMesure)
+                {
                     ROI *roiC = [roi copy];
                     roiC.locked = NO;
                     [self addROI2Pix:roiC atSlice:pixIndex inViewer:self.viewerPET hidden:YES];
+                    copiedSomething = YES;
                 }
             }
         }
+        if (copiedSomething) {
+            return YES;
+        }
+        else
+        {
+            [MirrorROIPluginFilterOC alertWithMessage:@"Unable to complete as no valid transforms were found" andTitle:@"Copy transforms"];
+            return NO;
+        }
+    }
+    else
+    {
+        [MirrorROIPluginFilterOC alertWithMessage:@"Unable to complete as either the viewer windows are not assigned, or the number of slices in each window do not match" andTitle:@"Copy transforms"];
+        return NO;
     }
 }
 -(void)addROI2Pix:(ROI *)roi2add atSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
@@ -534,6 +584,10 @@
         [[viewer.roiList objectAtIndex: slice] addObject: roi2add];
         roi2add.curView = viewer.imageView;
         [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi2add];
+    }
+    else
+    {
+        NSLog(@"addROI2Pix: Slice index %li not in range of pixlist %li and roilist %li counts", (long) slice, (long)[[viewer pixList] count], (long)[[viewer roiList] count]);
     }
 }
 -(void)replaceROIInPix:(ROI *)roi2add atIndex:(NSUInteger)index inSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
@@ -551,6 +605,8 @@
     }
 }
 -(void)mirrorActiveROIUsingLengthROIn3D:(BOOL)in3D {
+    BOOL mirroredSomething = NO;
+
     NSMutableArray  *roisInAllSlices  = [self.viewerPET roiList];
     NSUInteger startSlice = 0;
     NSUInteger endSlice = 0;
@@ -595,9 +651,10 @@
                                    imageOrigin:roi2Clone.imageOrigin];
                 [MirrorROIPluginFilterOC  setROIcolour:createdROI forType:Mirrored_ROI];
                 [self addROI2Pix:createdROI atSlice:slice inViewer:self.viewerPET hidden:NO];
-                //[roisInThisSlice addObject:createdROI];
+
                 [MirrorROIPluginFilterOC forceRecomputeDataForROI:createdROI];
                 [self addROItoCTAtSlice:slice forActiveROI:roi2Clone mirroredROI:createdROI];
+                mirroredSomething = YES;
             }
         }
     }
@@ -605,6 +662,9 @@
     [MirrorROIPluginFilterOC deselectROIforViewer:self.viewerCT];
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
+    if (!mirroredSomething) {
+        [MirrorROIPluginFilterOC alertWithMessage:@"Unable to mirror anything" andTitle:@"Mirror Active ROI"];
+    }
 }
 -(void)addROItoCTAtSlice:(NSUInteger)slice forActiveROI:(ROI *)activeROI mirroredROI:(ROI *)mirroredROI {
     if ([self valid2DViewer:self.viewerCT])
@@ -612,16 +672,11 @@
         if (activeROI) {
             ROI *aP = [activeROI copy];
             aP.locked = NO;
-            
-            //[self.viewerPET convertBrushROItoPolygon:activeROI numPoints:50];
-            //aP.name = activeROI.name;
             [self addROI2Pix:aP atSlice:slice inViewer:self.viewerCT hidden:NO];
         }
         if (mirroredROI) {
             ROI *mP = [mirroredROI copy];
             mP.locked = NO;
-            //self.viewerPET convertBrushROItoPolygon:mirroredROI numPoints:50];
-            //mP.name = mirroredROI.name;
             [self addROI2Pix:mP atSlice:slice inViewer:self.viewerCT hidden:NO];
         }
     }
@@ -794,9 +849,19 @@
             break;
     }
 }
+-(void)unlockROIsIn2DViewer:(ViewerController *)viewer withSeriesName:(NSString *)name{
+    for (NSUInteger roiIndex =0; roiIndex<viewer.roiList.count;roiIndex++) {
+        for (ROI *roi in [viewer.roiList objectAtIndex:roiIndex]) {
+            if (name == nil || [roi.name isEqualToString:name]) {
+                roi.locked = NO;
+            }
+        }
+    }
+}
 - (void)deleteROIsFromViewerController:(ViewerController *)active2Dwindow withName:(NSString *)name {
     if (active2Dwindow)
     {
+        [self unlockROIsIn2DViewer:active2Dwindow withSeriesName:name];
         [active2Dwindow deleteSeriesROIwithName:name];
         [active2Dwindow needsDisplayUpdate];
         if (active2Dwindow == self.viewerCT) {
@@ -808,6 +873,7 @@
 - (void)deleteROIsInSlice:(NSUInteger)slice inViewerController:(ViewerController *)active2Dwindow withName:(NSString *)name {
     if (active2Dwindow && slice<active2Dwindow.roiList.count)
     {
+        [self unlockROIsIn2DViewer:active2Dwindow withSeriesName:name];
         NSMutableArray *roisInSlice = [active2Dwindow.roiList objectAtIndex:slice];
         NSMutableIndexSet *set = [NSMutableIndexSet indexSet];
         for (NSUInteger i = 0; i<[roisInSlice count];i++) {
@@ -828,6 +894,7 @@
 - (void)deleteAllROIsFromViewerController:(ViewerController *)active2Dwindow {
     if (active2Dwindow)
     {
+        [self unlockROIsIn2DViewer:active2Dwindow withSeriesName:nil];
         [active2Dwindow roiDeleteAll:nil];
         if (active2Dwindow == self.viewerCT) {[self clearJiggleROIsAndValuesAndResetDisplayed];}
         [active2Dwindow needsDisplayUpdate];
@@ -963,59 +1030,73 @@
 }
 
 #pragma mark - ROI Export
-+(NSString *)fileNameForExportType:(ExportDataType)type {
-switch (type) {
-    case Roi:
-        return @"RoiData";
-        break;
-    case PixelsFlat:
-        return @"PixelsFlatData";
-        break;
-    case Pixels:
-        return @"PixelsGridData";
-        break;
-    case Summary:
-        return @"SummaryData";
-        break;
-    case ThreeD:
-        return @"3DData";
-        break;
-    case AllData:
-        return @"AllData";
-        break;
-    case PETRois:
-        return @"PETROIs";
-        break;
-//    case Delta:
-//        return @"Delta";
-//        break;
-    default:
-        return @"?";
-        break;
+-(NSString *)anatomicalSiteName {
+    return [self.comboAnatomicalSite.stringValue stringByAppendingString:@" "];
 }
-}
-- (IBAction)exportDataTapped:(NSButton *)sender {
-    NSInteger exportType = self.popupExportData.indexOfSelectedItem;
-    //[[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
-    switch (exportType) {
+-(NSString *)fileNameForExportType:(ExportDataType)type {
+    NSString *typeString = @"";
+    switch (type) {
         case Roi:
-        case Summary:
-        case ThreeD:
-        case AllData:
+            typeString =  @"_RoiData";
+            break;
         case PixelsFlat:
-            [self exportROIdata:sender.tag];
+            typeString =  @"_PixelsFlatData";
+            break;
+        case PixelsSummary:
+            typeString =  @"_PixelsGridSummaryData";
+            break;
+        case PixelsAll:
+            typeString =  @"_PixelsGridAllData";
+            break;
+        case Summary:
+            typeString =  @"_SummaryData";
+            break;
+        case ThreeD:
+            typeString =  @"_3DData";
+            break;
+        case AllData:
+            typeString =  @"_AllData";
             break;
         case PETRois:
-            [self exportAMTroi];
+            typeString =  @"_PETROIs";
             break;
-        case Pixels:
-            [self exportDeltaROI:sender.tag];
-            break;
-        case JiggleRoi:
-            [self exportJiggleValues:sender.tag];
-            break;
+            //    case Delta:
+            //        typeString =  @"Delta";
+            //        break;
         default:
+            typeString =  @"?";
             break;
+    }
+    return [[self anatomicalSiteName] stringByAppendingString:typeString];
+}
+- (IBAction)exportDataTapped:(NSButton *)sender {
+    if (self.comboAnatomicalSite.stringValue.length > 0) {
+        NSInteger exportType = self.popupExportData.indexOfSelectedItem;
+        switch (exportType) {
+            case Roi:
+            case Summary:
+            case ThreeD:
+            case AllData:
+            case PixelsFlat:
+                [self exportROIdata:sender.tag];
+                break;
+            case PETRois:
+                [self exportAMTroi];
+                break;
+            case PixelsSummary:
+            case PixelsAll:
+                [self exportDeltaROI:sender.tag exportType:exportType];
+                break;
+            case JiggleRoi:
+                [self exportJiggleValues:sender.tag];
+                break;
+            default:
+                break;
+        }
+    }
+    else
+    {
+        [MirrorROIPluginFilterOC alertWithMessage:@"No anatomical site is entered - please enter a description and try again." andTitle:@"Export"];
     }
 }
 - (void)exportJiggleValues:(ExportDataHow)exportHow {
@@ -1034,7 +1115,7 @@ switch (type) {
 
 }
 
--(NSString *)pixelStatsString {
+-(NSString *)pixelStatsStringForType:(ExportDataType)type {
     NSMutableDictionary *dict = [self deltaData];
     NSString *stats = @"";
     NSArray *keys = [dict.allKeys sortedArrayUsingSelector:@selector(compare:)];
@@ -1044,33 +1125,43 @@ switch (type) {
             stats = [stats stringByAppendingString:[NSString stringWithFormat:@"%@\t%@\n",currkey,dict[currkey]]];
         }
     }
-    return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n",
-            stats,
-            kDeltaNameActivePixFlat,
-            [[self arrayOfIndexesOfSlicesWithROIofType:Active_ROI] componentsJoinedByString:@"\t"],
-            [self stringForDataArray:[dict objectForKey:kDeltaNameActivePixFlat] forceTranspose:NO],
-            kDeltaNameMirroredPixFlat,
-            [self stringForDataArray:[dict objectForKey:kDeltaNameMirroredPixFlat] forceTranspose:NO],
-            kDeltaNameSubtractedPix,
-            [self stringForDataArray:[dict objectForKey:kDeltaNameSubtractedPix] forceTranspose:NO],
-            kDeltaNameDividedPix,
-            [self stringForDataArray:[dict objectForKey:kDeltaNameDividedPix] forceTranspose:NO],
-            kDeltaNameActivePixGrid,
-            [self dataStringFor2DpixelDataForROIType:Active_ROI],
-            kDeltaNameMirroredPixGrid,
-            [self dataStringFor2DpixelDataForROIType:Mirrored_ROI]
-            ];
+    switch (type) {
+        case PixelsAll:
+            return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n",
+                    stats,
+                    kDeltaNameActivePixFlat,
+                    [[self arrayOfIndexesOfSlicesWithROIofType:Active_ROI] componentsJoinedByString:@"\t"],
+                    [self stringForDataArray:[dict objectForKey:kDeltaNameActivePixFlat] forceTranspose:NO],
+                    kDeltaNameMirroredPixFlat,
+                    [self stringForDataArray:[dict objectForKey:kDeltaNameMirroredPixFlat] forceTranspose:NO],
+                    kDeltaNameSubtractedPix,
+                    [self stringForDataArray:[dict objectForKey:kDeltaNameSubtractedPix] forceTranspose:NO],
+                    kDeltaNameDividedPix,
+                    [self stringForDataArray:[dict objectForKey:kDeltaNameDividedPix] forceTranspose:NO],
+                    kDeltaNameActivePixGrid,
+                    [self dataStringFor2DpixelDataForROIType:Active_ROI],
+                    kDeltaNameMirroredPixGrid,
+                    [self dataStringFor2DpixelDataForROIType:Mirrored_ROI]
+                    ];
+            break;
+        case PixelsSummary:
+            return stats;
+            break;
+        default:
+            return @"?";
+            break;
+    }
     
 }
--(void)exportDeltaROI:(ExportDataHow)exportHow {
-    NSString *fileTypeName = [MirrorROIPluginFilterOC fileNameForExportType:Pixels];
+-(void)exportDeltaROI:(ExportDataHow)exportHow exportType:(ExportDataType)exportType{
+    NSString *fileTypeName = [self fileNameForExportType:exportType];
     NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
     switch (exportHow) {
         case ExportAsFile:
-            [self saveData:[self pixelStatsString] withName:fileName];
+            [self saveData:[self pixelStatsStringForType:exportType] withName:fileName];
             break;
         case ViewInWindow:
-            [MirrorROIPluginFilterOC showStringInWindow:[self pixelStatsString] withTitle:fileName];
+            [MirrorROIPluginFilterOC showStringInWindow:[self pixelStatsStringForType:exportType] withTitle:fileName];
             break;
         default:
             break;
@@ -1236,7 +1327,7 @@ switch (type) {
     NSInteger exportType = [[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
     NSString *dataStringA = nil;
     NSString *dataStringM = nil;
-    NSString *fileTypeName = [MirrorROIPluginFilterOC fileNameForExportType:exportType];
+    NSString *fileTypeName = [self fileNameForExportType:exportType];
     switch (exportType) {
         case Roi:
             dataStringA = [self dataStringForROIdataForType:Active_ROI];
