@@ -93,8 +93,9 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSTextField *labelCT;
 @property (assign) IBOutlet NSTextField *labelPET;
 @property (assign) IBOutlet NSTextField *labelWarningNoTools;
-
+@property (assign) IBOutlet NSTextField *labelWarningNoAdjust;
 @property (assign) IBOutlet NSView *viewTools;
+@property (assign) IBOutlet NSView *viewAdjust;
 
 @property (assign) IBOutlet NSLevelIndicator *levelJiggleIndex;
 

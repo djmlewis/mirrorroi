@@ -173,7 +173,9 @@
 }
 -(void)showHideControlsIfViewersValid {
     self.viewTools.hidden = ![self validCTandPETwindows];
+    self.viewAdjust.hidden = self.viewTools.hidden;
     self.labelWarningNoTools.hidden = !self.viewTools.hidden;
+    self.labelWarningNoAdjust.hidden = self.labelWarningNoTools.hidden;
 }
 -(IBAction)smartAssignCTPETwindowsClicked:(id)sender {
     [self smartAssignCTPETwindows];
