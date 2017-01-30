@@ -12,6 +12,8 @@
 
 #define kAllSlices -1
 
+#define kBookmarkStringKey @"kBookmarkStringKey"
+
 #define kColor_Stem @"kColour_"
 #define kColor_Active @"kColour_Active"
 #define kColor_Mirrored @"kColour_Mirrored"

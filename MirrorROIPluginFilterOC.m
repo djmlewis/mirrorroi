@@ -20,58 +20,11 @@
 
 - (void) initPlugin {
     // Register the preference defaults early.
-    NSMutableDictionary *defaults = [NSMutableDictionary dictionary];
-    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor yellowColor]] forKey:kColor_Active];
-    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor blueColor]] forKey:kColor_Mirrored];
-    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor greenColor]] forKey:kColor_TransformPlaced];
-    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor redColor]] forKey:kColor_TransformIntercalated];
-    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor purpleColor]] forKey:kColor_Jiggle];
-    [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
-    [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
-    
-    [defaults setValue:[NSNumber numberWithInteger:0] forKey:kExportMenuSelectedIndexDefault];
-    [defaults setValue:[NSNumber numberWithInteger:0] forKey:kSegmentFusedOrPETSegmentDefault];
-    [defaults setValue:[NSNumber numberWithInteger:1] forKey:kMirrorMoveByPixels];
-    [defaults setValue:[NSNumber numberWithInteger:1] forKey:kJiggleBoundsPixels];
-    [defaults setValue:[NSNumber numberWithInteger:2] forKey:kExtendSingleTransformDefault];
-    
-    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kCombineExportsOneFileDefault];
-    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeExportedDataDefault];
-    [defaults setValue:[NSNumber numberWithBool:NO] forKey:kIncludeOriginalInJiggleDefault];
-    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kRankJiggleDefault];
-    
-    //the sortKeys used in sorting jiggleROI are in an Array, each key a dict
-    NSMutableArray *arrayOfKeys = [NSMutableArray array];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"distance",kJiggleCheckKey : @"1"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"mean",kJiggleCheckKey : @"0"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"meanfloor",kJiggleCheckKey : @"1"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"sdev",kJiggleCheckKey : @"0"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"sdevfloor",kJiggleCheckKey : @"1"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"median",kJiggleCheckKey : @"0"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"midrange",kJiggleCheckKey : @"1"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"range",kJiggleCheckKey : @"1"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"min",kJiggleCheckKey : @"0"}];
-    [arrayOfKeys addObject:@{kJiggleSortKey : @"max",kJiggleCheckKey : @"0"}];
-    [defaults setObject:arrayOfKeys forKey:kJiggleSortsArrayName];
-    
-    NSMutableArray *arrayOfjROIs = [NSMutableArray array];
-    [arrayOfjROIs addObject:@{kJiggleROIsArrayKey : @"1"}];
-    [defaults setObject:arrayOfjROIs forKey:kJiggleROIsArrayName];
-    
-    [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
-    
-    [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixCloseViewerNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerControllerDidLoadImagesNotification object:nil];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixDCMUpdateCurrentImageNotification object:nil];
-    
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Active options:NSKeyValueObservingOptionNew context:nil];
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Mirrored options:NSKeyValueObservingOptionNew context:nil];
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformPlaced options:NSKeyValueObservingOptionNew context:nil];
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformIntercalated options:NSKeyValueObservingOptionNew context:nil];
-    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Jiggle options:NSKeyValueObservingOptionNew context:nil];
-
+    [self initDefaults];
+    [self initNotfications];
+    self.dictBookmarks = [NSMutableDictionary dictionary];
+    self.arrayJiggleROIvalues = [NSMutableArray array];
+    self.arrayBookmarkedSites = [NSMutableArray array];
 }
 
 -(void)dealloc {
@@ -120,11 +73,74 @@
         [self refreshDisplayedDataForCT];
     }
 }
+#pragma mark - Initialisations
+-(void)initDefaults {
+    NSMutableDictionary *defaults = [NSMutableDictionary dictionary];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor yellowColor]] forKey:kColor_Active];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor blueColor]] forKey:kColor_Mirrored];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor greenColor]] forKey:kColor_TransformPlaced];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor redColor]] forKey:kColor_TransformIntercalated];
+    [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor purpleColor]] forKey:kColor_Jiggle];
+    [defaults setValue:@"Transform" forKey:kTransformROInameDefault];
+    [defaults setValue:@"Mirrored" forKey:kMirroredROInameDefault];
+    
+    [defaults setValue:[NSNumber numberWithInteger:0] forKey:kExportMenuSelectedIndexDefault];
+    [defaults setValue:[NSNumber numberWithInteger:0] forKey:kSegmentFusedOrPETSegmentDefault];
+    [defaults setValue:[NSNumber numberWithInteger:1] forKey:kMirrorMoveByPixels];
+    [defaults setValue:[NSNumber numberWithInteger:1] forKey:kJiggleBoundsPixels];
+    [defaults setValue:[NSNumber numberWithInteger:2] forKey:kExtendSingleTransformDefault];
+    
+    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kCombineExportsOneFileDefault];
+    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeExportedDataDefault];
+    [defaults setValue:[NSNumber numberWithBool:NO] forKey:kIncludeOriginalInJiggleDefault];
+    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kRankJiggleDefault];
+    
+    //the sortKeys used in sorting jiggleROI are in an Array, each key a dict
+    NSMutableArray *arrayOfKeys = [NSMutableArray array];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"distance",kJiggleCheckKey : @"1"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"mean",kJiggleCheckKey : @"0"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"meanfloor",kJiggleCheckKey : @"1"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"sdev",kJiggleCheckKey : @"0"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"sdevfloor",kJiggleCheckKey : @"1"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"median",kJiggleCheckKey : @"0"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"midrange",kJiggleCheckKey : @"1"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"range",kJiggleCheckKey : @"1"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"min",kJiggleCheckKey : @"0"}];
+    [arrayOfKeys addObject:@{kJiggleSortKey : @"max",kJiggleCheckKey : @"0"}];
+    [defaults setObject:arrayOfKeys forKey:kJiggleSortsArrayName];
+    
+    NSMutableArray *arrayOfjROIs = [NSMutableArray array];
+    [arrayOfjROIs addObject:@{kJiggleROIsArrayKey : @"1"}];
+    [defaults setObject:arrayOfjROIs forKey:kJiggleROIsArrayName];
+    
+    [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
+    
+    //override Osirix Defaults
+    [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
+    
+    //add observers for defaults changes
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Active options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Mirrored options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformPlaced options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformIntercalated options:NSKeyValueObservingOptionNew context:nil];
+    [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Jiggle options:NSKeyValueObservingOptionNew context:nil];
+
+    
+}
+
+-(void)initNotfications {
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixCloseViewerNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerControllerDidLoadImagesNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixDCMUpdateCurrentImageNotification object:nil];
+}
 
 #pragma mark - Windows
 +(void)alertWithMessage:(NSString *)message andTitle:(NSString *)title
 {
     NSRunCriticalAlertPanel(NSLocalizedString(title,nil), NSLocalizedString(message,nil) , NSLocalizedString(@"Close",nil), nil, nil);
+}
++(void)alertSound {
+    [[NSSound soundNamed:@"Basso"] play];
 }
 -(IBAction)assignWindowClicked:(NSButton *)sender {
     [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:sender.tag];
@@ -1031,85 +1047,193 @@
     return nil;
 }
 
-#pragma mark - ROI Export
+#pragma mark - anatomicalSite
 -(NSString *)anatomicalSiteName {
     return [self.comboAnatomicalSite.stringValue stringByAppendingString:@" "];
 }
--(NSString *)fileNameForExportType:(ExportDataType)type {
+-(BOOL)anatomicalSiteDefined {
+    if (self.comboAnatomicalSite.stringValue.length > 0)
+    {
+        return YES;
+    }
+    else
+    {
+        [MirrorROIPluginFilterOC alertWithMessage:@"No anatomical site is entered - please enter a description and try again." andTitle:@"Anatomical Site Undefined"];
+        return NO;
+    }
+
+}
+
+#pragma mark - Bookmarks
+- (IBAction)addSubtractTrashExportViewBookmarks:(NSButton *)sender {
+    switch (sender.tag) {
+        case BookmarkAdd:
+            [self addBookmarkDataForCurrentSite];
+            break;
+        case BookmarkSubtract:
+            [self subtractBookmarkDataForSelectedSite];
+            break;
+        case BookmarkTrash:
+            [self trashAllBookmarks];
+            break;
+        case BookmarkExport:
+            [self exportBookmarkedData:ExportAsFile];
+            break;
+        case BookmarkQuickLook:
+            [self exportBookmarkedData:ViewInWindow];
+            break;
+
+        default:
+            break;
+    }
+}
+
+
+-(void)subtractBookmarkDataForSelectedSite {
+    NSInteger index = self.arrayControllerBookmarks.selectionIndex;
+    if (index>=0 && index <self.arrayBookmarkedSites.count) {
+        NSString *selectedSite = [self.arrayBookmarkedSites objectAtIndex:index];
+        [self.arrayControllerBookmarks removeObjectAtArrangedObjectIndex:index];
+        [self.dictBookmarks removeObjectForKey:selectedSite];
+    }
+}
+
+-(void)trashAllBookmarks {
+    //easier to use this method to clear the array
+    [self willChangeValueForKey:@"arrayBookmarkedSites"];
+    [self.arrayBookmarkedSites removeAllObjects];
+    [self didChangeValueForKey:@"arrayBookmarkedSites"];
+    [self.dictBookmarks removeAllObjects];
+}
+-(void)addBookmarkDataForCurrentSite {
+    if ([self anatomicalSiteDefined]) {
+        NSString *anatSite = [self anatomicalSiteName];
+        [self.arrayControllerBookmarks removeObject:anatSite];//erase to replace
+        [self.arrayControllerBookmarks addObject:anatSite];
+        
+        NSMutableDictionary *dictForSite = [self.dictBookmarks objectForKey:anatSite];
+        if (dictForSite == nil) {
+            dictForSite = [NSMutableDictionary dictionary];
+        }
+        [dictForSite setObject:[self bookmarkStringForSite:anatSite] forKey:kBookmarkStringKey];
+        [self.dictBookmarks setObject:dictForSite forKey:anatSite];
+    }
+}
+
+-(NSString *)bookmarkStringForSite:(NSString *)anatSite {
+    return [NSString stringWithFormat:@"***********\n%@\n***********\n%@\n\n%@\n\n%@\n\n",anatSite,[self pixelStatsStringForType:PixelsGridAllData],[self combinedAandMstringsForExportROIdata_A:[self exportAllROIdataStringForType:Active_ROI] M:[self exportAllROIdataStringForType:Mirrored_ROI]],[self jiggleROIsummaryStringWithActiveROIinSliceString]];
+}
+
+-(NSString *)bookMarkStringsConjoined {
+    NSMutableArray *rows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
+    for (NSString *key in self.dictBookmarks) {
+        NSMutableDictionary *dictForSite = [self.dictBookmarks objectForKey:key];
+        NSString *bookmarkStringForSite = [dictForSite objectForKey:kBookmarkStringKey];
+        [rows addObject:bookmarkStringForSite];
+    }
+    return [rows componentsJoinedByString:@"\n\n"];
+}
+-(NSString *)bookmarkedDataFilename {
+    NSString *fileTypeName = [self exportTypeStringForExportType:BookmarkedData withAnatomicalSite:NO];
+    NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
+    return fileName;
+}
+- (void)exportBookmarkedData:(ExportDataHow)exportHow {
+
+    switch (exportHow) {
+        case ExportAsFile:
+            [self saveData:[self bookMarkStringsConjoined]
+                  withName:[self bookmarkedDataFilename]];
+            break;
+        case ViewInWindow:
+            [MirrorROIPluginFilterOC showStringInWindow:[self bookMarkStringsConjoined]
+                                              withTitle:[self bookmarkedDataFilename]];
+            break;
+        default:
+            break;
+    }
+    
+}
+
+
+#pragma mark - ROI Export
+-(NSString *)exportTypeStringForExportType:(ExportDataType)type withAnatomicalSite:(BOOL)withSite {
     NSString *typeString = @"";
     switch (type) {
-        case Roi:
+        case RoiData:
             typeString =  @"_RoiData";
             break;
-        case PixelsFlat:
-            typeString =  @"_PixelsFlatData";
+        case RoiPixelsFlat:
+            typeString =  @"_ROIPixelsFlatData";
             break;
-        case PixelsSummary:
+        case PixelsGridSummary:
             typeString =  @"_PixelsGridSummaryData";
             break;
-        case PixelsAll:
+        case PixelsGridAllData:
             typeString =  @"_PixelsGridAllData";
             break;
-        case Summary:
-            typeString =  @"_SummaryData";
+        case RoiSummary:
+            typeString =  @"_ROISummaryData";
             break;
-        case ThreeD:
-            typeString =  @"_3DData";
+        case RoiThreeD:
+            typeString =  @"_ROI3DData";
             break;
-        case AllData:
-            typeString =  @"_AllData";
+        case AllROIdata:
+            typeString =  @"_ROIAllData";
             break;
         case PETRois:
             typeString =  @"_PETROIs";
             break;
-            //    case Delta:
-            //        typeString =  @"Delta";
-            //        break;
+        case BookmarkedData:
+            typeString =  @"BookmarkedData";
+            break;
         default:
             typeString =  @"?";
             break;
     }
-    return [[self anatomicalSiteName] stringByAppendingString:typeString];
+    if (withSite) {
+        return [[self anatomicalSiteName] stringByAppendingString:typeString];
+    }
+    return typeString;
 }
 - (IBAction)exportDataTapped:(NSButton *)sender {
-    if (self.comboAnatomicalSite.stringValue.length > 0) {
-        NSInteger exportType = self.popupExportData.indexOfSelectedItem;
-        switch (exportType) {
-            case Roi:
-            case Summary:
-            case ThreeD:
-            case AllData:
-            case PixelsFlat:
-                [self exportROIdata:sender.tag];
-                break;
-            case PETRois:
-                [self exportAMTroi];
-                break;
-            case PixelsSummary:
-            case PixelsAll:
-                [self exportDeltaROI:sender.tag exportType:exportType];
-                break;
-            case JiggleRoi:
-                [self exportJiggleValues:sender.tag];
-                break;
-            default:
-                break;
-        }
+    if ([self anatomicalSiteDefined]) {
+        [self exportData:sender.tag];
     }
-    else
-    {
-        [MirrorROIPluginFilterOC alertWithMessage:@"No anatomical site is entered - please enter a description and try again." andTitle:@"Export"];
+}
+-(void)exportData:(ExportDataHow)exportHow {
+    NSInteger exportType = self.popupExportData.indexOfSelectedItem;
+    switch (exportType) {
+        case RoiData:
+        case RoiSummary:
+        case RoiThreeD:
+        case AllROIdata:
+        case RoiPixelsFlat:
+            [self exportROIdata:exportHow];
+            break;
+        case PETRois:
+            [self exportAMTroi];
+            break;
+        case PixelsGridSummary:
+        case PixelsGridAllData:
+            [self exportDeltaROI:exportHow exportType:exportType];
+            break;
+        case JiggleRoi:
+            [self exportJiggleValues:exportHow];
+            break;
+        default:
+            break;
     }
 }
 - (void)exportJiggleValues:(ExportDataHow)exportHow {
-    NSString *name = [NSString stringWithFormat:@"🌸-%@",self.viewerPET.window.title];
     switch (exportHow) {
         case ExportAsFile:
-                [self saveData:[NSString stringWithFormat:@"%@\n\n%@",[self summaryStringForActiveRoiInCurrentSliceInViewer:self.viewerCT],[self jiggleROIArrayFinalSummaryString]]
-                      withName:name];
+                [self saveData:[self jiggleROIsummaryStringWithActiveROIinSliceString]
+                      withName:[self jiggleROIfileName]];
             break;
         case ViewInWindow:
-            [MirrorROIPluginFilterOC showStringInWindow:[NSString stringWithFormat:@"%@\n\n%@",[self summaryStringForActiveRoiInCurrentSliceInViewer:self.viewerCT],[self jiggleROIArrayFinalSummaryString]] withTitle:name];
+            [MirrorROIPluginFilterOC showStringInWindow:[self jiggleROIsummaryStringWithActiveROIinSliceString]
+                                              withTitle:[self jiggleROIfileName]];
             break;
         default:
             break;
@@ -1117,8 +1241,7 @@
 
 }
 
--(NSString *)pixelStatsStringForType:(ExportDataType)type {
-    NSMutableDictionary *dict = [self deltaData];
+-(NSString *)pixelStatsStringFromDictionary:(NSMutableDictionary*)dict forType:(ExportDataType)type {
     NSString *stats = @"";
     NSArray *keys = [dict.allKeys sortedArrayUsingSelector:@selector(compare:)];
     for (int k=0;k<keys.count;k++) {
@@ -1128,7 +1251,7 @@
         }
     }
     switch (type) {
-        case PixelsAll:
+        case PixelsGridAllData:
             return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n",
                     stats,
                     kDeltaNameActivePixFlat,
@@ -1146,17 +1269,21 @@
                     [self dataStringFor2DpixelDataForROIType:Mirrored_ROI]
                     ];
             break;
-        case PixelsSummary:
+        case PixelsGridSummary:
             return stats;
             break;
         default:
             return @"?";
             break;
     }
-    
 }
--(void)exportDeltaROI:(ExportDataHow)exportHow exportType:(ExportDataType)exportType{
-    NSString *fileTypeName = [self fileNameForExportType:exportType];
+
+-(NSString *)pixelStatsStringForType:(ExportDataType)type {
+    return [self pixelStatsStringFromDictionary:[self pixelStatsDictionary] forType:type];
+}
+
+-(void)exportDeltaROI:(ExportDataHow)exportHow exportType:(ExportDataType)exportType {
+    NSString *fileTypeName = [self exportTypeStringForExportType:exportType withAnatomicalSite:YES];
     NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
     switch (exportHow) {
         case ExportAsFile:
@@ -1208,7 +1335,7 @@
     return arrayOfPixelsRows;
 }
 
--(NSMutableDictionary *)deltaData {
+-(NSMutableDictionary *)pixelStatsDictionary {
     NSMutableArray *dataAflat = [NSMutableArray array];//[self pixelDataFromROIasFlatArrayForType:Active_ROI addHeader:NO];
     NSMutableArray *dataMflat = [NSMutableArray array];//[self pixelDataFromROIasFlatArrayForType:Mirrored_ROI addHeader:NO];
     
@@ -1325,41 +1452,60 @@
     return sqrtf(variance/countF);
 }
 
+-(NSString *)combinedAandMstringsForExportROIdata_A:(NSString *)dataStringA M:(NSString *)dataStringM {
+    return [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],dataStringA,[self ROInameForType:Mirrored_ROI],dataStringM];
+}
 -(void)exportROIdata:(ExportDataHow)exportHow {
     NSInteger exportType = [[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
     NSString *dataStringA = nil;
     NSString *dataStringM = nil;
-    NSString *fileTypeName = [self fileNameForExportType:exportType];
-    switch (exportType) {
-        case Roi:
-            dataStringA = [self dataStringForROIdataForType:Active_ROI];
-            dataStringM = [self dataStringForROIdataForType:Mirrored_ROI];
-            break;
-        case Summary:
-            dataStringA = [self dataStringForSummaryROIdataForType:Active_ROI];
-            dataStringM = [self dataStringForSummaryROIdataForType:Mirrored_ROI];
-            break;
-        case ThreeD:
-            dataStringA = [self dataStringFor3DROIdataForType:Active_ROI];
-            dataStringM = [self dataStringFor3DROIdataForType:Mirrored_ROI];
-            break;
-        case PixelsFlat:
-            dataStringA = [self dataStringForFlatPixelDataForROIType:Active_ROI];
-            dataStringM = [self dataStringForFlatPixelDataForROIType:Mirrored_ROI];
-            break;
-        case AllData:
-            dataStringA = [self exportAllROIdataStringForType:Active_ROI];
-            dataStringM = [self exportAllROIdataStringForType:Mirrored_ROI];
-            break;
-        default:
-            break;
+    NSString *fileTypeName = [self exportTypeStringForExportType:exportType withAnatomicalSite:YES];
+    // check its bookmarkable if thats what we request
+    if (exportHow == BookmarkString) {
+        // only bookmarkable requests here
+        switch (exportType) {
+            case AllROIdata:
+                dataStringA = [self exportAllROIdataStringForType:Active_ROI];
+                dataStringM = [self exportAllROIdataStringForType:Mirrored_ROI];
+                break;
+            default:
+                break;
+        }
+    }
+    else
+    {
+        //offer up everyting
+        switch (exportType) {
+            case RoiData:
+                dataStringA = [self dataStringForROIdataForType:Active_ROI];
+                dataStringM = [self dataStringForROIdataForType:Mirrored_ROI];
+                break;
+            case RoiSummary:
+                dataStringA = [self dataStringForSummaryROIdataForType:Active_ROI];
+                dataStringM = [self dataStringForSummaryROIdataForType:Mirrored_ROI];
+                break;
+            case RoiThreeD:
+                dataStringA = [self dataStringFor3DROIdataForType:Active_ROI];
+                dataStringM = [self dataStringFor3DROIdataForType:Mirrored_ROI];
+                break;
+            case RoiPixelsFlat:
+                dataStringA = [self dataStringForFlatPixelDataForROIType:Active_ROI];
+                dataStringM = [self dataStringForFlatPixelDataForROIType:Mirrored_ROI];
+                break;
+            case AllROIdata:
+                dataStringA = [self exportAllROIdataStringForType:Active_ROI];
+                dataStringM = [self exportAllROIdataStringForType:Mirrored_ROI];
+                break;
+            default:
+                break;
+        }
     }
     switch (exportHow) {
         case ExportAsFile:
             if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
             {
                 if (dataStringA.length>0 && dataStringM.length>0) {
-                    [self saveData:[NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],dataStringA,[self ROInameForType:Mirrored_ROI],dataStringM] withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+                    [self saveData:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM] withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
                 }
             }
             else
@@ -1374,12 +1520,11 @@
             break;
         case ViewInWindow:
         {
-            NSString *displayString = nil;
             if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
             {
                 if (dataStringA.length>0 && dataStringM.length>0) {
-                    displayString = [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],dataStringA,[self ROInameForType:Mirrored_ROI],dataStringM];
-                    [MirrorROIPluginFilterOC showStringInWindow:displayString withTitle:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+                    [MirrorROIPluginFilterOC showStringInWindow:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM]
+                                                      withTitle:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
                 }
             }
             else
@@ -1397,7 +1542,6 @@
             break;
     }
 }
-
 
 -(NSString *)exportAllROIdataStringForType:(ROI_Type)type {
     NSMutableArray *finalString = [NSMutableArray arrayWithCapacity:4];
@@ -1878,7 +2022,13 @@
     
 }
 
-
+-(NSString *)jiggleROIfileName {
+    return [NSString stringWithFormat:@"🌸-%@",self.viewerPET.window.title];
+}
+-(NSString *)jiggleROIsummaryStringWithActiveROIinSliceString {
+    return [NSString stringWithFormat:@"%@\n\n%@",[self summaryStringForActiveRoiInCurrentSliceInViewer:self.viewerCT],[self jiggleROIArrayFinalSummaryString]];
+    
+}
 -(NSString *)summaryStringForActiveRoiInCurrentSliceInViewer:(ViewerController *)viewer {
     NSString *ss = @"Not Found";
     NSString *name = [self ROInameForType:Active_ROI];

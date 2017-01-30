@@ -71,13 +71,35 @@ typedef enum : NSInteger {
 } FusedOrPetAloneWindowSetting;
 
 typedef enum : NSInteger {
-    AllData, Summary, Roi,ThreeD, PixelsFlat, sep1, PixelsSummary,PixelsAll, sep2, JiggleRoi, sep3, PETRois
+    AllROIdata,
+    RoiSummary,
+    RoiData,
+    RoiThreeD,
+    RoiPixelsFlat,
+    JiggleRoi,
+        sep1,
+    PixelsGridAllData,
+    PixelsGridSummary,
+        sep2,
+    PETRois,
+    //not on menu:
+    BookmarkedData
 } ExportDataType;
 
 typedef enum : NSInteger {
     ExportAsFile = -1,
-    ViewInWindow = 0
+    ViewInWindow = 0,
+    BookmarkString = 1
 } ExportDataHow;
+
+typedef enum : NSInteger {
+    BookmarkSubtract = -1,
+    BookmarkTrash = 0,
+    BookmarkAdd = 1,
+    BookmarkExport = 2,
+    BookmarkQuickLook = 3
+} BookmarkEAST;
+
 
 typedef enum : NSInteger {
     JumpUndefined,JumpFirst,JumpDecrease,JumpIncrease,JumpLast
@@ -114,6 +136,11 @@ typedef enum : NSInteger {
 
 @property (assign) IBOutlet SKView *skView;
 @property (retain) SKScene *skScene;
+
+@property (strong) NSMutableDictionary *dictBookmarks;
+@property (strong) NSMutableArray *arrayBookmarkedSites;
+@property (assign) IBOutlet NSArrayController *arrayControllerBookmarks;
+
 
 @property (strong) NSMutableArray *arrayJiggleROIvalues;
 
