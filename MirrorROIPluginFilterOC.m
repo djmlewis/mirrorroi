@@ -11,6 +11,8 @@
 
 #import <OsiriXAPI/PluginFilter.h>
 #import <OsiriXAPI/Notifications.h>
+#import <OsiriXAPI/DicomStudy.h>
+#import <OsiriXAPI/BrowserController.h>
 
 
 @implementation MirrorROIPluginFilterOC
@@ -250,6 +252,11 @@
     NSMenuItem *dummy = [[[NSMenuItem alloc] init] autorelease];
     [self.viewerCT blendWindows:dummy];
 }
+- (IBAction)keyImageTapped:(id)sender {
+    [self.viewerPET setKeyImage:sender];
+    [self.viewerCT setKeyImage:sender];
+}
+
 +(FusedOrPetAloneWindowSetting)useFusedOrPetAloneWindow {
     return [[NSUserDefaults standardUserDefaults] integerForKey:kSegmentFusedOrPETSegmentDefault];
 }
@@ -1131,18 +1138,28 @@
         NSString *bookmarkStringForSite = [dictForSite objectForKey:kBookmarkStringKey];
         [rows addObject:bookmarkStringForSite];
     }
-    return [rows componentsJoinedByString:@"\n\n"];
+    return [NSString stringWithFormat:@"%@\n%@",[self participantDetailsString],[rows componentsJoinedByString:@"\n\n"]];
 }
 -(NSString *)bookmarkedDataFilename {
     NSString *fileTypeName = [self exportTypeStringForExportType:BookmarkedData withAnatomicalSite:NO];
     NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
     return fileName;
 }
-- (void)exportBookmarkedData:(ExportDataHow)exportHow {
+-(NSString *)participantDetailsString {
+    DicomStudy *study = [self.viewerPET currentStudy];
+    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tInjection Location\n%@\t%@\t%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,study.comment2,study.comment3,self.viewerPET.window.title];
+}
+- (void)attachBookmarkedDataFileAsReport:(NSURL*)url {
+    DicomStudy *study = [self.viewerPET currentStudy];
+    [[BrowserController currentBrowser] importReport:url.path UID:study.studyInstanceUID];
+}
 
+
+- (void)exportBookmarkedData:(ExportDataHow)exportHow {
+    NSURL *savedLocation = nil;
     switch (exportHow) {
         case ExportAsFile:
-            [self saveData:[self bookMarkStringsConjoined]
+            savedLocation = [self saveData:[self bookMarkStringsConjoined]
                   withName:[self bookmarkedDataFilename]];
             break;
         case ViewInWindow:
@@ -1153,6 +1170,10 @@
             break;
     }
     
+    if (savedLocation != nil)
+    {
+        [self attachBookmarkedDataFileAsReport:savedLocation];
+    }
 }
 
 
@@ -1744,7 +1765,7 @@
 -(NSString *)dataStringFor2DpixelDataForROIType:(ROI_Type)type {
     NSMutableDictionary *dictOfRoiGrids = [self dictOfPixelBufferValuesAs2DArrayForType:type];
     NSMutableArray *arrayOfRows = [NSMutableArray array];
-    [arrayOfRows addObject:[NSString stringWithFormat:@"2D grids of Pixel Data For %@ withput mirroring",[self ROInameForType:type]]];
+    [arrayOfRows addObject:[NSString stringWithFormat:@"2D grids of Pixel Data For %@ without mirroring",[self ROInameForType:type]]];
     if (dictOfRoiGrids.count>0) {
         NSArray *keys = [dictOfRoiGrids.allKeys sortedArrayUsingSelector:@selector(compare:)];
         for (int k=0; k<keys.count; k++) {
@@ -1809,14 +1830,19 @@
     }
     return nil;
 }
--(void)saveData:(NSString *)dataString withName:(NSString *)name {
+-(NSURL *)saveData:(NSString *)dataString withName:(NSString *)name {
     NSSavePanel *savePanel = [NSSavePanel savePanel];
     savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
     savePanel.nameFieldStringValue = name;
     if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
         NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:nil];
         [dataString writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
+        if (error.code == 0)
+        {
+            return savePanel.URL;
+        }
     }
+    return nil;
 }
 
 -(void)exportAMTroi {

@@ -19,6 +19,7 @@
 		8E4FBD201DFB2D9D00E54D6F /* TextDisplayWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E4FBD1D1DFB2D9D00E54D6F /* TextDisplayWindowController.h */; };
 		8E4FBD211DFB2D9D00E54D6F /* TextDisplayWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4FBD1E1DFB2D9D00E54D6F /* TextDisplayWindowController.m */; };
 		8E613DFE1DECCA7F0021049A /* JiggleAll.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E613DFD1DECCA7F0021049A /* JiggleAll.png */; };
+		8E6F81391E420A97002E5631 /* keyImageSquare.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E6F81381E420A97002E5631 /* keyImageSquare.png */; };
 		8E8838371DDA209400AE9166 /* ROIValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E8838351DDA209400AE9166 /* ROIValues.h */; };
 		8E8838381DDA209400AE9166 /* ROIValues.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E8838361DDA209400AE9166 /* ROIValues.m */; };
 		8E8AA1DB1E0693BB007621FB /* Jiggle small.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E8AA1DA1E0693BB007621FB /* Jiggle small.png */; };
@@ -66,6 +67,7 @@
 		8E4FBD1D1DFB2D9D00E54D6F /* TextDisplayWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextDisplayWindowController.h; sourceTree = "<group>"; };
 		8E4FBD1E1DFB2D9D00E54D6F /* TextDisplayWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextDisplayWindowController.m; sourceTree = "<group>"; };
 		8E613DFD1DECCA7F0021049A /* JiggleAll.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = JiggleAll.png; path = PNGs/JiggleAll.png; sourceTree = "<group>"; };
+		8E6F81381E420A97002E5631 /* keyImageSquare.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = keyImageSquare.png; path = PNGs/keyImageSquare.png; sourceTree = "<group>"; };
 		8E8838351DDA209400AE9166 /* ROIValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ROIValues.h; sourceTree = "<group>"; };
 		8E8838361DDA209400AE9166 /* ROIValues.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ROIValues.m; sourceTree = "<group>"; };
 		8E8AA1DA1E0693BB007621FB /* Jiggle small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Jiggle small.png"; path = "PNGs/Jiggle small.png"; sourceTree = "<group>"; };
@@ -198,6 +200,7 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				8E6F81381E420A97002E5631 /* keyImageSquare.png */,
 				8E8AA1DA1E0693BB007621FB /* Jiggle small.png */,
 				8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */,
 				8E613DFD1DECCA7F0021049A /* JiggleAll.png */,
@@ -333,6 +336,7 @@
 				8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */,
 				8E172CFE1DDD03F100F33DE5 /* JiggleSelect.png in Resources */,
 				8EC532661E05A2A6006B74E5 /* Flip Vertical Filled-24.png in Resources */,
+				8E6F81391E420A97002E5631 /* keyImageSquare.png in Resources */,
 				C52843C01DC250C600371742 /* aright.png in Resources */,
 				8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */,
 			);
