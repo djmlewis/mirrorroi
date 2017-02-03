@@ -32,6 +32,7 @@
 #define kSegmentFusedOrPETSegmentDefault @"kSegmentFusedOrPETSegmentDefault"
 #define kCombineExportsOneFileDefault @"kCombineExportsOneFileDefault"
 #define kExportMenuSelectedIndexDefault @"kExportMenuSelectedIndexDefault"
+#define kAddReportWhenSaveBookmarkedDataDefault @"kAddReportWhenSaveBookmarkedDataDefault"
 
 
 #define kJiggleROIName @"jiggle"

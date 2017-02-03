@@ -108,6 +108,10 @@ typedef enum : NSInteger {
 
 @interface MirrorROIPluginFilterOC : PluginFilter {}
 
+@property (assign) IBOutlet NSImageView *imageViewTempy;
+
+
+
 @property (nonatomic, retain) NSWindowController *windowControllerMain;
 @property (nonatomic, retain) ViewerController *viewerCT;
 @property (nonatomic, retain) ViewerController *viewerPET;

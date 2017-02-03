@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1217" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
@@ -18,6 +18,7 @@
                 <outlet property="colorWellTransformIntercalated" destination="VIc-sS-aOH" id="EJ1-nk-Sc6"/>
                 <outlet property="colorWellTransformPlaced" destination="8B7-Dw-GT5" id="kUh-Jl-Fqu"/>
                 <outlet property="comboAnatomicalSite" destination="7yk-hA-cJu" id="iM8-l7-Bqn"/>
+                <outlet property="imageViewTempy" destination="jD1-Ph-Rvo" id="vlM-A3-0du"/>
                 <outlet property="labelCT" destination="cDS-xb-qwA" id="NOs-y9-mrQ"/>
                 <outlet property="labelPET" destination="LyE-Lv-WwT" id="2oy-jg-6HK"/>
                 <outlet property="labelWarningNoAdjust" destination="Ym0-VB-dOe" id="AHK-4d-wZW"/>
@@ -35,10 +36,10 @@
         <window title="Mirror ROI" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" frameAutosaveName="" animationBehavior="default" id="GiC-Tf-amF" customClass="NSPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
-            <rect key="contentRect" x="75" y="87" width="245" height="368"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="1280" height="1001"/>
+            <rect key="contentRect" x="75" y="87" width="514" height="368"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2048" height="1257"/>
             <view key="contentView" focusRingType="none" id="EMO-X6-lMp">
-                <rect key="frame" x="0.0" y="0.0" width="245" height="368"/>
+                <rect key="frame" x="0.0" y="0.0" width="514" height="368"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                 <subviews>
                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RcO-sJ-Mb7">
@@ -479,19 +480,8 @@
                                                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                                                     </textFieldCell>
                                                 </textField>
-                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5xi-X7-KFH">
-                                                    <rect key="frame" x="202" y="208" width="18" height="18"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="keyImageSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="BrZ-ON-5me">
-                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                        <font key="font" metaFont="system"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="keyImageTapped:" target="-2" id="3NC-f7-BXf"/>
-                                                    </connections>
-                                                </button>
                                                 <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zx0-GW-xxA">
-                                                    <rect key="frame" x="179" y="208" width="18" height="18"/>
+                                                    <rect key="frame" x="132" y="208" width="18" height="18"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="yingyang" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="fyy-YO-EAs">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -499,6 +489,28 @@
                                                     </buttonCell>
                                                     <connections>
                                                         <action selector="fuseDefusetapped:" target="-2" id="U3R-8w-V8e"/>
+                                                    </connections>
+                                                </button>
+                                                <button verticalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="y9P-jO-5cs">
+                                                    <rect key="frame" x="201" y="208" width="20" height="18"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSShareTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="M6y-LP-GL0">
+                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="exportKeyImagesTapped:" target="-2" id="vre-uv-gFk"/>
+                                                    </connections>
+                                                </button>
+                                                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5xi-X7-KFH">
+                                                    <rect key="frame" x="179" y="208" width="18" height="18"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="keyImageSquare" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="BrZ-ON-5me">
+                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="keyImageTapped:" target="-2" id="3NC-f7-BXf"/>
                                                     </connections>
                                                 </button>
                                             </subviews>
@@ -964,9 +976,9 @@
                                             </connections>
                                         </colorWell>
                                         <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="yiO-AH-qiy">
-                                            <rect key="frame" x="2" y="1" width="217" height="18"/>
+                                            <rect key="frame" x="2" y="1" width="128" height="18"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <buttonCell key="cell" type="check" title="Combine Active &amp; Mirrored Files" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="W46-X8-4sr">
+                                            <buttonCell key="cell" type="check" title="Active &amp; Mirrored" bezelStyle="regularSquare" imagePosition="left" alignment="left" state="on" inset="2" id="W46-X8-4sr">
                                                 <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
@@ -987,7 +999,7 @@
                                             </connections>
                                         </textField>
                                         <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HiA-Ci-29d">
-                                            <rect key="frame" x="169" y="151" width="41" height="24"/>
+                                            <rect key="frame" x="169" y="151" width="41" height="27"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="1" maxValue="5" doubleValue="1" tickMarkPosition="below" numberOfTickMarks="5" allowsTickMarkValuesOnly="YES" sliderType="linear" id="3Yw-rs-Y5a"/>
                                             <connections>
@@ -1018,7 +1030,7 @@
                                             </connections>
                                         </button>
                                         <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OPC-sY-fTe">
-                                            <rect key="frame" x="169" y="125" width="41" height="24"/>
+                                            <rect key="frame" x="169" y="125" width="41" height="27"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="1" maxValue="3" doubleValue="1" tickMarkPosition="below" numberOfTickMarks="3" allowsTickMarkValuesOnly="YES" sliderType="linear" id="tOZ-Kd-LGF"/>
                                             <connections>
@@ -1151,6 +1163,20 @@
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <imageCell key="cell" refusesFirstResponder="YES" alignment="left" animates="YES" imageScaling="proportionallyDown" image="Jiggle" id="fWN-5g-IsL"/>
                                         </imageView>
+                                        <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="1SO-2q-rp8">
+                                            <rect key="frame" x="134" y="1" width="91" height="18"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="check" title="Add Report" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="ukJ-Ce-3id">
+                                                <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                                <connections>
+                                                    <binding destination="7He-O6-hgQ" name="value" keyPath="selection.kAddReportWhenSaveBookmarkedDataDefault" id="Hl8-gr-dAW"/>
+                                                </connections>
+                                            </buttonCell>
+                                            <connections>
+                                                <binding destination="fUA-5u-y3G" name="value" keyPath="values.kAddReportWhenSaveBookmarkedDataDefault" id="czj-6m-TfP"/>
+                                            </connections>
+                                        </button>
                                     </subviews>
                                 </view>
                             </tabViewItem>
@@ -1165,9 +1191,14 @@
                             <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                         </textFieldCell>
                     </textField>
+                    <imageView horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jD1-Ph-Rvo">
+                        <rect key="frame" x="260" y="131" width="240" height="217"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <imageCell key="cell" refusesFirstResponder="YES" alignment="left" imageScaling="proportionallyDown" id="woI-3c-vBF"/>
+                    </imageView>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="-14408" y="-2982"/>
+            <point key="canvasLocation" x="-15160" y="-2993"/>
         </window>
         <userDefaultsController representsSharedInstance="YES" id="fUA-5u-y3G"/>
         <arrayController preservesSelection="NO" selectsInsertedObjects="NO" avoidsEmptySelection="NO" id="7He-O6-hgQ" userLabel="sortKeysArrayController">

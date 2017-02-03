@@ -12,6 +12,7 @@
 #import <OsiriXAPI/PluginFilter.h>
 #import <OsiriXAPI/Notifications.h>
 #import <OsiriXAPI/DicomStudy.h>
+#import <OsiriXAPI/DicomSeries.h>
 #import <OsiriXAPI/BrowserController.h>
 
 
@@ -94,6 +95,7 @@
     
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kCombineExportsOneFileDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeExportedDataDefault];
+    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kAddReportWhenSaveBookmarkedDataDefault];
     [defaults setValue:[NSNumber numberWithBool:NO] forKey:kIncludeOriginalInJiggleDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kRankJiggleDefault];
     
@@ -115,10 +117,11 @@
     [arrayOfjROIs addObject:@{kJiggleROIsArrayKey : @"1"}];
     [defaults setObject:arrayOfjROIs forKey:kJiggleROIsArrayName];
     
-    [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
-    
     //override Osirix Defaults
     [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
+    
+    //register the defaults
+    [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
     //add observers for defaults changes
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Active options:NSKeyValueObservingOptionNew context:nil];
@@ -126,8 +129,6 @@
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformPlaced options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformIntercalated options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Jiggle options:NSKeyValueObservingOptionNew context:nil];
-
-    
 }
 
 -(void)initNotfications {
@@ -252,10 +253,6 @@
     NSMenuItem *dummy = [[[NSMenuItem alloc] init] autorelease];
     [self.viewerCT blendWindows:dummy];
 }
-- (IBAction)keyImageTapped:(id)sender {
-    [self.viewerPET setKeyImage:sender];
-    [self.viewerCT setKeyImage:sender];
-}
 
 +(FusedOrPetAloneWindowSetting)useFusedOrPetAloneWindow {
     return [[NSUserDefaults standardUserDefaults] integerForKey:kSegmentFusedOrPETSegmentDefault];
@@ -278,6 +275,81 @@
     [self showHideControlsIfViewersValid];
 }
 
+#pragma mark - Key Images
+
+- (IBAction)keyImageTapped:(id)sender {
+    [self.viewerPET setKeyImage:sender];
+    [self.viewerCT setKeyImage:sender];
+}
+- (IBAction)exportKeyImagesTapped:(id)sender {
+    [self exportKeyImagesFromViewersTypes:CTandPET_Windows];
+}
+-(void)exportKeyImagesFromViewersTypes:(ViewerWindow_Type)types {
+    //    NSSet *keyImages = self.viewerPET.imageView.seriesObj.keyImages;
+    //    DCMPix *pix = [[DCMPix alloc] initWithPath:self.completePath :0 :0 :nil :0 :[[self valueForKeyPath:@"series.id"] intValue] isBonjour:NO imageObj:self];
+    NSMutableArray *arrayKeyImagesData = [NSMutableArray array];
+    switch (types) {
+        case PET_Window:
+            arrayKeyImagesData = [self arrayKeyImagesFromViewer:self.viewerPET];
+            break;
+        case CT_Window:
+            arrayKeyImagesData = [self arrayKeyImagesFromViewer:self.viewerCT];
+            break;
+        case CTandPET_Windows:
+            arrayKeyImagesData = [self arrayKeyImagesFromViewer:self.viewerPET];
+            [arrayKeyImagesData addObjectsFromArray:[self arrayKeyImagesFromViewer:self.viewerCT]];
+            break;
+        default:
+            break;
+    }
+    [self saveImageFilesFromArray:arrayKeyImagesData];
+}
+
+-(NSString *)imageFileNameForIndex:(int)index andViewer:(ViewerController *)viewer {
+    return [NSString stringWithFormat:@"%@_%04li.png",viewer.window.title,(long)index];
+}
+-(NSMutableArray *)arrayKeyImagesFromViewer:(ViewerController *)viewer {
+    NSMutableArray *arrayKeyImagesData = [NSMutableArray array];
+    for (int pixIndex =0; pixIndex<viewer.pixList.count; pixIndex++) {
+        if ([viewer isKeyImage:pixIndex]) {
+            //DCMPix *pix = [viewer.pixList objectAtIndex:pixIndex];
+            int pixIndex = [viewer.imageView curImage];
+            NSImage *image = [viewer.imageView exportNSImageCurrentImageWithSize:0];//size 0 avoids rescale which destroys image??;
+            //[self.imageViewTempy setImage:image];
+            
+            NSData *tiffData = [image TIFFRepresentation];
+            NSBitmapImageRep *bitmapData = [NSBitmapImageRep imageRepWithData:tiffData];
+            NSData *pngData = [bitmapData representationUsingType:NSBitmapImageFileTypePNG properties:[NSDictionary dictionary]];
+            NSMutableDictionary *imageAndFilenameDict = [NSMutableDictionary dictionary];
+            [imageAndFilenameDict setObject:[self imageFileNameForIndex:pixIndex andViewer:viewer] forKey:@"name"];
+            [imageAndFilenameDict setObject:pngData forKey:@"data"];
+            [arrayKeyImagesData addObject:imageAndFilenameDict];
+            
+        }
+    }
+    return arrayKeyImagesData;
+}
+
+-(void)saveImageFilesFromArray:(NSMutableArray *)arrayOfFileNamesAndImages {
+    if (arrayOfFileNamesAndImages.count > 0)
+    {
+        NSOpenPanel* panel = [NSOpenPanel openPanel];
+        [panel setCanChooseDirectories:YES];
+        [panel setCanCreateDirectories:YES];
+        [panel setCanChooseFiles:NO];
+        [panel setAllowsMultipleSelection:NO];
+        
+        if ([panel runModal] == NSFileHandlingPanelOKButton) {
+            NSURL *dirUrl = [panel.URLs objectAtIndex:0];
+            for (NSMutableDictionary* filenameImageDict in arrayOfFileNamesAndImages) {
+                NSData *imageData = [filenameImageDict objectForKey:@"data"];
+                NSString *filename = [[filenameImageDict objectForKey:@"name"] stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+                NSURL *fileURL = [dirUrl URLByAppendingPathComponent:filename];
+                [imageData writeToURL:fileURL atomically:YES];
+            }
+        }
+    }
+}
 #pragma mark - TextDisplayWindowController
 + (void)showStringInWindow:(NSString *)string withTitle:(NSString *)title{
     //do not use withOwner in initWithWindowNibName, so it uses the links in the nib file to connect window with the TextDisplayWindowController
@@ -1170,7 +1242,7 @@
             break;
     }
     
-    if (savedLocation != nil)
+    if (savedLocation != nil && [[NSUserDefaults standardUserDefaults] boolForKey:kAddReportWhenSaveBookmarkedDataDefault])
     {
         [self attachBookmarkedDataFileAsReport:savedLocation];
     }
