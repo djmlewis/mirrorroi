@@ -98,6 +98,8 @@
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kAddReportWhenSaveBookmarkedDataDefault];
     [defaults setValue:[NSNumber numberWithBool:NO] forKey:kIncludeOriginalInJiggleDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kRankJiggleDefault];
+    [defaults setValue:[NSNumber numberWithBool:YES] forKey:kExportKeyImagesWhenSetting];
+    [defaults setValue:[NSNumber numberWithFloat:0.2] forKey:kKeyImageHeightFractionDefault];
     
     //the sortKeys used in sorting jiggleROI are in an Array, each key a dict
     NSMutableArray *arrayOfKeys = [NSMutableArray array];
@@ -129,6 +131,10 @@
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformPlaced options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformIntercalated options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Jiggle options:NSKeyValueObservingOptionNew context:nil];
+}
+
+-(BOOL)userDefaultBoolForKey:(NSString *)key {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:key];
 }
 
 -(void)initNotfications {
@@ -275,81 +281,6 @@
     [self showHideControlsIfViewersValid];
 }
 
-#pragma mark - Key Images
-
-- (IBAction)keyImageTapped:(id)sender {
-    [self.viewerPET setKeyImage:sender];
-    [self.viewerCT setKeyImage:sender];
-}
-- (IBAction)exportKeyImagesTapped:(id)sender {
-    [self exportKeyImagesFromViewersTypes:CTandPET_Windows];
-}
--(void)exportKeyImagesFromViewersTypes:(ViewerWindow_Type)types {
-    //    NSSet *keyImages = self.viewerPET.imageView.seriesObj.keyImages;
-    //    DCMPix *pix = [[DCMPix alloc] initWithPath:self.completePath :0 :0 :nil :0 :[[self valueForKeyPath:@"series.id"] intValue] isBonjour:NO imageObj:self];
-    NSMutableArray *arrayKeyImagesData = [NSMutableArray array];
-    switch (types) {
-        case PET_Window:
-            arrayKeyImagesData = [self arrayKeyImagesFromViewer:self.viewerPET];
-            break;
-        case CT_Window:
-            arrayKeyImagesData = [self arrayKeyImagesFromViewer:self.viewerCT];
-            break;
-        case CTandPET_Windows:
-            arrayKeyImagesData = [self arrayKeyImagesFromViewer:self.viewerPET];
-            [arrayKeyImagesData addObjectsFromArray:[self arrayKeyImagesFromViewer:self.viewerCT]];
-            break;
-        default:
-            break;
-    }
-    [self saveImageFilesFromArray:arrayKeyImagesData];
-}
-
--(NSString *)imageFileNameForIndex:(int)index andViewer:(ViewerController *)viewer {
-    return [NSString stringWithFormat:@"%@_%04li.png",viewer.window.title,(long)index];
-}
--(NSMutableArray *)arrayKeyImagesFromViewer:(ViewerController *)viewer {
-    NSMutableArray *arrayKeyImagesData = [NSMutableArray array];
-    for (int pixIndex =0; pixIndex<viewer.pixList.count; pixIndex++) {
-        if ([viewer isKeyImage:pixIndex]) {
-            //DCMPix *pix = [viewer.pixList objectAtIndex:pixIndex];
-            int pixIndex = [viewer.imageView curImage];
-            NSImage *image = [viewer.imageView exportNSImageCurrentImageWithSize:0];//size 0 avoids rescale which destroys image??;
-            //[self.imageViewTempy setImage:image];
-            
-            NSData *tiffData = [image TIFFRepresentation];
-            NSBitmapImageRep *bitmapData = [NSBitmapImageRep imageRepWithData:tiffData];
-            NSData *pngData = [bitmapData representationUsingType:NSBitmapImageFileTypePNG properties:[NSDictionary dictionary]];
-            NSMutableDictionary *imageAndFilenameDict = [NSMutableDictionary dictionary];
-            [imageAndFilenameDict setObject:[self imageFileNameForIndex:pixIndex andViewer:viewer] forKey:@"name"];
-            [imageAndFilenameDict setObject:pngData forKey:@"data"];
-            [arrayKeyImagesData addObject:imageAndFilenameDict];
-            
-        }
-    }
-    return arrayKeyImagesData;
-}
-
--(void)saveImageFilesFromArray:(NSMutableArray *)arrayOfFileNamesAndImages {
-    if (arrayOfFileNamesAndImages.count > 0)
-    {
-        NSOpenPanel* panel = [NSOpenPanel openPanel];
-        [panel setCanChooseDirectories:YES];
-        [panel setCanCreateDirectories:YES];
-        [panel setCanChooseFiles:NO];
-        [panel setAllowsMultipleSelection:NO];
-        
-        if ([panel runModal] == NSFileHandlingPanelOKButton) {
-            NSURL *dirUrl = [panel.URLs objectAtIndex:0];
-            for (NSMutableDictionary* filenameImageDict in arrayOfFileNamesAndImages) {
-                NSData *imageData = [filenameImageDict objectForKey:@"data"];
-                NSString *filename = [[filenameImageDict objectForKey:@"name"] stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
-                NSURL *fileURL = [dirUrl URLByAppendingPathComponent:filename];
-                [imageData writeToURL:fileURL atomically:YES];
-            }
-        }
-    }
-}
 #pragma mark - TextDisplayWindowController
 + (void)showStringInWindow:(NSString *)string withTitle:(NSString *)title{
     //do not use withOwner in initWithWindowNibName, so it uses the links in the nib file to connect window with the TextDisplayWindowController
@@ -670,40 +601,10 @@
         return NO;
     }
 }
--(void)addROI2Pix:(ROI *)roi2add atSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
-    if (slice <[[viewer pixList] count] && slice <[[viewer roiList] count])
-    {
-        //Correct the origin only if the orientation is the same
-        DCMPix *pix = [[viewer pixList] objectAtIndex:slice];
-        roi2add.pix = pix;
-        roi2add.hidden = hidden;
-        [roi2add setOriginAndSpacing: pix.pixelSpacingX :pix.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: pix]];
-        [[viewer.roiList objectAtIndex: slice] addObject: roi2add];
-        roi2add.curView = viewer.imageView;
-        [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi2add];
-    }
-    else
-    {
-        NSLog(@"addROI2Pix: Slice index %li not in range of pixlist %li and roilist %li counts", (long) slice, (long)[[viewer pixList] count], (long)[[viewer roiList] count]);
-    }
-}
--(void)replaceROIInPix:(ROI *)roi2add atIndex:(NSUInteger)index inSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
-    if (slice <[[viewer pixList] count] && slice <[[viewer roiList] count]
-        && index<[[[viewer roiList] objectAtIndex:slice] count])
-    {
-        //Correct the origin only if the orientation is the same
-        DCMPix *pix = [[viewer pixList] objectAtIndex:slice];
-        roi2add.pix = pix;
-        roi2add.hidden = hidden;
-        [roi2add setOriginAndSpacing: pix.pixelSpacingX :pix.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: pix]];
-        [[viewer.roiList objectAtIndex: slice] replaceObjectAtIndex:index withObject:roi2add];
-        roi2add.curView = viewer.imageView;
-        [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi2add];
-    }
-}
+
 -(void)mirrorActiveROIUsingLengthROIn3D:(BOOL)in3D {
     BOOL mirroredSomething = NO;
-
+    
     NSMutableArray  *roisInAllSlices  = [self.viewerPET roiList];
     NSUInteger startSlice = 0;
     NSUInteger endSlice = 0;
@@ -732,7 +633,7 @@
             //rename to keep in sync
             roi2Clone.name = [self ROInameForType:Active_ROI];
             [MirrorROIPluginFilterOC  setROIcolour:roi2Clone forType:Active_ROI];
-
+            
             NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
             
             if ([MirrorROIPluginFilterOC validDeltaPoint:deltaXY]) {
@@ -748,7 +649,7 @@
                                    imageOrigin:roi2Clone.imageOrigin];
                 [MirrorROIPluginFilterOC  setROIcolour:createdROI forType:Mirrored_ROI];
                 [self addROI2Pix:createdROI atSlice:slice inViewer:self.viewerPET hidden:NO];
-
+                
                 [MirrorROIPluginFilterOC forceRecomputeDataForROI:createdROI];
                 [self addROItoCTAtSlice:slice forActiveROI:roi2Clone mirroredROI:createdROI];
                 mirroredSomething = YES;
@@ -763,21 +664,9 @@
         [MirrorROIPluginFilterOC alertWithMessage:@"Unable to mirror anything" andTitle:@"Mirror Active ROI"];
     }
 }
--(void)addROItoCTAtSlice:(NSUInteger)slice forActiveROI:(ROI *)activeROI mirroredROI:(ROI *)mirroredROI {
-    if ([self valid2DViewer:self.viewerCT])
-    {
-        if (activeROI) {
-            ROI *aP = [activeROI copy];
-            aP.locked = NO;
-            [self addROI2Pix:aP atSlice:slice inViewer:self.viewerCT hidden:NO];
-        }
-        if (mirroredROI) {
-            ROI *mP = [mirroredROI copy];
-            mP.locked = NO;
-            [self addROI2Pix:mP atSlice:slice inViewer:self.viewerCT hidden:NO];
-        }
-    }
-}
+
+#pragma mark - Delta point
+
 +(NSPoint)deltaXYFromROI:(ROI*)roi2Clone usingLengthROI:(ROI*)lengthROI {
     NSPoint deltaPoint = [self anInvalidDeltaPoint];
     
@@ -915,6 +804,71 @@
     [self refreshDisplayedDataForCT];
 }
 
+#pragma mark - Add Replace ROI
+
+-(void)addTextROI2PixatCurrentSliceInBothViewersWithText:(NSString *)text {
+    [self addTextROI2PixatSlice:[[self.viewerPET imageView] curImage] inViewer:self.viewerPET hidden:NO withText:text andColour:kPETtextColour];
+    [self addTextROI2PixatSlice:[[self.viewerCT imageView] curImage] inViewer:self.viewerCT hidden:NO withText:text andColour:kCTtextColour];
+}
+-(void)addTextROI2PixatSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden withText:(NSString *)text andColour:(NSColor *)colour {
+    [self deleteROIsFromViewerController:viewer withName:text];
+    ROI *roi = [viewer newROI:tText];
+    [roi setThickness:8.0 globally:NO];//number of points above/below 12 the value is multiplied by 2
+    [roi setNSColor:colour globally:NO];
+    [roi setName:text];
+    [self addROI2Pix:roi atSlice:slice inViewer:viewer hidden:NO];
+    NSRect rect= roi.rect;
+    rect.origin = NSMakePoint(roi.pix.pwidth*0.5, roi.pix.pheight*[[NSUserDefaults standardUserDefaults] floatForKey:kKeyImageHeightFractionDefault]);
+    [roi setROIRect:rect];
+    
+}
+-(void)addROI2Pix:(ROI *)roi2add atSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
+    if (slice <[[viewer pixList] count] && slice <[[viewer roiList] count])
+    {
+        //Correct the origin only if the orientation is the same
+        DCMPix *pix = [[viewer pixList] objectAtIndex:slice];
+        roi2add.pix = pix;
+        roi2add.hidden = hidden;
+        [roi2add setOriginAndSpacing: pix.pixelSpacingX :pix.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: pix]];
+        [[viewer.roiList objectAtIndex: slice] addObject: roi2add];
+        roi2add.curView = viewer.imageView;
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi2add];
+    }
+    else
+    {
+        NSLog(@"addROI2Pix: Slice index %li not in range of pixlist %li and roilist %li counts", (long) slice, (long)[[viewer pixList] count], (long)[[viewer roiList] count]);
+    }
+}
+-(void)replaceROIInPix:(ROI *)roi2add atIndex:(NSUInteger)index inSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
+    if (slice <[[viewer pixList] count] && slice <[[viewer roiList] count]
+        && index<[[[viewer roiList] objectAtIndex:slice] count])
+    {
+        //Correct the origin only if the orientation is the same
+        DCMPix *pix = [[viewer pixList] objectAtIndex:slice];
+        roi2add.pix = pix;
+        roi2add.hidden = hidden;
+        [roi2add setOriginAndSpacing: pix.pixelSpacingX :pix.pixelSpacingY :[DCMPix originCorrectedAccordingToOrientation: pix]];
+        [[viewer.roiList objectAtIndex: slice] replaceObjectAtIndex:index withObject:roi2add];
+        roi2add.curView = viewer.imageView;
+        [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi2add];
+    }
+}
+-(void)addROItoCTAtSlice:(NSUInteger)slice forActiveROI:(ROI *)activeROI mirroredROI:(ROI *)mirroredROI {
+    if ([self valid2DViewer:self.viewerCT])
+    {
+        if (activeROI) {
+            ROI *aP = [activeROI copy];
+            aP.locked = NO;
+            [self addROI2Pix:aP atSlice:slice inViewer:self.viewerCT hidden:NO];
+        }
+        if (mirroredROI) {
+            ROI *mP = [mirroredROI copy];
+            mP.locked = NO;
+            [self addROI2Pix:mP atSlice:slice inViewer:self.viewerCT hidden:NO];
+        }
+    }
+}
+
 #pragma mark - Delete Rename ROIs
 - (IBAction)deleteActiveViewerROIsOfType:(NSButton *)sender {
     
@@ -965,8 +919,8 @@
             [self resetJiggleControlsAndRefresh];
         }
     }
-
 }
+
 - (void)deleteROIsInSlice:(NSUInteger)slice inViewerController:(ViewerController *)active2Dwindow withName:(NSString *)name {
     if (active2Dwindow && slice<active2Dwindow.roiList.count)
     {
@@ -1242,12 +1196,105 @@
             break;
     }
     
-    if (savedLocation != nil && [[NSUserDefaults standardUserDefaults] boolForKey:kAddReportWhenSaveBookmarkedDataDefault])
+    if (savedLocation != nil && [self userDefaultBoolForKey:kAddReportWhenSaveBookmarkedDataDefault])
     {
         [self attachBookmarkedDataFileAsReport:savedLocation];
     }
 }
 
+#pragma mark - Key Images
+
+- (IBAction)keyImageTapped:(NSButton*)sender {
+    [self setKeyImageInCurrentViews:sender.tag];
+}
+-(void)setKeyImageInCurrentViews:(KeyImageSetting)setKey {
+    switch (setKey) {
+        case KeyImageOff:
+            if ([self.viewerPET isKeyImage:[self.viewerPET.imageView curImage]]) {
+                [self.viewerPET setKeyImage:nil];
+            }
+            if ([self.viewerCT isKeyImage:[self.viewerCT.imageView curImage]]) {
+                [self.viewerCT setKeyImage:nil];
+            }
+            break;
+        case KeyImageOn:
+            if ([self anatomicalSiteDefined]) {
+                [self addTextROI2PixatCurrentSliceInBothViewersWithText:[self anatomicalSiteName]];
+                //setKeyImage toggles, so only toggle ON
+                if (![self.viewerPET isKeyImage:[self.viewerPET.imageView curImage]]) {
+                    [self.viewerPET setKeyImage:nil];
+                }
+                if (![self.viewerCT isKeyImage:[self.viewerCT.imageView curImage]]) {
+                    [self.viewerCT setKeyImage:nil];
+                }
+                if ([self userDefaultBoolForKey:kExportKeyImagesWhenSetting]) {
+                    [self exportKeyImagesFromViewersTypes:CTandPET_Windows];
+                }
+            }
+            break;
+        default:
+            break;
+    }
+}
+-(void)exportKeyImagesFromViewersTypes:(ViewerWindow_Type)types {
+    NSMutableArray *arrayKeyImagesData = [NSMutableArray array];
+    switch (types) {
+        case PET_Window:
+            arrayKeyImagesData = [self arrayKeyImagesFromViewer:self.viewerPET];
+            break;
+        case CT_Window:
+            arrayKeyImagesData = [self arrayKeyImagesFromViewer:self.viewerCT];
+            break;
+        case CTandPET_Windows:
+            arrayKeyImagesData = [self arrayKeyImagesFromViewer:self.viewerPET];
+            [arrayKeyImagesData addObjectsFromArray:[self arrayKeyImagesFromViewer:self.viewerCT]];
+            break;
+        default:
+            break;
+    }
+    [self saveImageFilesFromArray:arrayKeyImagesData];
+}
+
+-(NSString *)imageFileNameForIndex:(int)index andViewer:(ViewerController *)viewer {
+    return [NSString stringWithFormat:@"%@_%04li.png",viewer.window.title,(long)index];
+}
+-(NSMutableArray *)arrayKeyImagesFromViewer:(ViewerController *)viewer {
+    NSMutableArray *arrayKeyImagesData = [NSMutableArray array];
+    int pixIndex = [viewer.imageView curImage];
+    NSImage *image = [viewer.imageView exportNSImageCurrentImageWithSize:0];//size 0 avoids rescale which destroys image??;
+    //[self.imageViewTempy setImage:image];
+    
+    NSData *tiffData = [image TIFFRepresentation];
+    NSBitmapImageRep *bitmapData = [NSBitmapImageRep imageRepWithData:tiffData];
+    NSData *pngData = [bitmapData representationUsingType:NSBitmapImageFileTypePNG properties:[NSDictionary dictionary]];
+    NSMutableDictionary *imageAndFilenameDict = [NSMutableDictionary dictionary];
+    [imageAndFilenameDict setObject:[self imageFileNameForIndex:pixIndex andViewer:viewer] forKey:@"name"];
+    [imageAndFilenameDict setObject:pngData forKey:@"data"];
+    [arrayKeyImagesData addObject:imageAndFilenameDict];
+    
+    return arrayKeyImagesData;
+}
+
+-(void)saveImageFilesFromArray:(NSMutableArray *)arrayOfFileNamesAndImages {
+    if (arrayOfFileNamesAndImages.count > 0)
+    {
+        NSOpenPanel* panel = [NSOpenPanel openPanel];
+        [panel setCanChooseDirectories:YES];
+        [panel setCanCreateDirectories:YES];
+        [panel setCanChooseFiles:NO];
+        [panel setAllowsMultipleSelection:NO];
+        
+        if ([panel runModal] == NSFileHandlingPanelOKButton) {
+            NSURL *dirUrl = [panel.URLs objectAtIndex:0];
+            for (NSMutableDictionary* filenameImageDict in arrayOfFileNamesAndImages) {
+                NSData *imageData = [filenameImageDict objectForKey:@"data"];
+                NSString *filename = [[filenameImageDict objectForKey:@"name"] stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
+                NSURL *fileURL = [dirUrl URLByAppendingPathComponent:filename];
+                [imageData writeToURL:fileURL atomically:YES];
+            }
+        }
+    }
+}
 
 #pragma mark - ROI Export
 -(NSString *)exportTypeStringForExportType:(ExportDataType)type withAnatomicalSite:(BOOL)withSite {
@@ -1595,7 +1642,7 @@
     }
     switch (exportHow) {
         case ExportAsFile:
-            if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
+            if ([self userDefaultBoolForKey:kCombineExportsOneFileDefault] == YES)
             {
                 if (dataStringA.length>0 && dataStringM.length>0) {
                     [self saveData:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM] withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
@@ -1613,7 +1660,7 @@
             break;
         case ViewInWindow:
         {
-            if ([[NSUserDefaults standardUserDefaults] boolForKey:kCombineExportsOneFileDefault] == YES)
+            if ([self userDefaultBoolForKey:kCombineExportsOneFileDefault] == YES)
             {
                 if (dataStringA.length>0 && dataStringM.length>0) {
                     [MirrorROIPluginFilterOC showStringInWindow:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM]
@@ -1860,7 +1907,7 @@
 -(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
     if (arrayOfData.count>0) {
         NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
-        if (forceTranspose || [[NSUserDefaults standardUserDefaults] boolForKey:kTransposeExportedDataDefault]) {
+        if (forceTranspose || [self userDefaultBoolForKey:kTransposeExportedDataDefault]) {
             //find the max length of the rows = the number of rows we need when we switch
             NSUInteger maxRowLength = 0;
             for (NSUInteger r=0; r<arrayOfData.count; r++) {
@@ -2146,7 +2193,7 @@
         NSInteger index = [self indexOfJiggleForROI:roi];
         if (index != NSNotFound && index<[self jiggleROIValuesArrayCountInCurrentSlice]) {
             distanceString = [NSString stringWithFormat:@" ∆%li", (long)[[[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] distance] integerValue]];
-            if ([[NSUserDefaults standardUserDefaults] boolForKey:kRankJiggleDefault])
+            if ([self userDefaultBoolForKey:kRankJiggleDefault])
             {
                 rankString = [NSString stringWithFormat:@" #%li", (long)[[[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] rank] integerValue]];
             }
@@ -2315,7 +2362,7 @@
     ROI *roi2CloneCT = [self ROIfromSlice:currentSlice inViewer:self.viewerCT withName:[self ROInameForType:Active_ROI]];//take VALUES of the ACTIVE
     if (roi2ClonePET != nil && roi2CloneCT != nil) {
         //make the ROIS grid, dont add the zero ROI as its the already mirror unless specifically requested
-        BOOL excludeOriginal = ![[NSUserDefaults standardUserDefaults] boolForKey:kIncludeOriginalInJiggleDefault];
+        BOOL excludeOriginal = ![self userDefaultBoolForKey:kIncludeOriginalInJiggleDefault];
         int minBounds = -1*(int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels];
         int maxBounds = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels];
         for (int moveX = minBounds; moveX<=maxBounds; moveX++) {
@@ -2370,7 +2417,7 @@
     //get the sort descriptors
     NSArray *sortDescriptors = [self sortDescriptorsForJiggle];
     if (sortDescriptors.count>0) {
-        if ([[NSUserDefaults standardUserDefaults] boolForKey:kRankJiggleDefault]) {
+        if ([self userDefaultBoolForKey:kRankJiggleDefault]) {
             // zero the ranks
             for (ROIValues *rv in [self jiggleROIvaluesArrayForSlice:slice]) {
                 rv.rank = [NSNumber numberWithInteger:0];

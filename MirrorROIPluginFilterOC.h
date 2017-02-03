@@ -100,6 +100,11 @@ typedef enum : NSInteger {
     BookmarkQuickLook = 3
 } BookmarkEAST;
 
+typedef enum : NSInteger {
+    KeyImageOff = -1,
+    KeyImageOn = 1,
+} KeyImageSetting;
+
 
 typedef enum : NSInteger {
     JumpUndefined,JumpFirst,JumpDecrease,JumpIncrease,JumpLast

@@ -35,6 +35,7 @@
 		8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ECAD5EF1DDA57B20079DB97 /* yingyang.png */; };
 		8ED16B231DF99F890043A74C /* TextDisplayWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 8ED16B211DF99F890043A74C /* TextDisplayWindow.h */; };
 		8ED16B241DF99F890043A74C /* TextDisplayWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 8ED16B221DF99F890043A74C /* TextDisplayWindow.m */; };
+		8ED5349B1E449D2C003B1E8A /* keyImageSquare deleteAll.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED5349A1E449D2C003B1E8A /* keyImageSquare deleteAll.png */; };
 		8ED845F81DC6295D008399F1 /* SW.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F41DC6295D008399F1 /* SW.png */; };
 		8ED845F91DC6295D008399F1 /* SE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F51DC6295D008399F1 /* SE.png */; };
 		8ED845FA1DC6295D008399F1 /* NE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F61DC6295D008399F1 /* NE.png */; };
@@ -82,6 +83,7 @@
 		8ECAD5EF1DDA57B20079DB97 /* yingyang.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = yingyang.png; path = PNGs/yingyang.png; sourceTree = "<group>"; };
 		8ED16B211DF99F890043A74C /* TextDisplayWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextDisplayWindow.h; sourceTree = "<group>"; };
 		8ED16B221DF99F890043A74C /* TextDisplayWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextDisplayWindow.m; sourceTree = "<group>"; };
+		8ED5349A1E449D2C003B1E8A /* keyImageSquare deleteAll.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "keyImageSquare deleteAll.png"; path = "PNGs/keyImageSquare deleteAll.png"; sourceTree = "<group>"; };
 		8ED845F41DC6295D008399F1 /* SW.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = SW.png; path = PNGs/SW.png; sourceTree = "<group>"; };
 		8ED845F51DC6295D008399F1 /* SE.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = SE.png; path = PNGs/SE.png; sourceTree = "<group>"; };
 		8ED845F61DC6295D008399F1 /* NE.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NE.png; path = PNGs/NE.png; sourceTree = "<group>"; };
@@ -200,6 +202,7 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				8ED5349A1E449D2C003B1E8A /* keyImageSquare deleteAll.png */,
 				8E6F81381E420A97002E5631 /* keyImageSquare.png */,
 				8E8AA1DA1E0693BB007621FB /* Jiggle small.png */,
 				8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */,
@@ -332,6 +335,7 @@
 				8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */,
 				8ED845FB1DC6295D008399F1 /* NW.png in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
+				8ED5349B1E449D2C003B1E8A /* keyImageSquare deleteAll.png in Resources */,
 				C52843BF1DC250C600371742 /* aleft.png in Resources */,
 				8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */,
 				8E172CFE1DDD03F100F33DE5 /* JiggleSelect.png in Resources */,
