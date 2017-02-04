@@ -119,13 +119,20 @@
     [arrayOfjROIs addObject:@{kJiggleROIsArrayKey : @"1"}];
     [defaults setObject:arrayOfjROIs forKey:kJiggleROIsArrayName];
     
+    //comboBoxes arrays
+    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"treamentsites" ofType:@"plist"]] forKey:kDefaultTreatmentSites];
+    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"vaccines" ofType:@"plist"]] forKey:kDefaultTreatmentVaccines];
+    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"anatomicalsites" ofType:@"plist"]] forKey:kDefaultAnatomicalSites];
+    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"placebos" ofType:@"plist"]] forKey:kDefaultPlacebos];
+
+    
     //override Osirix Defaults
     [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
     
     //register the defaults
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
-    //add observers for defaults changes
+    //add observers for defaults changes so app can respond
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Active options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Mirrored options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformPlaced options:NSKeyValueObservingOptionNew context:nil];
@@ -155,7 +162,7 @@
     [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:sender.tag];
 }
 -(void)assignViewerWindow:(ViewerController *)viewController forType:(ViewerWindow_Type)type {
-    
+    [self clearTreatmentFields];
     if (type == CT_Window || type == CTandPET_Windows)
     {
         self.viewerCT = viewController;
@@ -176,6 +183,7 @@
         if (viewController != nil) {
             self.labelPET.stringValue = viewController.window.title;
             self.labelPET.toolTip = viewController.window.title;
+            [self populateTreatmentFieldsFromComments];
        }
         else
         {
@@ -279,6 +287,57 @@
 - (IBAction)segmentUseCTPETorPETaloneTapped:(NSSegmentedControl *)sender {
     [[NSUserDefaults standardUserDefaults] synchronize];
     [self showHideControlsIfViewersValid];
+}
+
+#pragma mark - ComboBox
+-(void) alterArrayForComboBox:(NSComboBox *)cbox forIdentifier:(NSString *)identifier withAlteration:(ComboBoxArrayAlteration)alteration{
+    NSMutableArray *array = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:identifier]];
+    if (cbox.stringValue.length > 0 && ![array containsObject:cbox.stringValue]) {
+        switch (alteration) {
+            case ComboArrayAdd:
+                [array addObject:cbox.stringValue];
+                break;
+            case ComboArrayDelete:
+                [array removeObject:cbox.stringValue];
+                break;
+                
+            default:
+                break;
+        }
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:array forKey: identifier];
+}
+
+- (IBAction)alterComboBoxItemTapped:(NSButton *)sender {
+    //    [self willChangeValueForKey:@"arrayVaccines"];
+    //    [self.arrayVaccines addObject:[[NSDate date] description]];
+    //    [self didChangeValueForKey:@"arrayVaccines"];
+    //NSUserDefaults call returns NSArray so we have to do arrayWithArray
+    
+    switch (sender.tag) {
+        case Combo_TreatmentSites:
+            [self alterArrayForComboBox:self.comboTreatmentSite forIdentifier:kDefaultTreatmentSites withAlteration:ComboArrayAdd];
+            break;
+        case Combo_TreatmentSites_Delete:
+            [self alterArrayForComboBox:self.comboTreatmentSite forIdentifier:kDefaultTreatmentSites withAlteration:ComboArrayDelete];
+            break;
+        case Combo_Vaccines:
+            [self alterArrayForComboBox:self.comboVaccines forIdentifier:kDefaultTreatmentVaccines withAlteration:ComboArrayAdd];
+            break;
+        case Combo_Vaccines_Delete:
+            [self alterArrayForComboBox:self.comboVaccines forIdentifier:kDefaultTreatmentVaccines withAlteration:ComboArrayDelete];
+            break;
+        case Combo_AnatomicalSites:
+            [self alterArrayForComboBox:self.comboAnatomicalSite forIdentifier:kDefaultAnatomicalSites withAlteration:ComboArrayAdd];
+            break;
+        case Combo_AnatomicalSites_Delete:
+            [self alterArrayForComboBox:self.comboAnatomicalSite forIdentifier:kDefaultAnatomicalSites withAlteration:ComboArrayDelete];
+            break;
+            
+        default:
+            break;
+    }
+    
 }
 
 #pragma mark - TextDisplayWindowController
@@ -1171,15 +1230,10 @@
     NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
     return fileName;
 }
--(NSString *)participantDetailsString {
-    DicomStudy *study = [self.viewerPET currentStudy];
-    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tInjection Location\n%@\t%@\t%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,study.comment2,study.comment3,self.viewerPET.window.title];
-}
 - (void)attachBookmarkedDataFileAsReport:(NSURL*)url {
     DicomStudy *study = [self.viewerPET currentStudy];
     [[BrowserController currentBrowser] importReport:url.path UID:study.studyInstanceUID];
 }
-
 
 - (void)exportBookmarkedData:(ExportDataHow)exportHow {
     NSURL *savedLocation = nil;
@@ -1199,6 +1253,53 @@
     if (savedLocation != nil && [self userDefaultBoolForKey:kAddReportWhenSaveBookmarkedDataDefault])
     {
         [self attachBookmarkedDataFileAsReport:savedLocation];
+    }
+}
+
+
+#pragma mark - Comments
+-(NSString *)participantDetailsString {
+    DicomStudy *study = [self.viewerPET currentStudy];
+    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tInjection Location\n%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,self.viewerPET.window.title];
+}
+
+-(void)clearTreatmentFields {
+    self.comboVaccines.stringValue = @"";
+    self.comboTreatmentSite.stringValue = @"";
+    self.textFieldVaccineDayOffset.stringValue = @"";
+    self.comboPlaceboUsed.stringValue = @"";
+
+}
+-(void)populateTreatmentFieldsFromComments {
+    NSArray *commentsArray = [[[self.viewerPET currentStudy] comment] componentsSeparatedByString:@"\t"];
+    if (commentsArray.count >= 4) {
+        self.comboVaccines.stringValue = [commentsArray objectAtIndex:0];
+        self.comboTreatmentSite.stringValue = [commentsArray objectAtIndex:1];
+        self.textFieldVaccineDayOffset.stringValue = [commentsArray objectAtIndex:2];
+        self.comboPlaceboUsed.stringValue = [commentsArray objectAtIndex:3];
+    }
+}
+
+-(NSString *)correctedStringForNullString:(NSString *)string {
+    if (string == nil) {return @"-";}
+    return string;
+}
+
+-(IBAction)readWriteCommentsFromFieldsTapped:(NSButton *)sender {
+    switch (sender.tag) {
+        case WriteComments:
+            [[self.viewerPET currentStudy] setComment:[NSString stringWithFormat:@"%@\t%@\t+%@\t%@",
+                                                       [self correctedStringForNullString:self.comboVaccines.stringValue],
+                                                       [self correctedStringForNullString:self.comboTreatmentSite.stringValue],
+                                                       [self correctedStringForNullString:self.textFieldVaccineDayOffset.stringValue],
+                                                       [self correctedStringForNullString:self.comboPlaceboUsed.stringValue]]];
+            break;
+        case ReadComments:
+            [self populateTreatmentFieldsFromComments];
+            break;
+            
+        default:
+            break;
     }
 }
 

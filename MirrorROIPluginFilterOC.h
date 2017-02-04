@@ -102,8 +102,31 @@ typedef enum : NSInteger {
 
 typedef enum : NSInteger {
     KeyImageOff = -1,
-    KeyImageOn = 1,
+    KeyImageOn = 1
 } KeyImageSetting;
+
+typedef enum : NSInteger {
+    WriteComments = -1,
+    ReadComments = 1
+} ReadWriteComments;
+
+typedef enum : NSInteger {
+    ComboArrayDelete = -1,
+    ComboArrayLoad = 0,
+    ComboArrayAdd = 1
+} ComboBoxArrayAlteration;
+
+typedef enum : NSInteger {
+    Combo_Vaccines_Delete = -1,
+    Combo_Vaccines = 1,
+    Combo_Vaccines_Load = 11,
+    Combo_TreatmentSites_Delete = -2,
+    Combo_TreatmentSites = 2,
+    Combo_TreatmentSites_Load = 12,
+    Combo_AnatomicalSites_Delete = -3,
+    Combo_AnatomicalSites = 3,
+    Combo_AnatomicalSites_Load = 13
+} ComboBoxIdentifiers;
 
 
 typedef enum : NSInteger {
@@ -137,6 +160,13 @@ typedef enum : NSInteger {
 
 @property (assign) IBOutlet NSPopUpButton *popupExportData;
 @property (assign) IBOutlet NSComboBox *comboAnatomicalSite;
+@property (assign) IBOutlet NSComboBox *comboTreatmentSite;
+@property (assign) IBOutlet NSComboBox *comboVaccines;
+@property (assign) IBOutlet NSComboBox *comboPlaceboUsed;
+
+@property (assign) IBOutlet NSTextField *textFieldVaccineDayOffset;
+
+
 
 @property (assign) IBOutlet NSColorWell *colorWellActive;
 @property (assign) IBOutlet NSColorWell *colorWellMirrored;
@@ -149,7 +179,6 @@ typedef enum : NSInteger {
 @property (strong) NSMutableDictionary *dictBookmarks;
 @property (strong) NSMutableArray *arrayBookmarkedSites;
 @property (assign) IBOutlet NSArrayController *arrayControllerBookmarks;
-
 
 @property (strong) NSMutableArray *arrayJiggleROIvalues;
 

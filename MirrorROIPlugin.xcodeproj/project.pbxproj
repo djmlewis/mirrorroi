@@ -10,6 +10,12 @@
 		8420023212E829A200E1E9CE /* OsiriXAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8420023112E829A200E1E9CE /* OsiriXAPI.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
+		8E15CE361E45F95F0009E1A5 /* vaccines.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8E15CE351E45F95F0009E1A5 /* vaccines.plist */; };
+		8E15CE391E4628070009E1A5 /* treamentsites.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8E15CE381E4628070009E1A5 /* treamentsites.plist */; };
+		8E15CE3B1E4628420009E1A5 /* anatomicalsites.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8E15CE3A1E4628420009E1A5 /* anatomicalsites.plist */; };
+		8E15CE3E1E4652400009E1A5 /* placebos.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8E15CE3D1E4652400009E1A5 /* placebos.plist */; };
+		8E15CE411E466EBA0009E1A5 /* DatabaseRead.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E15CE3F1E466EBA0009E1A5 /* DatabaseRead.png */; };
+		8E15CE421E466EBA0009E1A5 /* DatabaseWrite.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E15CE401E466EBA0009E1A5 /* DatabaseWrite.png */; };
 		8E172CFD1DDD03F100F33DE5 /* Jiggle.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E172CFB1DDD03F100F33DE5 /* Jiggle.png */; };
 		8E172CFE1DDD03F100F33DE5 /* JiggleSelect.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E172CFC1DDD03F100F33DE5 /* JiggleSelect.png */; };
 		8E1D23C31DE6386800469190 /* decrease.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E1D23C11DE6386800469190 /* decrease.png */; };
@@ -59,6 +65,12 @@
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		8420023112E829A200E1E9CE /* OsiriXAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OsiriXAPI.framework; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8E15CE351E45F95F0009E1A5 /* vaccines.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = vaccines.plist; path = arrays/vaccines.plist; sourceTree = "<group>"; };
+		8E15CE381E4628070009E1A5 /* treamentsites.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = treamentsites.plist; sourceTree = "<group>"; };
+		8E15CE3A1E4628420009E1A5 /* anatomicalsites.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = anatomicalsites.plist; sourceTree = "<group>"; };
+		8E15CE3D1E4652400009E1A5 /* placebos.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = placebos.plist; sourceTree = "<group>"; };
+		8E15CE3F1E466EBA0009E1A5 /* DatabaseRead.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = DatabaseRead.png; path = PNGs/DatabaseRead.png; sourceTree = "<group>"; };
+		8E15CE401E466EBA0009E1A5 /* DatabaseWrite.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = DatabaseWrite.png; path = PNGs/DatabaseWrite.png; sourceTree = "<group>"; };
 		8E172CFB1DDD03F100F33DE5 /* Jiggle.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Jiggle.png; path = PNGs/Jiggle.png; sourceTree = "<group>"; };
 		8E172CFC1DDD03F100F33DE5 /* JiggleSelect.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = JiggleSelect.png; path = PNGs/JiggleSelect.png; sourceTree = "<group>"; };
 		8E1D23C11DE6386800469190 /* decrease.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = decrease.png; path = PNGs/decrease.png; sourceTree = "<group>"; };
@@ -125,6 +137,7 @@
 				8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */,
 				8EE909791DA15C6F00AFAA00 /* unusedCode */,
 				8EDB8BDB1DAE5826007C14A9 /* PNGs */,
+				8E15CE3C1E4628830009E1A5 /* arraylists */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
 				32C88E010371C26100C91783 /* Other Sources */,
 				089C167CFE841241C02AAC07 /* Resources */,
@@ -199,9 +212,22 @@
 			name = "Other Sources";
 			sourceTree = "<group>";
 		};
+		8E15CE3C1E4628830009E1A5 /* arraylists */ = {
+			isa = PBXGroup;
+			children = (
+				8E15CE351E45F95F0009E1A5 /* vaccines.plist */,
+				8E15CE381E4628070009E1A5 /* treamentsites.plist */,
+				8E15CE3A1E4628420009E1A5 /* anatomicalsites.plist */,
+				8E15CE3D1E4652400009E1A5 /* placebos.plist */,
+			);
+			name = arraylists;
+			sourceTree = "<group>";
+		};
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				8E15CE3F1E466EBA0009E1A5 /* DatabaseRead.png */,
+				8E15CE401E466EBA0009E1A5 /* DatabaseWrite.png */,
 				8ED5349A1E449D2C003B1E8A /* keyImageSquare deleteAll.png */,
 				8E6F81381E420A97002E5631 /* keyImageSquare.png */,
 				8E8AA1DA1E0693BB007621FB /* Jiggle small.png */,
@@ -320,7 +346,9 @@
 				8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */,
 				8EF2964C1DC4D17200CC638E /* Erase Filled-50.png in Resources */,
 				8E8AA1DB1E0693BB007621FB /* Jiggle small.png in Resources */,
+				8E15CE3B1E4628420009E1A5 /* anatomicalsites.plist in Resources */,
 				8E1D23C41DE6386800469190 /* increase.png in Resources */,
+				8E15CE411E466EBA0009E1A5 /* DatabaseRead.png in Resources */,
 				8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */,
 				C52843BA1DC250BA00371742 /* aup.png in Resources */,
 				8ED845F91DC6295D008399F1 /* SE.png in Resources */,
@@ -328,12 +356,16 @@
 				8E172CFD1DDD03F100F33DE5 /* Jiggle.png in Resources */,
 				8E1D23C31DE6386800469190 /* decrease.png in Resources */,
 				8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */,
+				8E15CE361E45F95F0009E1A5 /* vaccines.plist in Resources */,
 				8EF296521DC4D2FB00CC638E /* start.png in Resources */,
 				8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */,
+				8E15CE3E1E4652400009E1A5 /* placebos.plist in Resources */,
 				C52843BE1DC250C600371742 /* adownward.png in Resources */,
+				8E15CE391E4628070009E1A5 /* treamentsites.plist in Resources */,
 				8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */,
 				8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */,
 				8ED845FB1DC6295D008399F1 /* NW.png in Resources */,
+				8E15CE421E466EBA0009E1A5 /* DatabaseWrite.png in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
 				8ED5349B1E449D2C003B1E8A /* keyImageSquare deleteAll.png in Resources */,
 				C52843BF1DC250C600371742 /* aleft.png in Resources */,
