@@ -120,10 +120,10 @@
     [defaults setObject:arrayOfjROIs forKey:kJiggleROIsArrayName];
     
     //comboBoxes arrays
-    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"treamentsites" ofType:@"plist"]] forKey:kDefaultTreatmentSites];
-    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"vaccines" ofType:@"plist"]] forKey:kDefaultTreatmentVaccines];
-    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"anatomicalsites" ofType:@"plist"]] forKey:kDefaultAnatomicalSites];
-    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"placebos" ofType:@"plist"]] forKey:kDefaultPlacebos];
+    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"treamentsites" ofType:@"plist"]] forKey:kDefaultArrayTreatmentSites];
+    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"vaccines" ofType:@"plist"]] forKey:kDefaultArrayTreatmentVaccines];
+    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"anatomicalsites" ofType:@"plist"]] forKey:kDefaultArrayAnatomicalSites];
+    [defaults setObject:[NSMutableArray arrayWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource:@"placebos" ofType:@"plist"]] forKey:kDefaultArrayPlacebos];
 
     
     //override Osirix Defaults
@@ -289,21 +289,149 @@
     [self showHideControlsIfViewersValid];
 }
 
-#pragma mark - ComboBox
--(void) alterArrayForComboBox:(NSComboBox *)cbox forIdentifier:(NSString *)identifier withAlteration:(ComboBoxArrayAlteration)alteration{
-    NSMutableArray *array = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:identifier]];
-    if (cbox.stringValue.length > 0 && ![array containsObject:cbox.stringValue]) {
-        switch (alteration) {
-            case ComboArrayAdd:
-                [array addObject:cbox.stringValue];
+#pragma mark - Import Lists
+- (IBAction)importComboBoxListFileTapped:(NSButton *)sender {
+    switch (sender.tag) {
+        case Combo_Vaccines_Load:
+        case Combo_TreatmentSites_Load:
+        case Combo_AnatomicalSites_Load:
+        case Combo_Placebo_Load:
+            [self selectArrayListFileForCombo:sender.tag];
+            break;
+        case Combo_Vaccines_Save:
+        case Combo_TreatmentSites_Save:
+        case Combo_AnatomicalSites_Save:
+        case Combo_Placebo_Save:
+            [self saveArrayFileForCombo:sender.tag];
+            break;
+            
+        default:
+            break;
+    }
+}
+
+-(void)selectArrayListFileForCombo:(ComboBoxIdentifier)comboBox {
+    // Get the main window for the document.
+    NSWindow* window = self.windowControllerMain.window;
+    // Create and configure the panel.
+    NSOpenPanel* panel = [NSOpenPanel openPanel];
+    [panel setCanChooseDirectories:NO];
+    [panel setAllowsMultipleSelection:NO];
+    [panel setMessage:@"Import a file with a new list"];
+    
+    // Display the panel attached to the document's window.
+    [panel beginSheetModalForWindow:window completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            [self importComboArrayFileAtURL:[[panel URLs] objectAtIndex:0] forComboBox:comboBox];
+        }
+    }];
+
+}
+
+-(void)saveArrayFileForCombo:(ComboBoxIdentifier)comboBox {
+    NSArray *array = [self arrayForComboBox:comboBox];
+    if (array.count > 0) {
+        NSSavePanel *savePanel = [NSSavePanel savePanel];
+        savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
+        savePanel.nameFieldStringValue = [[MirrorROIPluginFilterOC fileNameForComboBox:comboBox] stringByAppendingPathExtension:@"txt"];
+        if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
+            NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:nil];
+            [[array componentsJoinedByString:@"\n"] writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
+        }
+    }
+    else {
+        [MirrorROIPluginFilterOC alertWithMessage:@"There are no items in the list" andTitle:[NSString stringWithFormat:@"Export Items for %@",[MirrorROIPluginFilterOC fileNameForComboBox:comboBox]]];
+    }
+}
+
+-(void)importComboArrayFileAtURL:(NSURL *)url forComboBox:(ComboBoxIdentifier)comboBox {
+    NSError *error = [NSError errorWithDomain:NSCocoaErrorDomain code:0 userInfo:nil];
+    NSString *string = [NSString stringWithContentsOfURL:url usedEncoding:nil error:&error];
+    NSMutableArray *array = [NSMutableArray arrayWithArray:[string componentsSeparatedByString:@"\n"]];
+    //purge blank lines
+    NSMutableIndexSet *set = [NSMutableIndexSet indexSet];
+    for (NSUInteger i=0; i<array.count; i++) {
+        if ([[array objectAtIndex:i] length]<1) {
+            [set addIndex:i];
+        }
+    }
+    if (set.count>0) {
+        [array removeObjectsAtIndexes:set];
+    }
+    if (array.count>0) {
+        switch (comboBox) {
+            case Combo_Vaccines_Load:
+                [[NSUserDefaults standardUserDefaults] setObject:array forKey:kDefaultArrayTreatmentVaccines];
                 break;
-            case ComboArrayDelete:
-                [array removeObject:cbox.stringValue];
+            case Combo_TreatmentSites_Load:
+                [[NSUserDefaults standardUserDefaults] setObject:array forKey:kDefaultArrayTreatmentSites];
+                break;
+            case Combo_AnatomicalSites_Load:
+                [[NSUserDefaults standardUserDefaults] setObject:array forKey:kDefaultArrayAnatomicalSites];
+                break;
+            case Combo_Placebo_Load:
+                [[NSUserDefaults standardUserDefaults] setObject:array forKey:kDefaultArrayPlacebos];
                 break;
                 
             default:
                 break;
         }
+    }
+    else {
+        [MirrorROIPluginFilterOC alertWithMessage:[NSString stringWithFormat:@"The file could not be loaded either because it could not be opened or it did not contain readable text. The file must be text with a single item on each line. Read Error: %@", error.localizedDescription] andTitle:@"Error loading file"];
+    }
+}
+
+#pragma mark - ComboBox
++(NSString *)fileNameForComboBox:(ComboBoxIdentifier)comboBox {
+    switch (comboBox) {
+        case Combo_Vaccines_Save:
+            return @"Vaccines";
+        case Combo_TreatmentSites_Save:
+            return @"Treatment Sites";
+        case Combo_AnatomicalSites_Save:
+            return @"Anatomical Sites";
+        case Combo_Placebo_Save:
+            return @"Placebos";
+            break;
+            
+        default:
+            return nil;
+            break;
+    }
+}
+
+-(NSArray *)arrayForComboBox:(ComboBoxIdentifier)comboBox {
+    switch (comboBox) {
+        case Combo_Vaccines_Save:
+            return [[NSUserDefaults standardUserDefaults] objectForKey:kDefaultArrayTreatmentVaccines];
+        case Combo_TreatmentSites_Save:
+            return [[NSUserDefaults standardUserDefaults] objectForKey:kDefaultArrayTreatmentSites];
+        case Combo_AnatomicalSites_Save:
+            return [[NSUserDefaults standardUserDefaults] objectForKey:kDefaultArrayAnatomicalSites];
+        case Combo_Placebo_Save:
+            return [[NSUserDefaults standardUserDefaults] objectForKey:kDefaultArrayPlacebos];
+            
+        default:
+            return nil;
+            break;
+    }
+}
+
+-(void) alterArrayForComboBox:(NSComboBox *)cbox forIdentifier:(NSString *)identifier withAlteration:(ComboBoxArrayAlteration)alteration {
+    NSMutableArray *array = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:identifier]];
+    switch (alteration) {
+        case ComboArrayAdd:
+            if (cbox.stringValue.length > 0 && ![array containsObject:cbox.stringValue]) {
+                [array addObject:cbox.stringValue];
+            }
+            break;
+        case ComboArrayDelete:
+            [array removeObject:cbox.stringValue];
+            break;
+            
+        default:
+            break;
     }
     [[NSUserDefaults standardUserDefaults] setObject:array forKey: identifier];
 }
@@ -316,24 +444,29 @@
     
     switch (sender.tag) {
         case Combo_TreatmentSites:
-            [self alterArrayForComboBox:self.comboTreatmentSite forIdentifier:kDefaultTreatmentSites withAlteration:ComboArrayAdd];
+            [self alterArrayForComboBox:self.comboTreatmentSite forIdentifier:kDefaultArrayTreatmentSites withAlteration:ComboArrayAdd];
             break;
         case Combo_TreatmentSites_Delete:
-            [self alterArrayForComboBox:self.comboTreatmentSite forIdentifier:kDefaultTreatmentSites withAlteration:ComboArrayDelete];
+            [self alterArrayForComboBox:self.comboTreatmentSite forIdentifier:kDefaultArrayTreatmentSites withAlteration:ComboArrayDelete];
             break;
         case Combo_Vaccines:
-            [self alterArrayForComboBox:self.comboVaccines forIdentifier:kDefaultTreatmentVaccines withAlteration:ComboArrayAdd];
+            [self alterArrayForComboBox:self.comboVaccines forIdentifier:kDefaultArrayTreatmentVaccines withAlteration:ComboArrayAdd];
             break;
         case Combo_Vaccines_Delete:
-            [self alterArrayForComboBox:self.comboVaccines forIdentifier:kDefaultTreatmentVaccines withAlteration:ComboArrayDelete];
+            [self alterArrayForComboBox:self.comboVaccines forIdentifier:kDefaultArrayTreatmentVaccines withAlteration:ComboArrayDelete];
+            break;
+        case Combo_Placebo:
+            [self alterArrayForComboBox:self.comboPlaceboUsed forIdentifier:kDefaultArrayPlacebos withAlteration:ComboArrayAdd];
+            break;
+        case Combo_Placebo_Delete:
+            [self alterArrayForComboBox:self.comboPlaceboUsed forIdentifier:kDefaultArrayPlacebos withAlteration:ComboArrayDelete];
             break;
         case Combo_AnatomicalSites:
-            [self alterArrayForComboBox:self.comboAnatomicalSite forIdentifier:kDefaultAnatomicalSites withAlteration:ComboArrayAdd];
+            [self alterArrayForComboBox:self.comboAnatomicalSite forIdentifier:kDefaultArrayAnatomicalSites withAlteration:ComboArrayAdd];
             break;
         case Combo_AnatomicalSites_Delete:
-            [self alterArrayForComboBox:self.comboAnatomicalSite forIdentifier:kDefaultAnatomicalSites withAlteration:ComboArrayDelete];
+            [self alterArrayForComboBox:self.comboAnatomicalSite forIdentifier:kDefaultArrayAnatomicalSites withAlteration:ComboArrayDelete];
             break;
-            
         default:
             break;
     }
@@ -1256,13 +1389,14 @@
     }
 }
 
-
 #pragma mark - Comments
 -(NSString *)participantDetailsString {
     DicomStudy *study = [self.viewerPET currentStudy];
     return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tInjection Location\n%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,self.viewerPET.window.title];
 }
-
+-(IBAction)clearTreatmentFieldsTapped:(id)sender {
+    [self clearTreatmentFields];
+}
 -(void)clearTreatmentFields {
     self.comboVaccines.stringValue = @"";
     self.comboTreatmentSite.stringValue = @"";
@@ -1384,7 +1518,8 @@
         [panel setCanCreateDirectories:YES];
         [panel setCanChooseFiles:NO];
         [panel setAllowsMultipleSelection:NO];
-        
+        [panel setMessage:@"Select location to save Key Image files"];
+
         if ([panel runModal] == NSFileHandlingPanelOKButton) {
             NSURL *dirUrl = [panel.URLs objectAtIndex:0];
             for (NSMutableDictionary* filenameImageDict in arrayOfFileNamesAndImages) {

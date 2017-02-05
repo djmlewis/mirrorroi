@@ -140,7 +140,7 @@
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <comboBox verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="IHb-5L-YBO">
-                                            <rect key="frame" x="16" y="212" width="148" height="26"/>
+                                            <rect key="frame" x="2" y="212" width="148" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="Vaccine" drawsBackground="YES" buttonBordered="NO" numberOfVisibleItems="5" id="VEr-0x-fQe">
                                                 <font key="font" metaFont="system"/>
@@ -148,11 +148,11 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </comboBoxCell>
                                             <connections>
-                                                <binding destination="fUA-5u-y3G" name="contentValues" keyPath="values.kDefaultTreatmentVaccines" id="CNY-Xh-iRJ"/>
+                                                <binding destination="fUA-5u-y3G" name="contentValues" keyPath="values.kDefaultArrayTreatmentVaccines" id="Yym-HR-xIS"/>
                                             </connections>
                                         </comboBox>
                                         <comboBox verticalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="D0j-bt-khy">
-                                            <rect key="frame" x="17" y="176" width="148" height="26"/>
+                                            <rect key="frame" x="3" y="176" width="148" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="Injection Site" drawsBackground="YES" buttonBordered="NO" numberOfVisibleItems="5" id="BCu-UW-1hA">
                                                 <font key="font" metaFont="system"/>
@@ -160,11 +160,11 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </comboBoxCell>
                                             <connections>
-                                                <binding destination="fUA-5u-y3G" name="contentValues" keyPath="values.kDefaultTreatmentSites" id="5zO-qp-eNB"/>
+                                                <binding destination="fUA-5u-y3G" name="contentValues" keyPath="values.kDefaultArrayTreatmentSites" id="fON-gf-1eA"/>
                                             </connections>
                                         </comboBox>
                                         <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I2f-0J-paI">
-                                            <rect key="frame" x="17" y="144" width="127" height="22"/>
+                                            <rect key="frame" x="3" y="144" width="127" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" placeholderString="Days Post Vaccine" drawsBackground="YES" id="b0j-v2-UM2">
                                                 <numberFormatter key="formatter" formatterBehavior="default10_4" numberStyle="decimal" minimumIntegerDigits="1" maximumIntegerDigits="2000000000" maximumFractionDigits="3" id="b4B-RS-rtd"/>
@@ -174,7 +174,7 @@
                                             </textFieldCell>
                                         </textField>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="tTw-pn-t6s">
-                                            <rect key="frame" x="171" y="216" width="13" height="19"/>
+                                            <rect key="frame" x="153" y="216" width="13" height="19"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Pgn-uy-5dY">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -185,7 +185,7 @@
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="6WX-tU-kyC">
-                                            <rect key="frame" x="171" y="180" width="13" height="19"/>
+                                            <rect key="frame" x="153" y="180" width="13" height="19"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="t9a-rj-yEN">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -196,7 +196,7 @@
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="-1" translatesAutoresizingMaskIntoConstraints="NO" id="dvk-jC-o1F">
-                                            <rect key="frame" x="187" y="216" width="13" height="19"/>
+                                            <rect key="frame" x="171" y="216" width="13" height="19"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRemoveTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="fca-mT-1oR">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -207,7 +207,7 @@
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="-2" translatesAutoresizingMaskIntoConstraints="NO" id="7no-Pz-7L9">
-                                            <rect key="frame" x="187" y="180" width="13" height="19"/>
+                                            <rect key="frame" x="171" y="180" width="13" height="19"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRemoveTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="5yb-rh-Vqg">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -218,29 +218,29 @@
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="11" translatesAutoresizingMaskIntoConstraints="NO" id="AA9-oJ-wdr">
-                                            <rect key="frame" x="208" y="216" width="13" height="19"/>
+                                            <rect key="frame" x="196" y="216" width="13" height="19"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSFolder" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="YgA-O3-DRT">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                             <connections>
-                                                <action selector="alterComboBoxItemTapped:" target="-2" id="CII-PB-0vf"/>
+                                                <action selector="importComboBoxListFileTapped:" target="-2" id="kvE-Ll-Bbw"/>
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="12" translatesAutoresizingMaskIntoConstraints="NO" id="Kb4-hy-AmG">
-                                            <rect key="frame" x="208" y="180" width="13" height="19"/>
+                                            <rect key="frame" x="196" y="180" width="13" height="19"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSFolder" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Wmq-ME-JnH">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                             <connections>
-                                                <action selector="alterComboBoxItemTapped:" target="-2" id="pT0-Yf-BAj"/>
+                                                <action selector="importComboBoxListFileTapped:" target="-2" id="OuB-mr-wA7"/>
                                             </connections>
                                         </button>
                                         <comboBox verticalHuggingPriority="750" fixedFrame="YES" tag="2" translatesAutoresizingMaskIntoConstraints="NO" id="TN3-ZU-LZN">
-                                            <rect key="frame" x="16" y="109" width="148" height="26"/>
+                                            <rect key="frame" x="2" y="109" width="148" height="26"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="Placebo Used" drawsBackground="YES" buttonBordered="NO" numberOfVisibleItems="5" id="AFZ-jF-91z">
                                                 <font key="font" metaFont="system"/>
@@ -248,11 +248,11 @@
                                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                             </comboBoxCell>
                                             <connections>
-                                                <binding destination="fUA-5u-y3G" name="contentValues" keyPath="values.kDefaultPlacebos" id="r5v-cr-0qK"/>
+                                                <binding destination="fUA-5u-y3G" name="contentValues" keyPath="values.kDefaultArrayPlacebos" id="rcL-mS-eiL"/>
                                             </connections>
                                         </comboBox>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="4" translatesAutoresizingMaskIntoConstraints="NO" id="caD-I2-dB1">
-                                            <rect key="frame" x="171" y="113" width="13" height="19"/>
+                                            <rect key="frame" x="153" y="113" width="13" height="19"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="ljR-WD-R3A">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -263,7 +263,7 @@
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="-4" translatesAutoresizingMaskIntoConstraints="NO" id="HFL-PJ-HUc">
-                                            <rect key="frame" x="187" y="113" width="13" height="19"/>
+                                            <rect key="frame" x="171" y="113" width="13" height="19"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRemoveTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="7Jk-30-snb">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -274,18 +274,51 @@
                                             </connections>
                                         </button>
                                         <button verticalHuggingPriority="750" fixedFrame="YES" tag="14" translatesAutoresizingMaskIntoConstraints="NO" id="cEM-UE-0jo">
-                                            <rect key="frame" x="208" y="113" width="13" height="19"/>
+                                            <rect key="frame" x="196" y="113" width="13" height="19"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSFolder" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="hvU-Xo-rqb">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
                                             <connections>
-                                                <action selector="alterComboBoxItemTapped:" target="-2" id="YUb-Uf-mA2"/>
+                                                <action selector="importComboBoxListFileTapped:" target="-2" id="0eq-po-7Rv"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" tag="21" translatesAutoresizingMaskIntoConstraints="NO" id="5AA-8Q-w8x">
+                                            <rect key="frame" x="217" y="218" width="13" height="19"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSShareTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="q3m-Av-rph">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="importComboBoxListFileTapped:" target="-2" id="tvk-q1-qBl"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" tag="22" translatesAutoresizingMaskIntoConstraints="NO" id="a5q-l2-waK">
+                                            <rect key="frame" x="217" y="182" width="13" height="19"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSShareTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="v8f-dl-uZX">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="importComboBoxListFileTapped:" target="-2" id="p6O-Iv-cN9"/>
+                                            </connections>
+                                        </button>
+                                        <button verticalHuggingPriority="750" fixedFrame="YES" tag="24" translatesAutoresizingMaskIntoConstraints="NO" id="aCN-MX-01c">
+                                            <rect key="frame" x="217" y="115" width="13" height="19"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSShareTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="U9v-Rp-72A">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="importComboBoxListFileTapped:" target="-2" id="FRd-cy-Efc"/>
                                             </connections>
                                         </button>
                                         <button fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="3Di-rw-0bq">
-                                            <rect key="frame" x="51" y="29" width="48" height="48"/>
+                                            <rect key="frame" x="33" y="28" width="48" height="48"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="DatabaseRead" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="h9d-Ua-afR">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -296,7 +329,7 @@
                                             </connections>
                                         </button>
                                         <button fixedFrame="YES" tag="-1" translatesAutoresizingMaskIntoConstraints="NO" id="zvQ-Af-OeG">
-                                            <rect key="frame" x="131" y="29" width="48" height="48"/>
+                                            <rect key="frame" x="91" y="28" width="48" height="48"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="DatabaseWrite" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="QZF-eu-2i9">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -304,6 +337,17 @@
                                             </buttonCell>
                                             <connections>
                                                 <action selector="readWriteCommentsFromFieldsTapped:" target="-2" id="vnV-rO-KWd"/>
+                                            </connections>
+                                        </button>
+                                        <button fixedFrame="YES" tag="-1" translatesAutoresizingMaskIntoConstraints="NO" id="5Rf-XA-clr">
+                                            <rect key="frame" x="150" y="28" width="48" height="48"/>
+                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                            <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSTrashFull" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="wJn-at-qfB">
+                                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                <font key="font" metaFont="system"/>
+                                            </buttonCell>
+                                            <connections>
+                                                <action selector="clearTreatmentFieldsTapped:" target="-2" id="ixk-Ht-f3V"/>
                                             </connections>
                                         </button>
                                     </subviews>
@@ -329,7 +373,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <subviews>
                                                 <comboBox verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7yk-hA-cJu">
-                                                    <rect key="frame" x="6" y="178" width="166" height="26"/>
+                                                    <rect key="frame" x="6" y="178" width="148" height="26"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <comboBoxCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" borderStyle="bezel" placeholderString="Anatomical Site" drawsBackground="YES" buttonBordered="NO" numberOfVisibleItems="5" id="cmj-iS-2eV">
                                                         <font key="font" metaFont="system"/>
@@ -337,7 +381,7 @@
                                                         <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                                     </comboBoxCell>
                                                     <connections>
-                                                        <binding destination="fUA-5u-y3G" name="contentValues" keyPath="values.kDefaultAnatomicalSites" id="oHT-Af-imS"/>
+                                                        <binding destination="fUA-5u-y3G" name="contentValues" keyPath="values.kDefaultArrayAnatomicalSites" id="d15-Sd-6fy"/>
                                                     </connections>
                                                 </comboBox>
                                                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Jqn-mN-vfa">
@@ -646,8 +690,30 @@
                                                         <action selector="keyImageTapped:" target="-2" id="9mK-XN-ivf"/>
                                                     </connections>
                                                 </button>
+                                                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="e0q-sC-mB2">
+                                                    <rect key="frame" x="80" y="154" width="21" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSTrashFull" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="EN6-bO-Pwr">
+                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="addSubtractTrashExportViewBookmarks:" target="-2" id="Hzp-6y-SRF"/>
+                                                    </connections>
+                                                </button>
+                                                <button verticalHuggingPriority="750" fixedFrame="YES" tag="23" translatesAutoresizingMaskIntoConstraints="NO" id="aWb-4Q-wLk">
+                                                    <rect key="frame" x="215" y="184" width="13" height="19"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                    <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSShareTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="MYJ-y6-mHF">
+                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                        <font key="font" metaFont="system"/>
+                                                    </buttonCell>
+                                                    <connections>
+                                                        <action selector="importComboBoxListFileTapped:" target="-2" id="NSY-xm-cVb"/>
+                                                    </connections>
+                                                </button>
                                                 <button verticalHuggingPriority="750" fixedFrame="YES" tag="3" translatesAutoresizingMaskIntoConstraints="NO" id="8EJ-CZ-pvg">
-                                                    <rect key="frame" x="178" y="182" width="13" height="19"/>
+                                                    <rect key="frame" x="154" y="182" width="13" height="19"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSAddTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="81R-FT-AMD">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -658,7 +724,7 @@
                                                     </connections>
                                                 </button>
                                                 <button verticalHuggingPriority="750" fixedFrame="YES" tag="-3" translatesAutoresizingMaskIntoConstraints="NO" id="Rb8-d2-FEy">
-                                                    <rect key="frame" x="194" y="182" width="13" height="19"/>
+                                                    <rect key="frame" x="172" y="182" width="13" height="19"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSRemoveTemplate" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="SFD-oe-5fE">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -669,25 +735,14 @@
                                                     </connections>
                                                 </button>
                                                 <button verticalHuggingPriority="750" fixedFrame="YES" tag="13" translatesAutoresizingMaskIntoConstraints="NO" id="WPj-B9-zmb">
-                                                    <rect key="frame" x="215" y="182" width="13" height="19"/>
+                                                    <rect key="frame" x="195" y="182" width="13" height="19"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                     <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSFolder" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Rlh-Hp-pB1">
                                                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                         <font key="font" metaFont="system"/>
                                                     </buttonCell>
                                                     <connections>
-                                                        <action selector="alterComboBoxItemTapped:" target="-2" id="nCg-bA-oD9"/>
-                                                    </connections>
-                                                </button>
-                                                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="e0q-sC-mB2">
-                                                    <rect key="frame" x="80" y="154" width="21" height="21"/>
-                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                    <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSTrashFull" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="EN6-bO-Pwr">
-                                                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                        <font key="font" metaFont="system"/>
-                                                    </buttonCell>
-                                                    <connections>
-                                                        <action selector="addSubtractTrashExportViewBookmarks:" target="-2" id="Hzp-6y-SRF"/>
+                                                        <action selector="importComboBoxListFileTapped:" target="-2" id="5Pu-UB-xSZ"/>
                                                     </connections>
                                                 </button>
                                             </subviews>
@@ -1424,7 +1479,7 @@
                     </button>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="-16773" y="-3203"/>
+            <point key="canvasLocation" x="-16779" y="-3301"/>
         </window>
         <userDefaultsController representsSharedInstance="YES" id="fUA-5u-y3G"/>
         <arrayController preservesSelection="NO" selectsInsertedObjects="NO" avoidsEmptySelection="NO" id="7He-O6-hgQ" userLabel="sortKeysArrayController">
