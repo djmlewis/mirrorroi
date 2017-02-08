@@ -29,7 +29,6 @@
     self.arrayJiggleROIvalues = [NSMutableArray array];
     self.arrayBookmarkedSites = [NSMutableArray array];
 }
-
 -(void)dealloc {
     //[self.skScene release];
     //[self.windowControllerMain release];
@@ -38,7 +37,6 @@
     //[self.arrayJiggleROIvalues release];
     [super dealloc];
 }
-
 - (void) willUnload {
     
     [super willUnload];
@@ -58,7 +56,6 @@
     if(completedOK) return 0; // No Errors
     else return -1;
 }
-
 -(void)handleNotification:(NSNotification *)notification {
     //NSLog(@"%@ -- %@ -- %@ << %li",notification.name, notification.object, notification.userInfo,(long)[[self.viewerCT imageView] curImage]);
     if ([notification.name isEqualToString:OsirixViewerControllerDidLoadImagesNotification] ||
@@ -139,20 +136,64 @@
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformIntercalated options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Jiggle options:NSKeyValueObservingOptionNew context:nil];
 }
-
 -(BOOL)userDefaultBoolForKey:(NSString *)key {
     return [[NSUserDefaults standardUserDefaults] boolForKey:key];
 }
-
 -(void)initNotfications {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixCloseViewerNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerControllerDidLoadImagesNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixDCMUpdateCurrentImageNotification object:nil];
 }
 
+#pragma mark - Array functions
+-(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
+    if (arrayOfData.count>0) {
+        NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
+        if (forceTranspose || [self userDefaultBoolForKey:kTransposeExportedDataDefault]) {
+            //find the max length of the rows = the number of rows we need when we switch
+            NSUInteger maxRowLength = 0;
+            for (NSUInteger r=0; r<arrayOfData.count; r++) {
+                maxRowLength = MAX(maxRowLength,[[arrayOfData objectAtIndex:r] count]);
+            }
+            //Make an array to hold these rows of data
+            NSMutableArray *arrayTransposedRows = [NSMutableArray arrayWithCapacity:maxRowLength];
+            for (int c=0; c<maxRowLength; c++) {
+                [arrayTransposedRows addObject:[NSMutableArray array]];
+            }
+            //r is the original row with data from ROI in slice 0..count
+            //i is the item in each roiArray
+            //go thru the new array of possible maxRowLength cols, askeach ROI data array  if it can contribute. If roiarray.count<maxRowLength use @"" as a placeholder
+            for (int roiArraysIndex=0; roiArraysIndex<arrayOfData.count; roiArraysIndex++) {
+                NSMutableArray *arrayOfDataFromROIatIndex = [arrayOfData objectAtIndex:roiArraysIndex];
+                NSUInteger roiArrayCount = arrayOfDataFromROIatIndex.count;
+                for (int roiarrayDataIndex=0; roiarrayDataIndex<maxRowLength; roiarrayDataIndex++) {
+                    if (roiarrayDataIndex<roiArrayCount) {
+                        [[arrayTransposedRows objectAtIndex:roiarrayDataIndex] addObject:[arrayOfDataFromROIatIndex objectAtIndex:roiarrayDataIndex]];
+                    }
+                    else {
+                        [[arrayTransposedRows objectAtIndex:roiarrayDataIndex] addObject:@""];
+                    }
+                }
+            }
+            // now fuse the new cols as rows
+            for (int r=0; r<arrayTransposedRows.count; r++) {
+                [arrayOfRowStrings addObject:[[arrayTransposedRows objectAtIndex:r]componentsJoinedByString:@"\t"]];
+            }
+        }
+        else {
+            // just fuse the new cols as rows
+            for (int r=0; r<arrayOfData.count; r++) {
+                [arrayOfRowStrings addObject:[[arrayOfData objectAtIndex:r]componentsJoinedByString:@"\t"]];
+            }
+        }
+        //  fuse the new rows as table
+        return [arrayOfRowStrings componentsJoinedByString:@"\n"];
+    }
+    return nil;
+}
+
 #pragma mark - Windows
-+(void)alertWithMessage:(NSString *)message andTitle:(NSString *)title
-{
++(void)alertWithMessage:(NSString *)message andTitle:(NSString *)title {
     NSRunCriticalAlertPanel(NSLocalizedString(title,nil), NSLocalizedString(message,nil) , NSLocalizedString(@"Close",nil), nil, nil);
 }
 +(void)alertSound {
@@ -400,7 +441,6 @@
             break;
     }
 }
-
 -(NSArray *)arrayForComboBox:(ComboBoxIdentifier)comboBox {
     switch (comboBox) {
         case Combo_Vaccines_Save:
@@ -417,7 +457,6 @@
             break;
     }
 }
-
 -(void) alterArrayForComboBox:(NSComboBox *)cbox forIdentifier:(NSString *)identifier withAlteration:(ComboBoxArrayAlteration)alteration {
     NSMutableArray *array = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:identifier]];
     switch (alteration) {
@@ -435,7 +474,6 @@
     }
     [[NSUserDefaults standardUserDefaults] setObject:array forKey: identifier];
 }
-
 - (IBAction)alterComboBoxItemTapped:(NSButton *)sender {
     //    [self willChangeValueForKey:@"arrayVaccines"];
     //    [self.arrayVaccines addObject:[[NSDate date] description]];
@@ -793,7 +831,6 @@
         return NO;
     }
 }
-
 -(void)mirrorActiveROIUsingLengthROIn3D:(BOOL)in3D {
     BOOL mirroredSomething = NO;
     
@@ -858,7 +895,6 @@
 }
 
 #pragma mark - Delta point
-
 +(NSPoint)deltaXYFromROI:(ROI*)roi2Clone usingLengthROI:(ROI*)lengthROI {
     NSPoint deltaPoint = [self anInvalidDeltaPoint];
     
@@ -921,6 +957,22 @@
     }
     return set;
 }
+-(NSMutableArray *)arrayOfIndexesOfSlicesWithROIofType:(ROI_Type)type{
+    NSString *roiname = [self ROInameForType:type];
+    NSMutableArray *arrayOfSlicesIndexes = [NSMutableArray array];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        BOOL foundROI = NO;
+        for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
+            if ([roi.name isEqualToString:roiname]) {
+                if (!foundROI) {
+                    [arrayOfSlicesIndexes addObject:[NSNumber numberWithInteger:pix]];
+                }
+                foundROI = YES;
+            }
+        }
+    }
+    return arrayOfSlicesIndexes;
+}
 - (IBAction)moveMirrorROI:(NSButton *)sender {
     int moveX = 0;
     int moveY = 0;
@@ -978,8 +1030,7 @@
                                spacingY:roi2Clone.pixelSpacingY
                                imageOrigin:roi2Clone.imageOrigin];
             [createdROI setNSColor:roi2Clone.NSColor globally:NO];
-            //[roisInThisSlice replaceObjectAtIndex:i withObject:createdROI];
-            //[MirrorROIPluginFilterOC forceRecomputeDataForROI:createdROI];
+
             [roisInThisSlice removeObjectAtIndex:i];
             [self addROI2Pix:createdROI atSlice:activeSlice inViewer:self.viewerPET hidden:NO];
             //move the polygon
@@ -1155,7 +1206,6 @@
     }
 }
 
-
 #pragma mark - Buffer
 +(unsigned char*)flippedBufferHorizontalFromROI:(ROI *)roi2Clone{
     int textureBuffer_Length = roi2Clone.textureHeight * roi2Clone.textureWidth;
@@ -1182,7 +1232,6 @@
     if (data != nil) return (NSColor *)[NSUnarchiver unarchiveObjectWithData:data];
     return [NSColor blackColor];
 }
-
 +(NSColor *)colourForType:(ROI_Type)type {
     NSColor *colour = [NSColor blackColor];
     switch (type) {
@@ -1226,14 +1275,12 @@
             break;
     }
 }
-
 +(void)setROIcolour:(ROI *)roi forType:(ROI_Type)type {
     [roi setNSColor:[[MirrorROIPluginFilterOC colourForType:type] colorWithAlphaComponent:0.5] globally:NO];
 }
 
 
 #pragma mark - ROI Data
-
 +(void)forceRecomputeDataForROI:(ROI *)roi {
     if (roi != nil) {
         [roi recompute];
@@ -1312,8 +1359,6 @@
             break;
     }
 }
-
-
 -(void)subtractBookmarkDataForSelectedSite {
     NSInteger index = self.arrayControllerBookmarks.selectionIndex;
     if (index>=0 && index <self.arrayBookmarkedSites.count) {
@@ -1322,7 +1367,6 @@
         [self.dictBookmarks removeObjectForKey:selectedSite];
     }
 }
-
 -(void)trashAllBookmarks {
     //easier to use this method to clear the array
     [self willChangeValueForKey:@"arrayBookmarkedSites"];
@@ -1344,11 +1388,22 @@
         [self.dictBookmarks setObject:dictForSite forKey:anatSite];
     }
 }
-
 -(NSString *)bookmarkStringForSite:(NSString *)anatSite {
-    return [NSString stringWithFormat:@"***********\n%@\n***********\n%@\n\n%@\n\n%@\n\n",anatSite,[self pixelStatsStringForType:PixelsGridAllData],[self combinedAandMstringsForExportROIdata_A:[self exportAllROIdataStringForType:Active_ROI] M:[self exportAllROIdataStringForType:Mirrored_ROI]],[self jiggleROIsummaryStringWithActiveROIinSliceString]];
+    //Do 3D calculation FIRST as this resets the pixels nicely
+    NSMutableDictionary *data3D_A = [self dataDictFor3DROIdataForType:Active_ROI];
+    NSMutableDictionary *data3D_M = [self dataDictFor3DROIdataForType:Mirrored_ROI];
+    NSString *data3Dstring = [self combinedAandMstringsForExportROIdata_A:[self dataStringFor3DROIdataFromDict:data3D_A] M:[self dataStringFor3DROIdataFromDict:data3D_M]];
+    
+    //now get raw pixels
+    NSMutableDictionary *dictRawPixelsData = [self rawPixelsDelta_obtainData_MirrorPixels_CalcStats_createDict];
+    NSString *dataStringRawPixelsFromDict = [self rawPixelsDelta_assembleFinalDataStringFromDict:dictRawPixelsData forExportType:PixelsGridAllData];
+    
+    return [NSString stringWithFormat:@"***********\n%@\n***********\n%@\n\n%@\n\n%@\n\n",
+            anatSite,
+            data3Dstring,
+            dataStringRawPixelsFromDict,
+            [self jiggleROIsummaryStringWithActiveROIinSliceString]];
 }
-
 -(NSString *)bookMarkStringsConjoined {
     NSMutableArray *rows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     for (NSString *key in self.dictBookmarks) {
@@ -1359,7 +1414,7 @@
     return [NSString stringWithFormat:@"%@\n%@",[self participantDetailsString],[rows componentsJoinedByString:@"\n\n"]];
 }
 -(NSString *)bookmarkedDataFilename {
-    NSString *fileTypeName = [self exportTypeStringForExportType:BookmarkedData withAnatomicalSite:NO];
+    NSString *fileTypeName = [self fileNameForExportType:BookmarkedData withAnatomicalSite:NO];
     NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
     return fileName;
 }
@@ -1367,7 +1422,6 @@
     DicomStudy *study = [self.viewerPET currentStudy];
     [[BrowserController currentBrowser] importReport:url.path UID:study.studyInstanceUID];
 }
-
 - (void)exportBookmarkedData:(ExportDataHow)exportHow {
     NSURL *savedLocation = nil;
     switch (exportHow) {
@@ -1413,12 +1467,10 @@
         self.comboPlaceboUsed.stringValue = [commentsArray objectAtIndex:3];
     }
 }
-
 -(NSString *)correctedStringForNullString:(NSString *)string {
     if (string == nil) {return @"-";}
     return string;
 }
-
 -(IBAction)readWriteCommentsFromFieldsTapped:(NSButton *)sender {
     switch (sender.tag) {
         case WriteComments:
@@ -1489,7 +1541,6 @@
     }
     [self saveImageFilesFromArray:arrayKeyImagesData];
 }
-
 -(NSString *)imageFileNameForIndex:(int)index andViewer:(ViewerController *)viewer {
     return [NSString stringWithFormat:@"%@_%04li.png",viewer.window.title,(long)index];
 }
@@ -1509,7 +1560,6 @@
     
     return arrayKeyImagesData;
 }
-
 -(void)saveImageFilesFromArray:(NSMutableArray *)arrayOfFileNamesAndImages {
     if (arrayOfFileNamesAndImages.count > 0)
     {
@@ -1532,8 +1582,8 @@
     }
 }
 
-#pragma mark - ROI Export
--(NSString *)exportTypeStringForExportType:(ExportDataType)type withAnatomicalSite:(BOOL)withSite {
+#pragma mark -  Export
+-(NSString *)fileNameForExportType:(ExportDataType)type withAnatomicalSite:(BOOL)withSite {
     NSString *typeString = @"";
     switch (type) {
         case RoiData:
@@ -1592,7 +1642,7 @@
             break;
         case PixelsGridSummary:
         case PixelsGridAllData:
-            [self exportDeltaROI:exportHow exportType:exportType];
+            [self rawPixelsDelta_export:exportHow exportType:exportType];
             break;
         case JiggleRoi:
             [self exportJiggleValues:exportHow];
@@ -1601,6 +1651,232 @@
             break;
     }
 }
+
+#pragma mark -  ROI does calculations
+-(void)exportROIdata:(ExportDataHow)exportHow {
+    NSInteger exportType = [[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
+    NSString *dataStringA = nil;
+    NSString *dataStringM = nil;
+    NSString *fileTypeName = [self fileNameForExportType:exportType withAnatomicalSite:YES];
+
+    switch (exportType) {
+        case RoiData:
+            dataStringA = [self dataStringForROIdataForType:Active_ROI];
+            dataStringM = [self dataStringForROIdataForType:Mirrored_ROI];
+            break;
+        case RoiSummary:
+            dataStringA = [self dataStringForSummaryROIdataForType:Active_ROI];
+            dataStringM = [self dataStringForSummaryROIdataForType:Mirrored_ROI];
+            break;
+        case RoiThreeD:
+            dataStringA = [self dataStringFor3DROIdataForType:Active_ROI];
+            dataStringM = [self dataStringFor3DROIdataForType:Mirrored_ROI];
+            break;
+        case RoiPixelsFlat:
+            dataStringA = [self dataStringFromDataValuesArrayFromROIsOfType:Active_ROI];
+            dataStringM = [self dataStringFromDataValuesArrayFromROIsOfType:Mirrored_ROI];
+            break;
+        case AllROIdata:
+            dataStringA = [self dataStringForAllROdataIForType:Active_ROI];
+            dataStringM = [self dataStringForAllROdataIForType:Mirrored_ROI];
+            break;
+        default:
+            break;
+    }
+    switch (exportHow) {
+        case ExportAsFile:
+            if ([self userDefaultBoolForKey:kCombineExportsOneFileDefault] == YES)
+            {
+                if (dataStringA.length>0 && dataStringM.length>0) {
+                    [self saveData:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM] withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+                }
+            }
+            else
+            {
+                if (dataStringA.length>0) {
+                    [self saveData:dataStringA withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
+                }
+                if (dataStringM.length>0) {
+                    [self saveData:dataStringM withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
+                }
+            }
+            break;
+        case ViewInWindow:
+        {
+            if ([self userDefaultBoolForKey:kCombineExportsOneFileDefault] == YES)
+            {
+                if (dataStringA.length>0 && dataStringM.length>0) {
+                    [MirrorROIPluginFilterOC showStringInWindow:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM]
+                                                      withTitle:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
+                }
+            }
+            else
+            {
+                if (dataStringA.length>0) {
+                    [MirrorROIPluginFilterOC showStringInWindow:dataStringA withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
+                }
+                if (dataStringM.length>0) {
+                    [MirrorROIPluginFilterOC showStringInWindow:dataStringM withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
+                }
+            }
+        }
+            break;
+        default:
+            break;
+    }
+}
+-(NSString *)dataStringForAllROdataIForType:(ROI_Type)type {
+    NSMutableArray *finalString = [NSMutableArray arrayWithCapacity:4];
+    NSString *dataString = [self dataStringFor3DROIdataForType:type];
+    if (dataString != nil) {[finalString addObject:[@"3D data\n" stringByAppendingString:dataString]];}
+    dataString = [self dataStringForSummaryROIdataForType:type];
+    if (dataString != nil) {[finalString addObject:[@"Summary data\n" stringByAppendingString:dataString]];}
+    dataString = [self dataStringForROIdataForType:type];
+    if (dataString != nil) {[finalString addObject:[@"ROI data\n" stringByAppendingString:dataString]];}
+    dataString = [self dataStringFromDataValuesArrayFromROIsOfType:type];
+    if (dataString != nil) {[finalString addObject:[@"Flat Pixel data\n" stringByAppendingString:dataString]];}
+    if (finalString.count>0) {
+        return [finalString componentsJoinedByString:@"\n\n"];
+    }
+    return @"";
+}
+-(NSString *)dataStringForSummaryROIdataForType:(ROI_Type)type {
+    NSUInteger capacity = self.viewerPET.roiList.count;
+    NSMutableDictionary *dictOfRows = [NSMutableDictionary dictionaryWithCapacity:capacity];
+    NSString *roiname = [self ROInameForType:type];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
+        for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
+            ROI *roi = [roiList objectAtIndex:roiIndex];
+            if ([roi.name isEqualToString:roiname]) {
+                if (dictOfRows[@"index"] == nil) {
+                    dictOfRows[@"index"] = [NSMutableArray arrayWithCapacity:capacity];
+                    [dictOfRows[@"index"] addObject:[NSNumber numberWithInt:pix]];
+                } else {
+                    [dictOfRows[@"index"] addObject:[NSNumber numberWithInt:pix]];
+                }
+                
+                [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
+                NSMutableDictionary *roidatadict = [roi dataString];
+                for (NSString *key in roidatadict) {
+                    id value = roidatadict[key];
+                    if (dictOfRows[key] == nil) {
+                        dictOfRows[key] = [NSMutableArray arrayWithCapacity:capacity];
+                        [dictOfRows[key] addObject:value];
+                    } else {
+                        [dictOfRows[key] addObject:value];
+                    }
+                }
+                break;
+            }
+        }
+    }
+    //add the  col data to array
+    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:capacity];
+    //each row has the data for one roi
+    for (NSString *key in dictOfRows) {
+        if (![key isEqualToString:@"Name"] && ![key isEqualToString:@"Type"]) {
+            [dictOfRows[key] insertObject:key atIndex:0];
+            [arrayOfRows addObject:dictOfRows[key]];
+        }
+    }
+    if (arrayOfRows.count>0) {
+        return [self stringForDataArray:arrayOfRows forceTranspose:YES];
+    }
+    return nil;
+}
+-(NSMutableDictionary *)dataDictFor3DROIdataForType:(ROI_Type)type {
+    [self.viewerPET roiSelectDeselectAll: nil];
+    NSString *roiname = [self ROInameForType:type];
+    ROI *roi = [self ROIfromFirstMatchedSliceInViewer:self.viewerPET withName:roiname];
+    NSString *error = nil;
+    NSMutableDictionary *dataDict = [NSMutableDictionary dictionary];
+    [self.viewerPET computeVolume:roi points:nil generateMissingROIs:NO generatedROIs:nil computeData:dataDict error:&error];
+    if (error == nil) {
+        return dataDict;
+    }
+    return nil;
+}
+-(NSString *)dataStringFor3DROIdataFromDict:(NSMutableDictionary *)dataDict {
+    if (dataDict != nil) {
+        NSUInteger capacity = self.viewerPET.roiList.count;
+        NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:capacity];
+        //each row has the data for one roi
+        for (NSString *key in dataDict) {
+            if (![key isEqualToString:@"rois"]) {
+                [arrayOfRows addObject:[NSString stringWithFormat:@"%@\t%@",key,dataDict[key]]];
+            }
+        }
+        if (arrayOfRows.count>0) {
+            return [arrayOfRows componentsJoinedByString:@"\n"];
+        }
+    }
+    return nil;
+}
+
+-(NSString *)dataStringFor3DROIdataForType:(ROI_Type)type {
+    [self.viewerPET roiSelectDeselectAll: nil];
+    NSString *roiname = [self ROInameForType:type];
+    ROI *roi = [self ROIfromFirstMatchedSliceInViewer:self.viewerPET withName:roiname];
+    NSString *error = nil;
+    NSMutableDictionary *dataDict = [NSMutableDictionary dictionary];
+    [self.viewerPET computeVolume:roi points:nil generateMissingROIs:NO generatedROIs:nil computeData:dataDict error:&error];
+    if (error == nil) {
+        NSUInteger capacity = self.viewerPET.roiList.count;
+        NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:capacity];
+        //each row has the data for one roi
+        for (NSString *key in dataDict) {
+            if (![key isEqualToString:@"rois"]) {
+                [arrayOfRows addObject:[NSString stringWithFormat:@"%@\t%@",key,dataDict[key]]];
+            }
+        }
+        if (arrayOfRows.count>0) {
+            return [arrayOfRows componentsJoinedByString:@"\n"];
+        }
+    }
+    return nil;
+}
+-(NSString *)dataStringForROIdataForType:(ROI_Type)type {
+    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+    //each row has the data for one roi
+    //add the headings
+    [arrayOfRows addObject:@"index\tmean\tsdev\tmax\tmin\tcount"];
+    NSString *roiname = [self ROInameForType:type];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
+        for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
+            ROI *roi = [roiList objectAtIndex:roiIndex];
+            if ([roi.name isEqualToString:roiname]) {
+
+                [arrayOfRows addObject:[[NSArray arrayWithObjects:
+                                         [NSNumber numberWithInt:pix],
+                                         [NSNumber numberWithFloat:roi.mean],
+                                         [NSNumber numberWithFloat:roi.dev],
+                                         [NSNumber numberWithFloat:roi.max],
+                                         [NSNumber numberWithFloat:roi.min],
+                                         [NSNumber numberWithFloat:roi.total],
+                                         nil] componentsJoinedByString:@"\t"]];
+                break;
+            }
+        }
+    }
+    if (arrayOfRows.count>0) {
+        return [arrayOfRows componentsJoinedByString:@"\n"];
+    }
+    return nil;
+}
+
+#pragma mark -  Export the ROIs as Osirix
+-(void)exportAMTroi {
+    if ([self valid2DViewer:self.viewerPET]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+        [[NSApplication sharedApplication] sendAction:@selector(roiSaveSeries:) to:self.viewerPET from:self.viewerPET];
+#pragma clang diagnostic pop
+    }
+}
+
+#pragma mark -  Export Jiggle
 - (void)exportJiggleValues:(ExportDataHow)exportHow {
     switch (exportHow) {
         case ExportAsFile:
@@ -1617,20 +1893,37 @@
 
 }
 
--(NSString *)pixelStatsStringFromDictionary:(NSMutableDictionary*)dict forType:(ExportDataType)type {
+#pragma mark -  Calculate delta from raw pixels
+-(void)rawPixelsDelta_export:(ExportDataHow)exportHow exportType:(ExportDataType)exportType {
+    NSString *fileTypeName = [self fileNameForExportType:exportType withAnatomicalSite:YES];
+    NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
+    switch (exportHow) {
+        case ExportAsFile:
+            [self saveData:[self rawPixelsDelta_assembleFinalDataString:exportType] withName:fileName];
+            break;
+        case ViewInWindow:
+            [MirrorROIPluginFilterOC showStringInWindow:[self rawPixelsDelta_assembleFinalDataString:exportType] withTitle:fileName];
+            break;
+        default:
+            break;
+    }
+}
+-(NSString *)rawPixelsDelta_assembleFinalDataStringFromDict:(NSMutableDictionary *)dict forExportType:(ExportDataType)type {
     NSString *stats = @"";
     NSArray *keys = [dict.allKeys sortedArrayUsingSelector:@selector(compare:)];
     for (int k=0;k<keys.count;k++) {
         NSString *currkey = keys[k];
         if (![currkey containsString:kDeltaNameGridDataTag]) {
-            stats = [stats stringByAppendingString:[NSString stringWithFormat:@"%@\t%@\n",currkey,dict[currkey]]];
+            stats = [stats stringByAppendingString:[NSString stringWithFormat:@"%@\t%@\n",
+                    //strip the leading numbers used to sort
+                    [currkey substringFromIndex:2],dict[currkey]]];
         }
     }
     switch (type) {
         case PixelsGridAllData:
-            return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n",
+            return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n/%@\n%@\n%@\n%@\n",
                     stats,
-                    kDeltaNameActivePixFlat,
+                    [kDeltaNameActivePixFlat substringFromIndex:3],
                     [[self arrayOfIndexesOfSlicesWithROIofType:Active_ROI] componentsJoinedByString:@"\t"],
                     [self stringForDataArray:[dict objectForKey:kDeltaNameActivePixFlat] forceTranspose:NO],
                     kDeltaNameMirroredPixFlat,
@@ -1652,72 +1945,15 @@
             return @"?";
             break;
     }
-}
-
--(NSString *)pixelStatsStringForType:(ExportDataType)type {
-    return [self pixelStatsStringFromDictionary:[self pixelStatsDictionary] forType:type];
-}
-
--(void)exportDeltaROI:(ExportDataHow)exportHow exportType:(ExportDataType)exportType {
-    NSString *fileTypeName = [self exportTypeStringForExportType:exportType withAnatomicalSite:YES];
-    NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
-    switch (exportHow) {
-        case ExportAsFile:
-            [self saveData:[self pixelStatsStringForType:exportType] withName:fileName];
-            break;
-        case ViewInWindow:
-            [MirrorROIPluginFilterOC showStringInWindow:[self pixelStatsStringForType:exportType] withTitle:fileName];
-            break;
-        default:
-            break;
-    }
-}
-
--(NSMutableArray *)pixelsForROI:(ROI *)roi{
-    NSMutableArray *arrayOfPixelsRows = [NSMutableArray array];
-    if (roi.pix != nil) {
-        long height = roi.pix.pheight, width = roi.pix.pwidth;
-        
-        float *computedfImage = [roi.pix computefImage];
-        long textWidth = roi.textureWidth, textHeight = roi.textureHeight;
-        long textureUpLeftCornerX = roi.textureUpLeftCornerX, textureUpLeftCornerY = roi.textureUpLeftCornerY;
-        unsigned char *buf = roi.textureBuffer;
-        
-        for( long y = 0; y < textHeight; y++)
-        {
-            NSMutableArray *rowPixels = [NSMutableArray array];
-            for( long x = 0; x < textWidth; x++)
-            {
-                if( buf [ x + y * textWidth] != 0)
-                {
-                    long xx = (x + textureUpLeftCornerX);
-                    long yy = (y + textureUpLeftCornerY);
-                    
-                    if( xx >= 0 && xx < width && yy >= 0 && yy < height)
-                    {
-                        {
-                            [rowPixels addObject:[NSNumber numberWithFloat: computedfImage[ (yy * width) + xx]]];
-                        }
-                    }
-                }
-            }
-            if (rowPixels.count > 0) {
-                //this needs to be watched - here NO Y MIRROR is assumed, so we can skip empty rows as the Y are the same in both ROIs
-                //if Y mirroring then we woudl have to account for that
-                [arrayOfPixelsRows addObject:rowPixels];
-            }
-        }
-    }
-    return arrayOfPixelsRows;
-}
-
--(NSMutableDictionary *)pixelStatsDictionary {
-    NSMutableArray *dataAflat = [NSMutableArray array];//[self pixelDataFromROIasFlatArrayForType:Active_ROI addHeader:NO];
-    NSMutableArray *dataMflat = [NSMutableArray array];//[self pixelDataFromROIasFlatArrayForType:Mirrored_ROI addHeader:NO];
     
-    NSMutableArray *dataA2D = [self pixelBufferValuesAs2DArrayForType:Active_ROI];
-    NSMutableArray *dataM2D = [self pixelBufferValuesAs2DArrayForType:Mirrored_ROI];
-
+}
+-(NSMutableDictionary *)rawPixelsDelta_obtainData_MirrorPixels_CalcStats_createDict {
+    NSMutableArray *dataAflat = [NSMutableArray array];
+    NSMutableArray *dataMflat = [NSMutableArray array];
+    
+    NSMutableArray *dataA2D = [self rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:Active_ROI];
+    NSMutableArray *dataM2D = [self rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:Mirrored_ROI];
+    
     NSMutableArray *subtracted = [NSMutableArray array];
     NSMutableArray *divided = [NSMutableArray array];
     NSUInteger countOfPixels = 0;
@@ -1790,7 +2026,7 @@
     sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:dataAflat withMean:sumOfA/countOfPixelsF andCountF:countOfPixelsF startingAtRow:0];
     [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameActiveSD];
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameActiveSEM];
-
+    
     [dict setObject:dataMflat forKey:kDeltaNameMirroredPixFlat];
     [dict setObject:dataM2D forKey:kDeltaNameMirroredPixGrid];
     [dict setObject:[NSNumber numberWithFloat:sumOfM] forKey:kDeltaNameMirroredSum];
@@ -1800,7 +2036,7 @@
     sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:dataMflat withMean:sumOfM/countOfPixelsF andCountF:countOfPixelsF startingAtRow:0];
     [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameMirroredSD];
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameMirroredSEM];
-
+    
     [dict setObject:subtracted forKey:kDeltaNameSubtractedPix];
     [dict setObject:divided forKey:kDeltaNameDividedPix];
     [dict setObject:[NSNumber numberWithUnsignedInteger:countOfPixels] forKey:kDeltaNameCount];
@@ -1815,9 +2051,105 @@
     sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:divided withMean:dividedMean andCountF:countOfPixelsF startingAtRow:0];
     [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameDividedSD];
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameDividedSEM];
-
+    
     return dict;
 }
+-(NSMutableArray *)rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:(ROI_Type)type{
+    NSString *roiname = [self ROInameForType:type];
+    NSMutableArray *arrayOfROIgrids = [NSMutableArray array];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        BOOL foundROI = NO;
+        for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
+            if ([roi.name isEqualToString:roiname]) {
+                NSMutableArray *roiData = [self rawPixelsDelta_extractPixelsInOrderedRowsFromROI:roi];
+                if (!foundROI) {
+                    [arrayOfROIgrids addObject:roiData];
+                }
+                foundROI = YES;
+            }
+        }
+    }
+    return arrayOfROIgrids;
+}
+-(NSMutableArray *)rawPixelsDelta_extractPixelsInOrderedRowsFromROI:(ROI *)roi{
+    NSMutableArray *arrayOfPixelsRows = [NSMutableArray array];
+    if (roi.pix != nil) {
+        long height = roi.pix.pheight, width = roi.pix.pwidth;
+        
+        float *computedfImage = [roi.pix computefImage];
+        long textWidth = roi.textureWidth, textHeight = roi.textureHeight;
+        long textureUpLeftCornerX = roi.textureUpLeftCornerX, textureUpLeftCornerY = roi.textureUpLeftCornerY;
+        unsigned char *buf = roi.textureBuffer;
+        
+        for( long y = 0; y < textHeight; y++)
+        {
+            NSMutableArray *rowPixels = [NSMutableArray array];
+            for( long x = 0; x < textWidth; x++)
+            {
+                if( buf [ x + y * textWidth] != 0)
+                {
+                    long xx = (x + textureUpLeftCornerX);
+                    long yy = (y + textureUpLeftCornerY);
+                    
+                    if( xx >= 0 && xx < width && yy >= 0 && yy < height)
+                    {
+                        {
+                            [rowPixels addObject:[NSNumber numberWithFloat: computedfImage[ (yy * width) + xx]]];
+                        }
+                    }
+                }
+            }
+            if (rowPixels.count > 0) {
+                //this needs to be watched - here NO Y MIRROR is assumed, so we can skip empty rows as the Y are the same in both ROIs
+                //if Y mirroring then we woudl have to account for that
+                [arrayOfPixelsRows addObject:rowPixels];
+            }
+        }
+    }
+    return arrayOfPixelsRows;
+}
+
+-(NSString *)rawPixelsDelta_assembleFinalDataString:(ExportDataType)type {
+    NSMutableDictionary *dict = [self rawPixelsDelta_obtainData_MirrorPixels_CalcStats_createDict];
+    NSString *stats = @"";
+    NSArray *keys = [dict.allKeys sortedArrayUsingSelector:@selector(compare:)];
+    for (int k=0;k<keys.count;k++) {
+        NSString *currkey = keys[k];
+        if (![currkey containsString:kDeltaNameGridDataTag]) {
+            stats = [stats stringByAppendingString:[NSString stringWithFormat:@"%@\t%@\n",currkey,dict[currkey]]];
+        }
+    }
+    switch (type) {
+        case PixelsGridAllData:
+            return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n",
+                    stats,
+                    kDeltaNameActivePixFlat,
+                    [[self arrayOfIndexesOfSlicesWithROIofType:Active_ROI] componentsJoinedByString:@"\t"],
+                    [self stringForDataArray:[dict objectForKey:kDeltaNameActivePixFlat] forceTranspose:NO],
+                    kDeltaNameMirroredPixFlat,
+                    [self stringForDataArray:[dict objectForKey:kDeltaNameMirroredPixFlat] forceTranspose:NO],
+                    kDeltaNameSubtractedPix,
+                    [self stringForDataArray:[dict objectForKey:kDeltaNameSubtractedPix] forceTranspose:NO],
+                    kDeltaNameDividedPix,
+                    [self stringForDataArray:[dict objectForKey:kDeltaNameDividedPix] forceTranspose:NO],
+                    kDeltaNameActivePixGrid,
+                    [self dataStringFor2DpixelDataForROIType:Active_ROI],
+                    kDeltaNameMirroredPixGrid,
+                    [self dataStringFor2DpixelDataForROIType:Mirrored_ROI]
+                    ];
+            break;
+        case PixelsGridSummary:
+            return stats;
+            break;
+        default:
+            return @"?";
+            break;
+    }
+    
+}
+
+
+
 
 +(CGFloat)stDevForArrayOfRows:(NSMutableArray *)array withMean:(CGFloat)mean andCountF:(CGFloat)countF startingAtRow:(int)startingRow {
     CGFloat variance = 0.0;
@@ -1831,225 +2163,12 @@
 -(NSString *)combinedAandMstringsForExportROIdata_A:(NSString *)dataStringA M:(NSString *)dataStringM {
     return [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],dataStringA,[self ROInameForType:Mirrored_ROI],dataStringM];
 }
--(void)exportROIdata:(ExportDataHow)exportHow {
-    NSInteger exportType = [[NSUserDefaults standardUserDefaults] integerForKey:kExportMenuSelectedIndexDefault];
-    NSString *dataStringA = nil;
-    NSString *dataStringM = nil;
-    NSString *fileTypeName = [self exportTypeStringForExportType:exportType withAnatomicalSite:YES];
-    // check its bookmarkable if thats what we request
-    if (exportHow == BookmarkString) {
-        // only bookmarkable requests here
-        switch (exportType) {
-            case AllROIdata:
-                dataStringA = [self exportAllROIdataStringForType:Active_ROI];
-                dataStringM = [self exportAllROIdataStringForType:Mirrored_ROI];
-                break;
-            default:
-                break;
-        }
-    }
-    else
-    {
-        //offer up everyting
-        switch (exportType) {
-            case RoiData:
-                dataStringA = [self dataStringForROIdataForType:Active_ROI];
-                dataStringM = [self dataStringForROIdataForType:Mirrored_ROI];
-                break;
-            case RoiSummary:
-                dataStringA = [self dataStringForSummaryROIdataForType:Active_ROI];
-                dataStringM = [self dataStringForSummaryROIdataForType:Mirrored_ROI];
-                break;
-            case RoiThreeD:
-                dataStringA = [self dataStringFor3DROIdataForType:Active_ROI];
-                dataStringM = [self dataStringFor3DROIdataForType:Mirrored_ROI];
-                break;
-            case RoiPixelsFlat:
-                dataStringA = [self dataStringForFlatPixelDataForROIType:Active_ROI];
-                dataStringM = [self dataStringForFlatPixelDataForROIType:Mirrored_ROI];
-                break;
-            case AllROIdata:
-                dataStringA = [self exportAllROIdataStringForType:Active_ROI];
-                dataStringM = [self exportAllROIdataStringForType:Mirrored_ROI];
-                break;
-            default:
-                break;
-        }
-    }
-    switch (exportHow) {
-        case ExportAsFile:
-            if ([self userDefaultBoolForKey:kCombineExportsOneFileDefault] == YES)
-            {
-                if (dataStringA.length>0 && dataStringM.length>0) {
-                    [self saveData:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM] withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
-                }
-            }
-            else
-            {
-                if (dataStringA.length>0) {
-                    [self saveData:dataStringA withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
-                }
-                if (dataStringM.length>0) {
-                    [self saveData:dataStringM withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
-                }
-            }
-            break;
-        case ViewInWindow:
-        {
-            if ([self userDefaultBoolForKey:kCombineExportsOneFileDefault] == YES)
-            {
-                if (dataStringA.length>0 && dataStringM.length>0) {
-                    [MirrorROIPluginFilterOC showStringInWindow:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM]
-                                                      withTitle:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
-                }
-            }
-            else
-            {
-                if (dataStringA.length>0) {
-                    [MirrorROIPluginFilterOC showStringInWindow:dataStringA withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
-                }
-                if (dataStringM.length>0) {
-                    [MirrorROIPluginFilterOC showStringInWindow:dataStringM withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
-                }
-            }
-        }
-            break;
-        default:
-            break;
-    }
-}
 
--(NSString *)exportAllROIdataStringForType:(ROI_Type)type {
-    NSMutableArray *finalString = [NSMutableArray arrayWithCapacity:4];
-    NSString *dataString = [self dataStringFor3DROIdataForType:type];
-    if (dataString != nil) {[finalString addObject:[@"3D data\n" stringByAppendingString:dataString]];}
-    dataString = [self dataStringForSummaryROIdataForType:type];
-    if (dataString != nil) {[finalString addObject:[@"Summary data\n" stringByAppendingString:dataString]];}
-    dataString = [self dataStringForROIdataForType:type];
-    if (dataString != nil) {[finalString addObject:[@"ROI data\n" stringByAppendingString:dataString]];}
-    dataString = [self dataStringForFlatPixelDataForROIType:type];
-    if (dataString != nil) {[finalString addObject:[@"Flat Pixel data\n" stringByAppendingString:dataString]];}
-    if (finalString.count>0) {
-        return [finalString componentsJoinedByString:@"\n\n"];
-    }
-    return @"";
-}
 
--(NSString *)dataStringForSummaryROIdataForType:(ROI_Type)type {
-    NSUInteger capacity = self.viewerPET.roiList.count;
-    NSMutableDictionary *dictOfRows = [NSMutableDictionary dictionaryWithCapacity:capacity];
-    NSString *roiname = [self ROInameForType:type];
-    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
-        NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
-        for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
-            ROI *roi = [roiList objectAtIndex:roiIndex];
-            if ([roi.name isEqualToString:roiname]) {
-                if (dictOfRows[@"index"] == nil) {
-                    dictOfRows[@"index"] = [NSMutableArray arrayWithCapacity:capacity];
-                    [dictOfRows[@"index"] addObject:[NSNumber numberWithInt:pix]];
-                } else {
-                    [dictOfRows[@"index"] addObject:[NSNumber numberWithInt:pix]];
-                }
 
-                [MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
-                NSMutableDictionary *roidatadict = [roi dataString];
-                for (NSString *key in roidatadict) {
-                    id value = roidatadict[key];
-                    if (dictOfRows[key] == nil) {
-                        dictOfRows[key] = [NSMutableArray arrayWithCapacity:capacity];
-                        [dictOfRows[key] addObject:value];
-                    } else {
-                        [dictOfRows[key] addObject:value];
-                    }
-                }
-                break;
-            }
-        }
-    }
-    //add the  col data to array
-    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:capacity];
-    //each row has the data for one roi
-    for (NSString *key in dictOfRows) {
-        if (![key isEqualToString:@"Name"] && ![key isEqualToString:@"Type"]) {
-            [dictOfRows[key] insertObject:key atIndex:0];
-            [arrayOfRows addObject:dictOfRows[key]];
-        }
-    }
-    if (arrayOfRows.count>0) {
-        return [self stringForDataArray:arrayOfRows forceTranspose:YES];
-    }
-    return nil;
-}
--(NSString *)dataStringFor3DROIdataForType:(ROI_Type)type {
-    [self.viewerPET roiSelectDeselectAll: nil];
-    NSString *roiname = [self ROInameForType:type];
-    ROI *roi = [self ROIfromFirstMatchedSliceInViewer:self.viewerPET withName:roiname];
-    NSString *error = nil;
-    NSMutableDictionary *dataDict = [NSMutableDictionary dictionary];
-    [self.viewerPET computeVolume:roi points:nil generateMissingROIs:NO generatedROIs:nil computeData:dataDict error:&error];
-    if (error == nil) {
-        NSUInteger capacity = self.viewerPET.roiList.count;
-        NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:capacity];
-        //each row has the data for one roi
-        for (NSString *key in dataDict) {
-            if (![key isEqualToString:@"rois"]) {
-                [arrayOfRows addObject:[NSString stringWithFormat:@"%@\t%@",key,dataDict[key]]];
-            }
-        }
-        if (arrayOfRows.count>0) {
-            return [arrayOfRows componentsJoinedByString:@"\n"];
-        }
-    }
-    return nil;
-}
--(NSString *)dataStringForROIdataForType:(ROI_Type)type {
-    NSMutableArray *arrayOfRows = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
-    //each row has the data for one roi
-    //add the headings
-    [arrayOfRows addObject:@"index\tmean\tsdev\tmax\tmin\tcount"];
-    NSString *roiname = [self ROInameForType:type];
-    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
-        NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
-        for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
-            ROI *roi = [roiList objectAtIndex:roiIndex];
-            if ([roi.name isEqualToString:roiname]) {
-                //[MirrorROIPluginFilterOC forceRecomputeDataForROI:roi];
-                [arrayOfRows addObject:[[NSArray arrayWithObjects:
-                                         [NSNumber numberWithInt:pix],
-                                         [NSNumber numberWithFloat:roi.mean],
-                                         [NSNumber numberWithFloat:roi.dev],
-                                         [NSNumber numberWithFloat:roi.max],
-                                         [NSNumber numberWithFloat:roi.min],
-                                         [NSNumber numberWithFloat:roi.total],
-                                         nil] componentsJoinedByString:@"\t"]];
-                break;
-            }
-        }
-    }
-    if (arrayOfRows.count>0) {
-        return [arrayOfRows componentsJoinedByString:@"\n"];
-    }
-    return nil;
-}
 
--(NSMutableArray *)arrayOfIndexesOfSlicesWithROIofType:(ROI_Type)type{
-    NSString *roiname = [self ROInameForType:type];
-    NSMutableArray *arrayOfSlicesIndexes = [NSMutableArray array];
-    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
-        BOOL foundROI = NO;
-        for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
-            if ([roi.name isEqualToString:roiname]) {
-                if (!foundROI) {
-                    [arrayOfSlicesIndexes addObject:[NSNumber numberWithInteger:pix]];
-                }
-                foundROI = YES;
-            }
-        }
-    }
-    return arrayOfSlicesIndexes;
-}
 
--(NSMutableArray *)pixelDataFromROIasFlatArrayForType:(ROI_Type)type addHeader:(BOOL)addHeader{
+-(NSMutableArray *)dataValuesArrayFromROIsOfType:(ROI_Type)type addHeader:(BOOL)addHeader{
     NSString *roiname = [self ROInameForType:type];
     NSMutableArray *arrayOfRows = [NSMutableArray array];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
@@ -2071,14 +2190,14 @@
 }
 
 
--(NSMutableDictionary *)dictOfPixelBufferValuesAs2DArrayForType:(ROI_Type)type{
+-(NSMutableDictionary *)dictOfrawPixelsDelta_make2DarrayWithPixelsFromROIsForType:(ROI_Type)type{
     NSString *roiname = [self ROInameForType:type];
     NSMutableDictionary *dictOfROIgrids = [NSMutableDictionary dictionary];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
         BOOL foundROI = NO;
         for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
             if ([roi.name isEqualToString:roiname]) {
-                NSMutableArray *roiData = [self pixelsForROI:roi];
+                NSMutableArray *roiData = [self rawPixelsDelta_extractPixelsInOrderedRowsFromROI:roi];
                 if (!foundROI) {
                     [dictOfROIgrids setObject:roiData forKey:[NSString stringWithFormat:@"_%03li",(long)pix]];
                 }
@@ -2089,28 +2208,10 @@
     return dictOfROIgrids;
 }
 
--(NSMutableArray *)pixelBufferValuesAs2DArrayForType:(ROI_Type)type{
-    NSString *roiname = [self ROInameForType:type];
-    NSMutableArray *arrayOfROIgrids = [NSMutableArray array];
-    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
-        BOOL foundROI = NO;
-        for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
-            if ([roi.name isEqualToString:roiname]) {
-                NSMutableArray *roiData = [self pixelsForROI:roi];
-                if (!foundROI) {
-                    [arrayOfROIgrids addObject:roiData];
-                }
-                foundROI = YES;
-            }
-        }
-    }
-    return arrayOfROIgrids;
-}
 
 
-
--(NSString *)dataStringForFlatPixelDataForROIType:(ROI_Type)type {
-    NSMutableArray *arrayOfRows = [self pixelDataFromROIasFlatArrayForType:type addHeader:YES];
+-(NSString *)dataStringFromDataValuesArrayFromROIsOfType:(ROI_Type)type {
+    NSMutableArray *arrayOfRows = [self dataValuesArrayFromROIsOfType:type addHeader:YES];
     if (arrayOfRows.count>0) {
         return [self stringForDataArray:arrayOfRows forceTranspose:NO];
     }
@@ -2118,7 +2219,7 @@
 }
 
 -(NSString *)dataStringFor2DpixelDataForROIType:(ROI_Type)type {
-    NSMutableDictionary *dictOfRoiGrids = [self dictOfPixelBufferValuesAs2DArrayForType:type];
+    NSMutableDictionary *dictOfRoiGrids = [self dictOfrawPixelsDelta_make2DarrayWithPixelsFromROIsForType:type];
     NSMutableArray *arrayOfRows = [NSMutableArray array];
     [arrayOfRows addObject:[NSString stringWithFormat:@"2D grids of Pixel Data For %@ without mirroring",[self ROInameForType:type]]];
     if (dictOfRoiGrids.count>0) {
@@ -2140,51 +2241,7 @@
     return [arrayOfRows componentsJoinedByString:@"\n"];
 }
 
--(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
-    if (arrayOfData.count>0) {
-        NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
-        if (forceTranspose || [self userDefaultBoolForKey:kTransposeExportedDataDefault]) {
-            //find the max length of the rows = the number of rows we need when we switch
-            NSUInteger maxRowLength = 0;
-            for (NSUInteger r=0; r<arrayOfData.count; r++) {
-                maxRowLength = MAX(maxRowLength,[[arrayOfData objectAtIndex:r] count]);
-            }
-            //Make an array to hold these rows of data
-            NSMutableArray *arrayTransposedRows = [NSMutableArray arrayWithCapacity:maxRowLength];
-            for (int c=0; c<maxRowLength; c++) {
-                [arrayTransposedRows addObject:[NSMutableArray array]];
-            }
-            //r is the original row with data from ROI in slice 0..count
-            //i is the item in each roiArray
-            //go thru the new array of possible maxRowLength cols, askeach ROI data array  if it can contribute. If roiarray.count<maxRowLength use @"" as a placeholder
-            for (int roiArraysIndex=0; roiArraysIndex<arrayOfData.count; roiArraysIndex++) {
-                NSMutableArray *arrayOfDataFromROIatIndex = [arrayOfData objectAtIndex:roiArraysIndex];
-                NSUInteger roiArrayCount = arrayOfDataFromROIatIndex.count;
-                for (int roiarrayDataIndex=0; roiarrayDataIndex<maxRowLength; roiarrayDataIndex++) {
-                    if (roiarrayDataIndex<roiArrayCount) {
-                        [[arrayTransposedRows objectAtIndex:roiarrayDataIndex] addObject:[arrayOfDataFromROIatIndex objectAtIndex:roiarrayDataIndex]];
-                    }
-                    else {
-                        [[arrayTransposedRows objectAtIndex:roiarrayDataIndex] addObject:@""];
-                    }
-                }
-            }
-            // now fuse the new cols as rows
-            for (int r=0; r<arrayTransposedRows.count; r++) {
-                [arrayOfRowStrings addObject:[[arrayTransposedRows objectAtIndex:r]componentsJoinedByString:@"\t"]];
-            }
-        }
-        else {
-            // just fuse the new cols as rows
-            for (int r=0; r<arrayOfData.count; r++) {
-                [arrayOfRowStrings addObject:[[arrayOfData objectAtIndex:r]componentsJoinedByString:@"\t"]];
-            }
-        }
-        //  fuse the new rows as table
-        return [arrayOfRowStrings componentsJoinedByString:@"\n"];
-    }
-    return nil;
-}
+
 -(NSURL *)saveData:(NSString *)dataString withName:(NSString *)name {
     NSSavePanel *savePanel = [NSSavePanel savePanel];
     savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
@@ -2200,14 +2257,7 @@
     return nil;
 }
 
--(void)exportAMTroi {
-    if ([self valid2DViewer:self.viewerPET]) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundeclared-selector"
-        [[NSApplication sharedApplication] sendAction:@selector(roiSaveSeries:) to:self.viewerPET from:self.viewerPET];
-#pragma clang diagnostic pop
-    }
-}
+
 
 -(BOOL)roiIsActiveMirrorOrTransform:(ROI *)roi {
     return [roi.name isEqualToString:[self ROInameForType:Active_ROI]] || [roi.name isEqualToString:[self ROInameForType:Mirrored_ROI]] || [roi.name isEqualToString:[self ROInameForType:Transform_ROI_Placed]];
