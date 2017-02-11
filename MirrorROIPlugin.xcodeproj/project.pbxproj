@@ -30,6 +30,8 @@
 		8E8838381DDA209400AE9166 /* ROIValues.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E8838361DDA209400AE9166 /* ROIValues.m */; };
 		8E8AA1DB1E0693BB007621FB /* Jiggle small.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E8AA1DA1E0693BB007621FB /* Jiggle small.png */; };
 		8E8EA0B31DB5329D00940C46 /* Flip Vertical Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */; };
+		8E991B231E4E43130051BA90 /* Utility.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E991B211E4E43130051BA90 /* Utility.h */; };
+		8E991B241E4E43130051BA90 /* Utility.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E991B221E4E43130051BA90 /* Utility.m */; };
 		8E9C42631DCE03C200E2A40C /* MirrorROIPluginFilterOC.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */; };
 		8E9C42641DCE03C600E2A40C /* MirrorROIPluginFilterOC.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */; };
 		8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDEE1DB7A03900D7B0CA /* Length extend.png */; };
@@ -48,6 +50,10 @@
 		8ED845FB1DC6295D008399F1 /* NW.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F71DC6295D008399F1 /* NW.png */; };
 		8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE41DAE6039007C14A9 /* CT.png */; };
 		8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE51DAE6039007C14A9 /* PET.png */; };
+		8EE534A91E4DE11E007DA1E1 /* AnatomicalSites.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A51E4DE11E007DA1E1 /* AnatomicalSites.txt */; };
+		8EE534AA1E4DE11E007DA1E1 /* Vaccines.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A61E4DE11E007DA1E1 /* Vaccines.txt */; };
+		8EE534AB1E4DE11E007DA1E1 /* Placebos.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A71E4DE11E007DA1E1 /* Placebos.txt */; };
+		8EE534AC1E4DE11E007DA1E1 /* TreatmentSites.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A81E4DE11E007DA1E1 /* TreatmentSites.txt */; };
 		8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */ = {isa = PBXBuildFile; fileRef = 8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */; };
 		8EF2964C1DC4D17200CC638E /* Erase Filled-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EF2964B1DC4D17200CC638E /* Erase Filled-50.png */; };
 		8EF296511DC4D2FB00CC638E /* end.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EF2964F1DC4D2FB00CC638E /* end.png */; };
@@ -86,6 +92,8 @@
 		8E8AA1DA1E0693BB007621FB /* Jiggle small.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Jiggle small.png"; path = "PNGs/Jiggle small.png"; sourceTree = "<group>"; };
 		8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = MirrorROIPluginFilterOC.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = MirrorROIPluginFilterOC.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		8E991B211E4E43130051BA90 /* Utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utility.h; sourceTree = "<group>"; };
+		8E991B221E4E43130051BA90 /* Utility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utility.m; sourceTree = "<group>"; };
 		8EB2BDEE1DB7A03900D7B0CA /* Length extend.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length extend.png"; path = "PNGs/Length extend.png"; sourceTree = "<group>"; };
 		8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length +.png"; path = "PNGs/Length +.png"; sourceTree = "<group>"; };
 		8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = Tiling2x1.pdf; path = PNGs/Tiling2x1.pdf; sourceTree = "<group>"; };
@@ -103,11 +111,16 @@
 		8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled-50.png"; path = "PNGs/Flip Vertical Filled-50.png"; sourceTree = "<group>"; };
 		8EDB8BE41DAE6039007C14A9 /* CT.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = CT.png; path = PNGs/CT.png; sourceTree = "<group>"; };
 		8EDB8BE51DAE6039007C14A9 /* PET.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PET.png; path = PNGs/PET.png; sourceTree = "<group>"; };
+		8EE534A51E4DE11E007DA1E1 /* AnatomicalSites.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AnatomicalSites.txt; sourceTree = "<group>"; };
+		8EE534A61E4DE11E007DA1E1 /* Vaccines.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Vaccines.txt; sourceTree = "<group>"; };
+		8EE534A71E4DE11E007DA1E1 /* Placebos.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Placebos.txt; sourceTree = "<group>"; };
+		8EE534A81E4DE11E007DA1E1 /* TreatmentSites.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = TreatmentSites.txt; sourceTree = "<group>"; };
 		8EE909791DA15C6F00AFAA00 /* unusedCode */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; lineEnding = 0; path = unusedCode; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = "<none>"; };
 		8EE9097B1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MirrorROIPlugin_Prefix.pch; sourceTree = "<group>"; };
 		8EF2964B1DC4D17200CC638E /* Erase Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Erase Filled-50.png"; path = "PNGs/Erase Filled-50.png"; sourceTree = "<group>"; };
 		8EF2964F1DC4D2FB00CC638E /* end.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = end.png; path = PNGs/end.png; sourceTree = "<group>"; };
 		8EF296501DC4D2FB00CC638E /* start.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = start.png; path = PNGs/start.png; sourceTree = "<group>"; };
+		8EF682FB1E4BB3CD00FCE46F /* UnusedExportFunctions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UnusedExportFunctions.m; sourceTree = "<group>"; };
 		AB5D36050680E57E00F4007A /* MirrorROIPlugin.osirixplugin */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MirrorROIPlugin.osirixplugin; sourceTree = BUILT_PRODUCTS_DIR; };
 		C52843B91DC250BA00371742 /* aup.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = aup.png; path = PNGs/aup.png; sourceTree = "<group>"; };
 		C52843BB1DC250C600371742 /* adownward.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = adownward.png; path = PNGs/adownward.png; sourceTree = "<group>"; };
@@ -131,11 +144,14 @@
 		089C166AFE841209C02AAC07 /* MyNewPlugin */ = {
 			isa = PBXGroup;
 			children = (
+				8E991B211E4E43130051BA90 /* Utility.h */,
+				8E991B221E4E43130051BA90 /* Utility.m */,
 				8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */,
 				8EC3A55D1E0BE8F10019108E /* TDWindow.xib */,
 				8E90FA4F1DCA905D006B2086 /* MirrorROIPluginFilterOC.m */,
 				8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */,
 				8EE909791DA15C6F00AFAA00 /* unusedCode */,
+				8EF682FB1E4BB3CD00FCE46F /* UnusedExportFunctions.m */,
 				8EDB8BDB1DAE5826007C14A9 /* PNGs */,
 				8E15CE3C1E4628830009E1A5 /* arraylists */,
 				08FB77AFFE84173DC02AAC07 /* Classes */,
@@ -215,6 +231,10 @@
 		8E15CE3C1E4628830009E1A5 /* arraylists */ = {
 			isa = PBXGroup;
 			children = (
+				8EE534A51E4DE11E007DA1E1 /* AnatomicalSites.txt */,
+				8EE534A61E4DE11E007DA1E1 /* Vaccines.txt */,
+				8EE534A71E4DE11E007DA1E1 /* Placebos.txt */,
+				8EE534A81E4DE11E007DA1E1 /* TreatmentSites.txt */,
 				8E15CE351E45F95F0009E1A5 /* vaccines.plist */,
 				8E15CE381E4628070009E1A5 /* treamentsites.plist */,
 				8E15CE3A1E4628420009E1A5 /* anatomicalsites.plist */,
@@ -269,6 +289,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8ED16B231DF99F890043A74C /* TextDisplayWindow.h in Headers */,
+				8E991B231E4E43130051BA90 /* Utility.h in Headers */,
 				8EE9097C1DA15C8800AFAA00 /* MirrorROIPlugin_Prefix.pch in Headers */,
 				8E4FBD201DFB2D9D00E54D6F /* TextDisplayWindowController.h in Headers */,
 				8E9C42641DCE03C600E2A40C /* MirrorROIPluginFilterOC.h in Headers */,
@@ -359,13 +380,16 @@
 				8E15CE361E45F95F0009E1A5 /* vaccines.plist in Resources */,
 				8EF296521DC4D2FB00CC638E /* start.png in Resources */,
 				8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */,
+				8EE534AA1E4DE11E007DA1E1 /* Vaccines.txt in Resources */,
 				8E15CE3E1E4652400009E1A5 /* placebos.plist in Resources */,
 				C52843BE1DC250C600371742 /* adownward.png in Resources */,
+				8EE534AB1E4DE11E007DA1E1 /* Placebos.txt in Resources */,
 				8E15CE391E4628070009E1A5 /* treamentsites.plist in Resources */,
 				8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */,
 				8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */,
 				8ED845FB1DC6295D008399F1 /* NW.png in Resources */,
 				8E15CE421E466EBA0009E1A5 /* DatabaseWrite.png in Resources */,
+				8EE534AC1E4DE11E007DA1E1 /* TreatmentSites.txt in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,
 				8ED5349B1E449D2C003B1E8A /* keyImageSquare deleteAll.png in Resources */,
 				C52843BF1DC250C600371742 /* aleft.png in Resources */,
@@ -373,6 +397,7 @@
 				8E172CFE1DDD03F100F33DE5 /* JiggleSelect.png in Resources */,
 				8EC532661E05A2A6006B74E5 /* Flip Vertical Filled-24.png in Resources */,
 				8E6F81391E420A97002E5631 /* keyImageSquare.png in Resources */,
+				8EE534A91E4DE11E007DA1E1 /* AnatomicalSites.txt in Resources */,
 				C52843C01DC250C600371742 /* aright.png in Resources */,
 				8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */,
 			);
@@ -397,6 +422,7 @@
 			files = (
 				8ED16B241DF99F890043A74C /* TextDisplayWindow.m in Sources */,
 				8E8838381DDA209400AE9166 /* ROIValues.m in Sources */,
+				8E991B241E4E43130051BA90 /* Utility.m in Sources */,
 				8E9C42631DCE03C200E2A40C /* MirrorROIPluginFilterOC.m in Sources */,
 				8E4FBD211DFB2D9D00E54D6F /* TextDisplayWindowController.m in Sources */,
 			);

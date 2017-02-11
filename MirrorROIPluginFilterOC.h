@@ -23,6 +23,7 @@ typedef enum : NSInteger {
 } ExtendSingleLengthHow;
 
 typedef enum : NSUInteger {
+    GrowingRegion = -1,
     AllROI = 0,
     Mirrored_ROI = 1,
     Active_ROI = 2,
@@ -31,7 +32,8 @@ typedef enum : NSUInteger {
     AllROI_CT = 5,
     AllROI_PET = 6,
     Transform_Intercalated = 7,
-    Jiggle_ROI = 8
+    Jiggle_ROI = 8,
+    TextRectangleROIs = 9
 } ROI_Type;
 
 typedef enum : NSUInteger {
@@ -41,6 +43,13 @@ typedef enum : NSUInteger {
     NoType_Defined = 4,
     Front_Window = 5
 } ViewerWindow_Type;
+
+typedef enum : NSInteger {
+    ActiveMirroredInSingleSlice = 0,
+    ActiveMirroredIn3D = 1,
+    ActiveOnlyInSingleSlice = 2,
+    ActiveOnlyIn3D = 3,
+} ActiveMirrorGenerateHow;
 
 typedef enum : NSUInteger {
     MoveROI_Reset = 0,
@@ -71,18 +80,16 @@ typedef enum : NSInteger {
 } FusedOrPetAloneWindowSetting;
 
 typedef enum : NSInteger {
+    JiggleRoi,
+    PETRois,
+    //not on menu:
     AllROIdata,
     RoiSummary,
     RoiData,
     RoiThreeD,
     RoiPixelsFlat,
-    JiggleRoi,
-        sep1,
     PixelsGridAllData,
     PixelsGridSummary,
-        sep2,
-    PETRois,
-    //not on menu:
     BookmarkedData
 } ExportDataType;
 

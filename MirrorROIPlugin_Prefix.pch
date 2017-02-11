@@ -13,6 +13,8 @@
 #define kAllSlices -1
 
 #define kBookmarkStringKey @"kBookmarkStringKey"
+#define kBookmarkKeySummary @"kBookmarkKeySummary"
+#define kBookmarkKeyPixelsGrids @"kBookmarkKeyPixelsGrids"
 
 
 #define kPETtextColour [NSColor colorWithCalibratedRed:0.098 green:0.098 blue:0.098 alpha:1.00]
@@ -24,9 +26,10 @@
 #define kColor_TransformPlaced @"kColour_TransformPlaced"
 #define kColor_TransformIntercalated @"kColour_TransformIntercalated"
 #define kColor_Jiggle @"kColour_Jiggle"
+#define kGrowingRegionROInameDefault @"growingRegionROIName"
 #define kTransformROInameDefault @"kTransformROInameDefault"
 #define kMirroredROInameDefault @"kMirroredROInameDefault"
-#define kActiveROInameDefault @"growingRegionROIName" // this is set by OsiriX
+#define kActiveROInameDefault @"kActiveROInameDefault"
 #define kExtendSingleTransformDefault @"kExtendSingleTransformDefault"
 #define kTransposeExportedDataDefault @"kTransposeExportedDataDefault"
 #define kIncludeOriginalInJiggleDefault @"kIncludeOriginalInJiggleDefault"
@@ -34,13 +37,13 @@
 #define kJiggleBoundsPixels @"kJiggleBoundsPixels"
 #define kMirrorMoveByPixels @"kMirrorMoveByPixels"
 #define kSegmentFusedOrPETSegmentDefault @"kSegmentFusedOrPETSegmentDefault"
-#define kCombineExportsOneFileDefault @"kCombineExportsOneFileDefault"
+#define kCombinePixelsWithStatsInFileDefault @"kCombinePixelsWithStatsInFileDefault"
 #define kExportMenuSelectedIndexDefault @"kExportMenuSelectedIndexDefault"
 #define kAddReportWhenSaveBookmarkedDataDefault @"kAddReportWhenSaveBookmarkedDataDefault"
 #define kExportKeyImagesWhenSetting @"kExportKeyImagesWhenSetting"
 #define kKeyImageHeightFractionDefault @"kKeyImageHeightFractionDefault"
 
-#define kDefaultArrayTreatmentVaccines @"kDefaultArrayTreatmentVaccines"
+#define kDefaultArrayVaccines @"kDefaultArrayVaccines"
 #define kDefaultArrayTreatmentSites @"kDefaultArrayTreatmentSites"
 #define kDefaultArrayAnatomicalSites @"kDefaultArrayAnatomicalSites"
 #define kDefaultArrayPlacebos @"kDefaultArrayPlacebos"
@@ -77,9 +80,9 @@
 #define kDeltaNameGridDataTag @"⊞"
 #define kDeltaNameSubtractedPix @"⊞ Subtracted Pixels"
 #define kDeltaNameDividedPix @"⊞ Divided Pixels"
-#define kDeltaNameActivePixFlat @"⊞ Active Pixels From Pix Buffer For ROI At Slice# As Single Linear Array"
+#define kDeltaNameActivePixFlatAndNotMirrored @"⊞ Active Pixels From Pix Buffer For ROI At Slice# As Single Linear Array"
 #define kDeltaNameActivePixGrid @"⊞ Active Pixels From Pix Buffer For ROI At Slice# Shown In 2D"
-#define kDeltaNameMirroredPixFlat @"⊞ Mirrored Pixels From Pix Buffer For ROI At Slice# As Single Linear Array"
+#define kDeltaNameMirroredPixFlatAndMirroredInRows @"⊞ Mirrored Pixels From Pix Buffer For ROI At Slice# As Single Linear Array"
 #define kDeltaNameMirroredPixGrid @"⊞ Mirrored Pixels From Pix Buffer For ROI At Slice# Shown In 2D"
 
 #define kSpriteWidthMedian 3.0
