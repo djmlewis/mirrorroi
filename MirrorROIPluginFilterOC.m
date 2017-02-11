@@ -1109,16 +1109,25 @@
     NSRect rect= roi.rect;
     rect.origin = NSMakePoint(roi.pix.pwidth*0.5, roi.pix.pheight*[[NSUserDefaults standardUserDefaults] floatForKey:kKeyImageHeightFractionDefault]);
     [roi setROIRect:rect];
-    ROI *square = [viewer newROI:tROI];
-    rect = NSMakeRect(roi.pix.pwidth*0.5, roi.pix.pheight*0.5, 10.0, 10.0);
-    [square setROIRect:rect];
-    [square setNSColor:[NSColor orangeColor] globally:NO];
-    [square setName:text];
-    [self addROI2Pix:square atSlice:slice inViewer:viewer hidden:NO];
     [self.viewerCT setROIToolTag:tROISelector];
     [self.viewerPET setROIToolTag:tROISelector];
-
-    
+}
+-(IBAction)addTagRectsToActiveROIinPETviewerForAnatomicalSite:(id)sender {
+    if ([self anatomicalSiteDefined]) {
+        NSString *site = [self anatomicalSiteName];
+        for (int i=0; i<self.viewerPET.roiList.count;i++) {
+            for (ROI *roi in [self.viewerPET.roiList objectAtIndex:i]) {
+                if ([roi.name isEqualToString:[self ROInameForType:Active_ROI]]) {
+                    ROI *square = [self.viewerPET newROI:tROI];
+                    NSRect rect = NSMakeRect(roi.textureUpLeftCornerX, roi.textureUpLeftCornerY, roi.textureWidth, roi.textureHeight);
+                    [square setROIRect:rect];
+                    [square setNSColor:[NSColor orangeColor] globally:NO];
+                    [square setName:site];
+                    [self addROI2Pix:square atSlice:i inViewer:self.viewerPET hidden:NO];
+                }
+            }
+        }
+    }
 }
 -(void)addROI2Pix:(ROI *)roi2add atSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
     if (slice <[[viewer pixList] count] && slice <[[viewer roiList] count])
