@@ -1498,7 +1498,7 @@
                         </connections>
                     </segmentedControl>
                     <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zx0-GW-xxA">
-                        <rect key="frame" x="154" y="343" width="18" height="18"/>
+                        <rect key="frame" x="106" y="343" width="18" height="18"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="yingyang" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="fyy-YO-EAs">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1506,6 +1506,17 @@
                         </buttonCell>
                         <connections>
                             <action selector="fuseDefusetapped:" target="-2" id="U3R-8w-V8e"/>
+                        </connections>
+                    </button>
+                    <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qj2-0b-xFU">
+                        <rect key="frame" x="165" y="343" width="18" height="18"/>
+                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        <buttonCell key="cell" type="square" bezelStyle="shadowlessSquare" image="NSInfo" imagePosition="only" alignment="center" imageScaling="proportionallyUpOrDown" inset="2" id="D0z-P9-3YY">
+                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                            <font key="font" metaFont="system"/>
+                        </buttonCell>
+                        <connections>
+                            <action selector="infoTapped:" target="-2" id="4rJ-GO-M1B"/>
                         </connections>
                     </button>
                 </subviews>
@@ -1558,6 +1569,7 @@
         <image name="NSAddTemplate" width="11" height="11"/>
         <image name="NSBookmarksTemplate" width="17" height="18"/>
         <image name="NSFolder" width="32" height="32"/>
+        <image name="NSInfo" width="32" height="32"/>
         <image name="NSQuickLookTemplate" width="19" height="12"/>
         <image name="NSRefreshFreestandingTemplate" width="14" height="14"/>
         <image name="NSRemoveTemplate" width="11" height="11"/>

@@ -192,6 +192,11 @@
     return @"";
 }
 
+#pragma mark - help and Info
+- (IBAction)infoTapped:(NSButton *)sender {
+    [MirrorROIPluginFilterOC alertWithMessage:[NSString stringWithFormat:@"Build Version %@\nCreated By DJM Lewis\n© 2017 djml.eu\n All Rights Reserved E&OE",[[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]] andTitle:@"MirrorROI plugin"];
+}
+
 #pragma mark - Windows
 +(void)alertWithMessage:(NSString *)message andTitle:(NSString *)title {
     NSRunCriticalAlertPanel(NSLocalizedString(title,nil), NSLocalizedString(message,nil) , NSLocalizedString(@"Close",nil), nil, nil);
