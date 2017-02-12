@@ -2026,7 +2026,9 @@
                     minOfA = fminf(minOfA, A);
                     //add the NSNumbers to our flat 1D row, we note the reversal
                     [dataForROIflatA addObject:[rowAatY objectAtIndex:col]];
-                }//end of row at Y
+                    //add the NSNumbers to our 1Line,
+                    [dataA_1Line addObject:[rowAatY objectAtIndex:col]];
+               }//end of row at Y
             }//end of Pixels grid for ROI
             //we finished all the pixels in this grid for this ROI so update the flat arrays
             [dataAflat addObject:dataForROIflatA];
@@ -2037,7 +2039,7 @@
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     CGFloat sd;
     CGFloat countOfPixelsF = [[NSNumber numberWithUnsignedInteger:countOfPixels] floatValue];
-    
+    [dict setObject:[NSNumber numberWithUnsignedInteger:countOfPixels] forKey:kDeltaNameCount];
     [dict setObject:dataAflat forKey:kDeltaNameActivePixFlatAndNotMirrored];
     [dict setObject:dataA2D forKey:kDeltaNameActivePixGrid];
     [dict setObject:dataA_1Line forKey:kDeltaNameActivePix1Line];
@@ -2048,7 +2050,7 @@
     sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:dataAflat withMean:sumOfA/countOfPixelsF andCountF:countOfPixelsF startingAtRow:0];
     [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameActiveSD];
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameActiveSEM];
-    
+
     if (dataM2D.count > 0) {
         [dict setObject:dataMflat forKey:kDeltaNameMirroredPixFlatAndMirroredInRows];
         [dict setObject:dataM2D forKey:kDeltaNameMirroredPixGrid];
@@ -2062,7 +2064,6 @@
         
         [dict setObject:subtracted forKey:kDeltaNameSubtractedPix];
         [dict setObject:divided forKey:kDeltaNameDividedPix];
-        [dict setObject:[NSNumber numberWithUnsignedInteger:countOfPixels] forKey:kDeltaNameCount];
         CGFloat subtractedMean = sumOfSubtract/countOfPixelsF;
         [dict setObject:[NSNumber numberWithFloat:subtractedMean] forKey:kDeltaNameSubtractedMean];
         CGFloat dividedMean = sumOfDivide/countOfPixelsF;
