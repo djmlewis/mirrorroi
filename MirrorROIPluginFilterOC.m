@@ -194,12 +194,16 @@
 
 #pragma mark - help and Info
 - (IBAction)infoTapped:(NSButton *)sender {
-    [MirrorROIPluginFilterOC alertWithMessage:[NSString stringWithFormat:@"Build Version %@\nCreated By DJM Lewis\n© 2017 djml.eu\n All Rights Reserved E&OE",[[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]] andTitle:@"MirrorROI plugin"];
+    [MirrorROIPluginFilterOC alertWithMessage:[NSString stringWithFormat:@"Build Version %@\nCreated By DJM Lewis\n© 2017 djml.eu\n All Rights Reserved E&OE",[[[NSBundle bundleForClass:[self class]] infoDictionary] objectForKey:(NSString *)kCFBundleVersionKey]] andTitle:@"MirrorROI plugin" critical:NO];
 }
 
 #pragma mark - Windows
-+(void)alertWithMessage:(NSString *)message andTitle:(NSString *)title {
-    NSRunCriticalAlertPanel(NSLocalizedString(title,nil), NSLocalizedString(message,nil) , NSLocalizedString(@"Close",nil), nil, nil);
++(void)alertWithMessage:(NSString *)message andTitle:(NSString *)title critical:(BOOL)critical{
+    if (critical) {
+        NSRunCriticalAlertPanel(NSLocalizedString(title,nil), NSLocalizedString(message,nil) , NSLocalizedString(@"Close",nil), nil, nil);
+    } else {
+        NSRunAlertPanel(NSLocalizedString(title,nil), NSLocalizedString(message,nil) , NSLocalizedString(@"Close",nil), nil, nil);
+    }
 }
 +(void)alertSound {
     [[NSSound soundNamed:@"Basso"] play];
@@ -395,7 +399,7 @@
         }
     }
     else {
-        [MirrorROIPluginFilterOC alertWithMessage:@"There are no items in the list" andTitle:[NSString stringWithFormat:@"Export Items for %@",[MirrorROIPluginFilterOC fileNamePrefixForComboBox:comboBox]]];
+        [MirrorROIPluginFilterOC alertWithMessage:@"There are no items in the list" andTitle:[NSString stringWithFormat:@"Export Items for %@",[MirrorROIPluginFilterOC fileNamePrefixForComboBox:comboBox]] critical:YES];
     }
 }
 +(NSMutableArray *)arrayFromFileAtURL:(NSURL *) url {
@@ -436,7 +440,7 @@
         }
     }
     else {
-        [MirrorROIPluginFilterOC alertWithMessage:[NSString stringWithFormat:@"The file could not be loaded either because it could not be opened or it did not contain readable text. The file must be text with a single item on each line."] andTitle:@"Error loading file"];
+        [MirrorROIPluginFilterOC alertWithMessage:[NSString stringWithFormat:@"The file could not be loaded either because it could not be opened or it did not contain readable text. The file must be text with a single item on each line."] andTitle:@"Error loading file" critical:YES];
     }
 }
 
@@ -576,7 +580,7 @@
             }
         }
         if(indexesWithROI.count==0) {
-            [MirrorROIPluginFilterOC alertWithMessage:@"No PET slices have ROIs" andTitle:@"Creating transforms"];
+            [MirrorROIPluginFilterOC alertWithMessage:@"No PET slices have ROIs" andTitle:@"Creating transforms" critical:YES];
         }
         else if (indexesWithROI.count==1) {
             [self addLengthROIWithStart:[self pointForImageIndex:indexesWithROI.firstIndex inWindow:viewerToAdd start:YES]
@@ -605,7 +609,7 @@
     }
     else
     {
-        [MirrorROIPluginFilterOC alertWithMessage:@"Unable to add bounding transforms as no valid viewer" andTitle:@"Creating transforms"];
+        [MirrorROIPluginFilterOC alertWithMessage:@"Unable to add bounding transforms as no valid viewer" andTitle:@"Creating transforms" critical:YES];
     }
 }
 -(void)displayImageInCTandPETviewersWithIndex:(short)index {
@@ -670,7 +674,7 @@
         switch (indicesOfDCMPixWithMeasureROI.count)
         {
             case 0:
-                [MirrorROIPluginFilterOC alertWithMessage:@"No bounding transforms detected" andTitle:@"Completing transform series"];
+                [MirrorROIPluginFilterOC alertWithMessage:@"No bounding transforms detected" andTitle:@"Completing transform series" critical:YES];
                 break;
             case 1:
             {
@@ -711,7 +715,7 @@
     }
     else
     {
-        [MirrorROIPluginFilterOC alertWithMessage:@"Invalid viewer" andTitle:@"Completing transform series"];
+        [MirrorROIPluginFilterOC alertWithMessage:@"Invalid viewer" andTitle:@"Completing transform series" critical:YES];
     }
 }
 -(void)completeLengthROIseriesForViewerController:(ViewerController *)active2Dwindow betweenROI1:(ROI *)roi1 andROI2:(ROI *)roi2 inThisRange:(NSRange)rangeOfIndices{
@@ -854,13 +858,13 @@
         }
         else
         {
-            [MirrorROIPluginFilterOC alertWithMessage:@"Unable to complete as no valid transforms were found" andTitle:@"Copy transforms"];
+            [MirrorROIPluginFilterOC alertWithMessage:@"Unable to complete as no valid transforms were found" andTitle:@"Copy transforms" critical:YES];
             return NO;
         }
     }
     else
     {
-        [MirrorROIPluginFilterOC alertWithMessage:@"Unable to complete as either the viewer windows are not assigned, or the number of slices in each window do not match" andTitle:@"Copy transforms"];
+        [MirrorROIPluginFilterOC alertWithMessage:@"Unable to complete as either the viewer windows are not assigned, or the number of slices in each window do not match" andTitle:@"Copy transforms" critical:YES];
         return NO;
     }
 }
@@ -943,7 +947,7 @@
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
     if (!mirroredSomething) {
-        [MirrorROIPluginFilterOC alertWithMessage:@"Unable to mirror anything" andTitle:@"Mirror Active ROI"];
+        [MirrorROIPluginFilterOC alertWithMessage:@"Unable to mirror anything" andTitle:@"Mirror Active ROI" critical:YES];
     }
 }
 
@@ -1474,7 +1478,7 @@
     }
     else
     {
-        [MirrorROIPluginFilterOC alertWithMessage:@"No anatomical site is entered - please enter a description and try again." andTitle:@"Anatomical Site Undefined"];
+        [MirrorROIPluginFilterOC alertWithMessage:@"No anatomical site is entered - please enter a description and try again." andTitle:@"Anatomical Site Undefined" critical:YES];
         return NO;
     }
 
@@ -1708,13 +1712,13 @@
                             [self.arrayControllerBookmarks addObject:key];
                         }
                     } else {
-                        [MirrorROIPluginFilterOC alertWithMessage:@"No data were found to import" andTitle:@"Bookmarked Data Import"];
+                        [MirrorROIPluginFilterOC alertWithMessage:@"No data were found to import" andTitle:@"Bookmarked Data Import" critical:YES];
                     }
                 } else {
-                    [MirrorROIPluginFilterOC alertWithMessage:@"The file name does not match the current PET series name and so will not be imported" andTitle:@"Bookmarked Data Import"];
+                    [MirrorROIPluginFilterOC alertWithMessage:@"The file name does not match the current PET series name and so will not be imported" andTitle:@"Bookmarked Data Import" critical:YES];
                 }
             } else {
-                [MirrorROIPluginFilterOC alertWithMessage:@"The file is not a '.plist' file and so cannot be imported" andTitle:@"Bookmarked Data Import"];
+                [MirrorROIPluginFilterOC alertWithMessage:@"The file is not a '.plist' file and so cannot be imported" andTitle:@"Bookmarked Data Import" critical:YES];
             }
         }
     }];

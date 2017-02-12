@@ -136,7 +136,7 @@
                         <font key="font" metaFont="system"/>
                         <tabViewItems>
                             <tabViewItem label="💉" identifier="" id="vAQ-0r-kBQ">
-                                <view key="view" id="pFX-kX-Zyw">
+                                <view key="view" ambiguous="YES" id="pFX-kX-Zyw">
                                     <rect key="frame" x="10" y="33" width="230" height="253"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -355,7 +355,7 @@
                                 </view>
                             </tabViewItem>
                             <tabViewItem label="🔬" identifier="" id="zvN-dk-QnY">
-                                <view key="view" ambiguous="YES" id="PXW-jY-KX0">
+                                <view key="view" id="PXW-jY-KX0">
                                     <rect key="frame" x="10" y="33" width="230" height="253"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
