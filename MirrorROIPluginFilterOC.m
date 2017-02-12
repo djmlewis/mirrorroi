@@ -1491,7 +1491,7 @@
 }
 -(NSString *)participantDetailsString {
     DicomStudy *study = [self.viewerPET currentStudy];
-    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tInjection Location\n%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,self.viewerPET.window.title];
+    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tActive Site\tScan Day\tPlacebo\n%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,self.viewerPET.window.title];
 }
 -(NSString *)participantID {
     return [[self.viewerPET currentStudy] patientID];
@@ -1715,7 +1715,7 @@
                         [MirrorROIPluginFilterOC alertWithMessage:@"No data were found to import" andTitle:@"Bookmarked Data Import" critical:YES];
                     }
                 } else {
-                    [MirrorROIPluginFilterOC alertWithMessage:@"The file name does not match the current PET series name and so will not be imported" andTitle:@"Bookmarked Data Import" critical:YES];
+                    [MirrorROIPluginFilterOC alertWithMessage:[NSString stringWithFormat:@"The file name does not match the current PET series name (%@) and so will not be imported",self.viewerPET.window.title] andTitle:@"Bookmarked Data Import" critical:YES];
                 }
             } else {
                 [MirrorROIPluginFilterOC alertWithMessage:@"The file is not a '.plist' file and so cannot be imported" andTitle:@"Bookmarked Data Import" critical:YES];
@@ -1930,6 +1930,10 @@
 -(NSMutableDictionary *)dataDictForRawPixelsDelta {
     NSMutableArray *dataAflat = [NSMutableArray array];
     NSMutableArray *dataMflat = [NSMutableArray array];
+    NSMutableArray *dataA_1Line = [NSMutableArray array];
+    NSMutableArray *dataM_1Line = [NSMutableArray array];
+    NSMutableArray *dataD_1Line = [NSMutableArray array];
+    NSMutableArray *dataS_1Line = [NSMutableArray array];
     
     NSMutableArray *dataA2D = [self rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:Active_ROI];
     NSMutableArray *dataM2D = [self rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:Mirrored_ROI];
@@ -1983,9 +1987,18 @@
                     [roiSubtract addObject:[NSNumber numberWithFloat:subtraction]];
                     [roiDivide addObject:[NSNumber numberWithFloat:division]];
                     
+                    //add the results to our 1 Line also reflecting the reversed M
+                    [dataS_1Line addObject:[NSNumber numberWithFloat:subtraction]];
+                    [dataD_1Line addObject:[NSNumber numberWithFloat:division]];
+
                     //add the NSNumbers to our flat 1D row, we note the reversal
                     [dataForROIflatA addObject:[rowAatY objectAtIndex:col]];
                     [dataForROIflatM addObject:[rowMatY objectAtIndex:rowMatY.count-col-1]];//reversed for mirrored ROI
+                    
+                    //add the NSNumbers to our 1Line, we note the reversal but its irrelevant, could do straight div/subtractions tho
+                    [dataA_1Line addObject:[rowAatY objectAtIndex:col]];
+                    [dataM_1Line addObject:[rowMatY objectAtIndex:rowMatY.count-col-1]];//reversed for mirrored ROI
+
                 }//end of row at Y
             }//end of Pixels grid for ROI
             //we finished all the pixels in this grid for this ROI so update the flat arrays
@@ -2027,6 +2040,7 @@
     
     [dict setObject:dataAflat forKey:kDeltaNameActivePixFlatAndNotMirrored];
     [dict setObject:dataA2D forKey:kDeltaNameActivePixGrid];
+    [dict setObject:dataA_1Line forKey:kDeltaNameActivePix1Line];
     [dict setObject:[NSNumber numberWithFloat:sumOfA] forKey:kDeltaNameActiveSum];
     [dict setObject:[NSNumber numberWithFloat:sumOfA/countOfPixelsF] forKey:kDeltaNameActiveMean];
     [dict setObject:[NSNumber numberWithFloat:maxOfA] forKey:kDeltaNameActiveMax];
@@ -2060,6 +2074,11 @@
         sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:divided withMean:dividedMean andCountF:countOfPixelsF startingAtRow:0];
         [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameDividedSD];
         [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameDividedSEM];
+        
+        [dict setObject:dataM_1Line forKey:kDeltaNameMirroredPix1Line];
+        [dict setObject:dataS_1Line forKey:kDeltaNameSubtractedPix1Line];
+        [dict setObject:dataD_1Line forKey:kDeltaNameDividedPix1Line];
+
     } else {
         [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixFlatAndMirroredInRows];
         [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixGrid];
@@ -2080,12 +2099,26 @@
         [dict setObject:@"" forKey:kDeltaNameSubtractedSEM];
         [dict setObject:@"" forKey:kDeltaNameDividedSD];
         [dict setObject:@"" forKey:kDeltaNameDividedSEM];
+        
+        [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPix1Line];
+        [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix1Line];
+        [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix1Line];
+
     }
     
     return dict;
 }
 -(NSString *)dataStringRawPixelsFromDict:(NSMutableDictionary *)dict {
-    return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n",
+    return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n",
+            kDeltaNameActivePix1Line,
+            [[dict objectForKey:kDeltaNameActivePix1Line] componentsJoinedByString:@"\t"],
+            kDeltaNameDividedPix1Line,
+            [[dict objectForKey:kDeltaNameDividedPix1Line] componentsJoinedByString:@"\t"],
+            kDeltaNameSubtractedPix1Line,
+            [[dict objectForKey:kDeltaNameSubtractedPix1Line] componentsJoinedByString:@"\t"],
+            kDeltaNameMirroredPix1Line,
+            [[dict objectForKey:kDeltaNameMirroredPix1Line] componentsJoinedByString:@"\t"],
+            
             kDeltaNameActivePixFlatAndNotMirrored,
             [[self arrayOfIndexesOfSlicesWithROIofType:Active_ROI] componentsJoinedByString:@"\t"],
             [self stringForDataArray:[dict objectForKey:kDeltaNameActivePixFlatAndNotMirrored] forceTranspose:NO],

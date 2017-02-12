@@ -85,6 +85,12 @@
 #define kDeltaNameMirroredPixFlatAndMirroredInRows @"⊞ Mirrored Pixels From Pix Buffer For ROI At Slice# As Single Linear Array"
 #define kDeltaNameMirroredPixGrid @"⊞ Mirrored Pixels From Pix Buffer For ROI At Slice# Shown In 2D"
 
+#define kDeltaNameSubtractedPix1Line @"⊞ Subtracted Pixels In One Line"
+#define kDeltaNameDividedPix1Line @"⊞ Divided Pixels In 1 Line"
+#define kDeltaNameActivePix1Line @"⊞ Active Pixels In One Line"
+#define kDeltaNameMirroredPix1Line @"⊞ Mirrored Pixels In 1 Line"
+
+
 #define kSpriteWidthMedian 3.0
 #define kSpriteHeightMedian 29.0
 #define kSpriteHeightRange 3.0
