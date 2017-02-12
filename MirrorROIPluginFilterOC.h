@@ -104,7 +104,8 @@ typedef enum : NSInteger {
     BookmarkTrash = 0,
     BookmarkAdd = 1,
     BookmarkExport = 2,
-    BookmarkQuickLook = 3
+    BookmarkQuickLook = 3,
+    BookmarkPLISTimport = 4
 } BookmarkEAST;
 
 typedef enum : NSInteger {

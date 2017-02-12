@@ -14,7 +14,6 @@
 #import <OsiriXAPI/DicomStudy.h>
 #import <OsiriXAPI/DicomSeries.h>
 #import <OsiriXAPI/BrowserController.h>
-#import "Utility.h"
 
 
 @implementation MirrorROIPluginFilterOC
@@ -311,8 +310,9 @@
     }
     else
     {
-        [MirrorROIPluginFilterOC alertWithMessage:@"PET and CT windows have mismatched number of slices" andTitle:@"Unable To Proceed"];
-        return NO;
+        return [MirrorROIPluginFilterOC proceedAfterAlert:@"PET and CT windows have mismatched number of slices. If you continue the app may crash or data may be missed. Continue?"];
+        //[MirrorROIPluginFilterOC alertWithMessage: andTitle:@"Unable To Proceed"];
+        //return NO;
     }
 }
 - (IBAction)fuseDefusetapped:(NSButton *)sender {
@@ -888,7 +888,8 @@
 
     for (NSUInteger slice=startSlice; slice<endSlice; slice++) {
         NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];
-        ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tPlain];
+        ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithName:[self ROInameForType:GrowingRegion]];
+        //[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tPlain];
         if (roi2Clone != nil) {
             //rename to keep in sync
             roi2Clone.name = [self ROInameForType:Active_ROI];
@@ -989,6 +990,21 @@
             return roi;}
     }
     return nil;
+}
++(ROI*) roiFromList:(NSMutableArray *)roiList WithName:(NSString *)name2Find{
+    for (ROI *roi in roiList) {
+        if ([roi.name isEqualToString:name2Find]){
+            return roi;}
+    }
+    return nil;
+}
++(NSMutableArray*) roiArrayFromList:(NSMutableArray *)roiList WithName:(NSString *)name2Find{
+    NSMutableArray *roiarray = [NSMutableArray arrayWithCapacity:roiList.count];
+    for (ROI *roi in roiList) {
+        if ([roi.name isEqualToString:name2Find]){
+            [roiarray addObject:roi];}
+    }
+    return roiarray;
 }
 +(NSMutableIndexSet *)indicesInViewer:(ViewerController *)viewer withROIofType:(int)type2Find {
     NSMutableIndexSet *set = [NSMutableIndexSet indexSet];
@@ -1115,17 +1131,25 @@
 -(IBAction)addTagRectsToActiveROIinPETviewerForAnatomicalSite:(id)sender {
     if ([self anatomicalSiteDefined]) {
         NSString *site = [self anatomicalSiteName];
-        for (int i=0; i<self.viewerPET.roiList.count;i++) {
+        //it objects to modifying roilist while enumerating, so collect info and then do it
+        NSMutableArray *slices = [NSMutableArray arrayWithCapacity:self.viewerPET.roiList.count];
+        for (NSUInteger i=0; i<self.viewerPET.roiList.count;i++) {
             for (ROI *roi in [self.viewerPET.roiList objectAtIndex:i]) {
                 if ([roi.name isEqualToString:[self ROInameForType:Active_ROI]]) {
-                    ROI *square = [self.viewerPET newROI:tROI];
-                    NSRect rect = NSMakeRect(roi.textureUpLeftCornerX, roi.textureUpLeftCornerY, roi.textureWidth, roi.textureHeight);
-                    [square setROIRect:rect];
-                    [square setNSColor:[NSColor orangeColor] globally:NO];
-                    [square setName:site];
-                    [self addROI2Pix:square atSlice:i inViewer:self.viewerPET hidden:NO];
+                    [slices addObject:[NSArray arrayWithObjects:
+                                       [NSNumber numberWithUnsignedInteger:i],
+                                       [NSValue valueWithRect:NSMakeRect(roi.textureUpLeftCornerX, roi.textureUpLeftCornerY, roi.textureWidth, roi.textureHeight)], nil]];
                 }
             }
+        }
+        for (NSArray *array in slices) {
+            ROI *square = [self.viewerPET newROI:tROI];
+            NSUInteger slice = [array[0] unsignedIntegerValue];
+            NSRect rect = [array[1] rectValue];
+            [square setROIRect:rect];
+            [square setNSColor:[NSColor orangeColor] globally:NO];
+            [square setName:site];
+            [self addROI2Pix:square atSlice:slice inViewer:self.viewerPET hidden:NO];
         }
     }
 }
@@ -1618,7 +1642,9 @@
         case BookmarkQuickLook:
             [self exportBookmarkedData:ViewInWindow];
             break;
-            
+        case BookmarkPLISTimport:
+            [self bookmarkedDataImport];
+            break;
         default:
             break;
     }
@@ -1631,7 +1657,6 @@
         [self.dictBookmarks removeObjectForKey:selectedSite];
     }
 }
-
 -(void)trashAllBookmarks {
     //easier to use this method to clear the array
     if (self.arrayBookmarkedSites.count > 0 && [MirrorROIPluginFilterOC proceedAfterAlert:@"Delete all bookmarked data? This cannot be undone"]) {
@@ -1651,6 +1676,46 @@
         //self.dictBookmarks is a dict of sites, each site has a dict - each dict has 2 strings, for summary and for pixels
         [self.dictBookmarks setObject:[self bookmarkDictForSite:anatSite] forKey:anatSite];
     }
+}
+-(void)bookmarkedDataImport {
+    // Get the main window for the document.
+    NSWindow* window = self.windowControllerMain.window;
+    // Create and configure the panel.
+    NSOpenPanel* panel = [NSOpenPanel openPanel];
+    [panel setCanChooseDirectories:NO];
+    [panel setAllowsMultipleSelection:NO];
+    [panel setMessage:@"Import '.plist' file with bookmarked data.\nWARNING ! This will overwrite  existing data with the same anatomical site name"];
+    
+    // Display the panel attached to the document's window.
+    [panel beginSheetModalForWindow:window completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            NSURL *url = [[panel URLs] objectAtIndex:0];
+            if ([[url pathExtension] isEqualToString:@"plist"]) {
+                NSString *corrFn = [[url lastPathComponent] stringByDeletingPathExtension];
+                NSString *viewerN = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:self.viewerPET.window.title];
+                if ([viewerN isEqualToString:corrFn]) {
+                    NSMutableDictionary *replaceDict = [NSMutableDictionary dictionaryWithContentsOfURL:url];
+                    if (replaceDict.count>0) {
+                        for (NSString *key in replaceDict) {
+                            [self.dictBookmarks setObject:replaceDict[key] forKey:key];
+                            // arrayControllerBookmarks just lists the names of the bookmarks
+                            [self.arrayControllerBookmarks removeObject:key];//erase to replace
+                            [self.arrayControllerBookmarks addObject:key];
+                        }
+                    } else {
+                        [MirrorROIPluginFilterOC alertWithMessage:@"No data were found to import" andTitle:@"Bookmarked Data Import"];
+                    }
+                } else {
+                    [MirrorROIPluginFilterOC alertWithMessage:@"The file name does not match the current PET series name and so will not be imported" andTitle:@"Bookmarked Data Import"];
+                }
+            } else {
+                [MirrorROIPluginFilterOC alertWithMessage:@"The file is not a '.plist' file and so cannot be imported" andTitle:@"Bookmarked Data Import"];
+            }
+        }
+    }];
+    
+
+
 }
 -(NSMutableDictionary *)bookmarkDictForSite:(NSString *)anatSite {
     //Do 3D calculation FIRST as this resets the pixels nicely
@@ -1708,6 +1773,7 @@
             if (savedLocation != nil && [self userDefaultBoolForKey:kAddReportWhenSaveBookmarkedDataDefault])
             {
                 [self attachDatabaseReportBookmarksDataFileAtURL:savedLocation];
+                [self exportBookmarkedDataDictToURL:savedLocation];
             }
         }
             break;
@@ -1720,7 +1786,13 @@
     }
     
 }
-
+-(void)exportBookmarkedDataDictToURL:(NSURL *)url {
+    if (url != nil) {
+        NSString *fn = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:self.viewerPET.window.title];
+        url = [[[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:fn isDirectory:NO] URLByAppendingPathExtension:@"plist"];
+        [self.dictBookmarks writeToURL:url atomically:YES];
+    }
+}
 
 #pragma mark -  Export
 -(NSString *)fileNamePrefixForExportType:(ExportDataType)type withAnatomicalSite:(BOOL)withSite {
