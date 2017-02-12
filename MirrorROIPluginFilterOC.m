@@ -2092,7 +2092,6 @@
         
         [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix];
         [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix];
-        [dict setObject:@"" forKey:kDeltaNameCount];
         [dict setObject:@"" forKey:kDeltaNameSubtractedMean];
         [dict setObject:@"" forKey:kDeltaNameDividedMean];
         // SDEVs
