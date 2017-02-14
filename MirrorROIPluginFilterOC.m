@@ -1740,21 +1740,52 @@
      @"ROI\tMean\tSEM\t#Pixels\tSD\tMax\tMin\tTotal\tVolume\n"
      "%@ %@ Active (3D):\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
      "%@ %@ Active:\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
-     "%@ %@ Divided:\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
-     "%@ %@ Subtracted:\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
-     "%@ %@ Mirrored (3D):\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
-     "%@ %@ Mirrored:\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
-     "\n\n"
+     @"%@"
      ,
      [self participantID],anatSite, data3D_A[@"mean"],@"",@"",data3D_A[@"dev"],data3D_A[@"max"],data3D_A[@"min"],data3D_A[@"total"],data3D_A[@"volume"],
      [self participantID],anatSite, dictRaw[kDeltaNameActiveMean],dictRaw[kDeltaNameActiveSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameActiveSD],dictRaw[kDeltaNameActiveMax],dictRaw[kDeltaNameActiveMin],dictRaw[kDeltaNameActiveSum],data3D_A[@"volume"],
-     [self participantID],anatSite, dictRaw[kDeltaNameDividedMean],dictRaw[kDeltaNameDividedSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameDividedSD],@"",@"",@"",@"",
-     [self participantID],anatSite, dictRaw[kDeltaNameSubtractedMean],dictRaw[kDeltaNameSubtractedSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameSubtractedSD],@"",@"",@"",@"",
-     [self participantID],anatSite, data3D_M[@"mean"],@"",@"",data3D_M[@"dev"],data3D_M[@"max"],data3D_M[@"min"],data3D_M[@"total"],data3D_M[@"volume"],
-     [self participantID],anatSite, dictRaw[kDeltaNameMirroredMean],dictRaw[kDeltaNameMirroredSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameMirroredSD],dictRaw[kDeltaNameMirroredMax],dictRaw[kDeltaNameMirroredMin],dictRaw[kDeltaNameMirroredSum],@""
+     [self dataStringForMirroredSubtractedDividedDataFromRawDict:dictRaw dict3D_M:data3D_M forSite:anatSite]
      ];
-    
     return dictForSite;
+}
+-(NSString *)dataStringForMirroredSubtractedDividedDataFromRawDict:(NSMutableDictionary *)dictRaw dict3D_M:(NSMutableDictionary *)data3D_M forSite:(NSString *)anatSite {
+    //kDeltaNameDividedMean is a number or ""
+    if ([[dictRaw[kDeltaNameDividedMean] description] length]>0) {
+        return [NSString stringWithFormat:
+                @"%@ %@ Divided:\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
+                "%@ %@ Subtracted:\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
+                "%@ %@ Mirrored:\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
+                "%@ %@ Mirrored (3D):\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
+                ,
+                [self participantID],anatSite, dictRaw[kDeltaNameDividedMean],dictRaw[kDeltaNameDividedSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameDividedSD],@"",@"",@"",@"",
+                [self participantID],anatSite, dictRaw[kDeltaNameSubtractedMean],dictRaw[kDeltaNameSubtractedSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameSubtractedSD],@"",@"",@"",@"",
+                [self participantID],anatSite, dictRaw[kDeltaNameMirroredMean],dictRaw[kDeltaNameMirroredSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameMirroredSD],dictRaw[kDeltaNameMirroredMax],dictRaw[kDeltaNameMirroredMin],dictRaw[kDeltaNameMirroredSum],@"",
+                [self participantID],anatSite, data3D_M[@"mean"],@"",@"",data3D_M[@"dev"],data3D_M[@"max"],data3D_M[@"min"],data3D_M[@"total"],data3D_M[@"volume"]
+                
+                ];
+    }
+    return @"";
+}
+-(NSString *)dataStringRawPixelsFromDict:(NSMutableDictionary *)dict {
+    NSString *calculatedRowsString = @"";
+    //kDeltaNameDividedPix1Line is an array of values
+    if ([[dict objectForKey:kDeltaNameDividedPix1Line] count]>0) {
+        calculatedRowsString = [NSString stringWithFormat:
+                                @"%@\n%@\n%@\n%@\n%@\n%@",
+                                kDeltaNameDividedPix1Line,
+                                [[dict objectForKey:kDeltaNameDividedPix1Line] componentsJoinedByString:@"\t"],
+                                kDeltaNameSubtractedPix1Line,
+                                [[dict objectForKey:kDeltaNameSubtractedPix1Line] componentsJoinedByString:@"\t"],
+                                kDeltaNameMirroredPix1Line,
+                                [[dict objectForKey:kDeltaNameMirroredPix1Line] componentsJoinedByString:@"\t"]
+                                ];
+    }
+    return [NSString stringWithFormat:
+            @"%@\n%@\n%@",
+            kDeltaNameActivePix1Line,
+            [[dict objectForKey:kDeltaNameActivePix1Line] componentsJoinedByString:@"\t"],
+            calculatedRowsString
+            ];
 }
 -(NSString *)bookMarkStringsForAllSitesConjoined {
     NSMutableArray *summaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
@@ -2108,28 +2139,7 @@
     
     return dict;
 }
--(NSString *)dataStringRawPixelsFromDict:(NSMutableDictionary *)dict {
-    return [NSString stringWithFormat:@"%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n%@\n",
-            kDeltaNameActivePix1Line,
-            [[dict objectForKey:kDeltaNameActivePix1Line] componentsJoinedByString:@"\t"],
-            kDeltaNameDividedPix1Line,
-            [[dict objectForKey:kDeltaNameDividedPix1Line] componentsJoinedByString:@"\t"],
-            kDeltaNameSubtractedPix1Line,
-            [[dict objectForKey:kDeltaNameSubtractedPix1Line] componentsJoinedByString:@"\t"],
-            kDeltaNameMirroredPix1Line,
-            [[dict objectForKey:kDeltaNameMirroredPix1Line] componentsJoinedByString:@"\t"],
-            
-            kDeltaNameActivePixFlatAndNotMirrored,
-            [[self arrayOfIndexesOfSlicesWithROIofType:Active_ROI] componentsJoinedByString:@"\t"],
-            [self stringForDataArray:[dict objectForKey:kDeltaNameActivePixFlatAndNotMirrored] forceTranspose:NO],
-            kDeltaNameMirroredPixFlatAndMirroredInRows,
-            [self stringForDataArray:[dict objectForKey:kDeltaNameMirroredPixFlatAndMirroredInRows] forceTranspose:NO],
-            kDeltaNameSubtractedPix,
-            [self stringForDataArray:[dict objectForKey:kDeltaNameSubtractedPix] forceTranspose:NO],
-            kDeltaNameDividedPix,
-            [self stringForDataArray:[dict objectForKey:kDeltaNameDividedPix] forceTranspose:NO]
-            ];
-}
+
 -(NSMutableArray *)rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:(ROI_Type)type{
     NSString *roiname = [self ROInameForType:type];
     NSMutableArray *arrayOfROIgrids = [NSMutableArray array];
