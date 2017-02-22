@@ -31,6 +31,6 @@
 	<key>allowToolbarIcon</key>
 	<true/>
 	<key>pluginType</key>
-	<string>roiTool</string>
+	<string>Database</string>
 </dict>
 </plist>

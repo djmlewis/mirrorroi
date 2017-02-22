@@ -159,6 +159,7 @@ typedef enum : NSInteger {
 @property (nonatomic, retain) ViewerController *viewerCT;
 @property (nonatomic, retain) ViewerController *viewerPET;
 
+@property (assign) IBOutlet NSTextField *labelDicomStudy;
 @property (assign) IBOutlet NSTextField *labelCT;
 @property (assign) IBOutlet NSTextField *labelPET;
 @property (assign) IBOutlet NSTextField *labelWarningNoTools;
@@ -179,12 +180,6 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSComboBox *comboVaccines;
 @property (assign) IBOutlet NSComboBox *comboPlaceboUsed;
 @property (assign) IBOutlet NSTextField *textFieldVaccineDayOffset;
-
-//@property (copy) NSString *stringAnatomicalSite;
-//@property (copy) NSString *stringVaccine;
-//@property (copy) NSString *stringInjectionSite;
-//@property (copy) NSString *stringdaysPostVaccine;
-//@property (copy) NSString *stringPlacebo;
 
 @property (assign) IBOutlet NSColorWell *colorWellActive;
 @property (assign) IBOutlet NSColorWell *colorWellMirrored;

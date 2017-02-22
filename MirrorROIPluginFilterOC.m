@@ -56,17 +56,6 @@
     if(completedOK) return 0; // No Errors
     else return -1;
 }
--(void)handleNotification:(NSNotification *)notification {
-    //NSLog(@"%@ -- %@ -- %@ << %li",notification.name, notification.object, notification.userInfo,(long)[[self.viewerCT imageView] curImage]);
-    if ([notification.name isEqualToString:OsirixViewerControllerDidLoadImagesNotification] ||
-        [notification.name isEqualToString:OsirixCloseViewerNotification]) {
-        [self smartAssignCTPETwindows];
-    }
-    if ([notification.name isEqualToString:OsirixDCMUpdateCurrentImageNotification] &&
-        notification.object == self.viewerCT.imageView) {
-        [self resetJiggleControlsAndRefresh];
-    }
-}
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     if ([keyPath containsString:kColor_Stem]) {
@@ -143,6 +132,21 @@
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixCloseViewerNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixViewerControllerDidLoadImagesNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixDCMUpdateCurrentImageNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleNotification:) name:OsirixNewStudySelectedNotification object:nil];
+}
+-(void)handleNotification:(NSNotification *)notification {
+    if ([notification.name isEqualToString:OsirixViewerControllerDidLoadImagesNotification] ||
+        [notification.name isEqualToString:OsirixCloseViewerNotification]) {
+        [self smartAssignCTPETwindows];
+    }
+    else if ([notification.name isEqualToString:OsirixDCMUpdateCurrentImageNotification] &&
+        notification.object == self.viewerCT.imageView) {
+        [self resetJiggleControlsAndRefresh];
+    }
+    else if ([notification.name isEqualToString:OsirixNewStudySelectedNotification]) {
+        DicomStudy *study = [notification.userInfo objectForKey:@"Selected Study"];
+        [self populateTreatmentFieldsFromCommentsWithStudy:study];
+    }
 }
 
 #pragma mark - Array functions
@@ -243,7 +247,7 @@
         if (viewController != nil) {
             self.labelPET.stringValue = viewController.window.title;
             self.labelPET.toolTip = viewController.window.title;
-            [self populateTreatmentFieldsFromComments];
+            [self populateTreatmentFieldsFromCommentsWithStudy:[self.viewerPET currentStudy]];
        }
         else
         {
@@ -563,7 +567,7 @@
     if (viewerToAdd != nil)
     {
         [viewerToAdd setROIToolTag:tMesure];
-        [viewerToAdd deleteSeriesROIwithName:[self ROInameForType:Transform_ROI_Placed]];
+        [self deleteTransformsFromViewer:viewerToAdd];
         
         //find the first and last pixIndex with an ACTIVE ROI
         NSMutableIndexSet *indexesWithROI= [[NSMutableIndexSet alloc]init];
@@ -910,14 +914,14 @@
                 {
                     NSPoint deltaXY = [MirrorROIPluginFilterOC deltaXYFromROI:roi2Clone usingLengthROI:[MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithType:tMesure]];
                     
-                    if ([MirrorROIPluginFilterOC validDeltaPoint:deltaXY]) {
+                    if ([MirrorROIPluginFilterOC isValidDeltaPoint:deltaXY]) {
                         ROI *createdROI  = [[ROI alloc]
                                       initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
                                       textWidth:roi2Clone.textureWidth
                                       textHeight:roi2Clone.textureHeight
                                       textName:[self ROInameForType:Mirrored_ROI]
                                       positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
-                                      positionY:roi2Clone.textureUpLeftCornerY-deltaXY.y
+                                      positionY:roi2Clone.textureUpLeftCornerY+deltaXY.y
                                       spacingX:roi2Clone.pixelSpacingX
                                       spacingY:roi2Clone.pixelSpacingY
                                       imageOrigin:roi2Clone.imageOrigin];
@@ -953,7 +957,7 @@
 
 #pragma mark - Delta point
 +(NSPoint)deltaXYFromROI:(ROI*)roi2Clone usingLengthROI:(ROI*)lengthROI {
-    NSPoint deltaPoint = [self anInvalidDeltaPoint];
+    NSPoint deltaPoint = [self invalidDeltaPoint];
     
     if (roi2Clone && lengthROI) {
         NSPoint ipsi = [(MyPoint *)[lengthROI.points objectAtIndex:0] point];
@@ -978,17 +982,18 @@
         deltaPoint.x = ceilf((2.0*(ipsi.x-roi2Clone.textureUpLeftCornerX))+(contra.x-ipsi.x)-(roi2Clone.textureWidth));
         
         /*
-         Y is not mirrored and must only move by the translation to keep the floor of the texture aligned with the anchor
-                        translation             */
-        deltaPoint.y = ceilf(contra.y-ipsi.y);
+         Y is not mirrored and must only move by the translation to keep the floor of the texture aligned with the anchor translation.
+         */
+        deltaPoint.y = floorf(contra.y-ipsi.y);
+        NSLog(@"ipsi %f contra %f delta %f",ipsi.y,contra.y,deltaPoint.y);
         
     }
     return deltaPoint;
 }
-+(BOOL)validDeltaPoint:(NSPoint)delta2test{
++(BOOL)isValidDeltaPoint:(NSPoint)delta2test{
     return delta2test.x != CGFLOAT_MAX && delta2test.y != CGFLOAT_MAX;
 }
-+(NSPoint)anInvalidDeltaPoint{
++(NSPoint)invalidDeltaPoint{
     return NSMakePoint(CGFLOAT_MAX, CGFLOAT_MAX);
 }
 
@@ -1125,6 +1130,9 @@
     [self addTextROI2PixatSlice:[[self.viewerCT imageView] curImage] inViewer:self.viewerCT hidden:NO withText:text andColour:kCTtextColour];
 }
 -(void)addTextROI2PixatSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden withText:(NSString *)text andColour:(NSColor *)colour {
+    //override HIDDEN as it makes things locked
+    hidden = NO;
+    
     [self deleteROIsFromViewerController:viewer withName:text];
     ROI *roi = [viewer newROI:tText];
     [roi setThickness:8.0 globally:NO];//number of points above/below 12 the value is multiplied by 2
@@ -1163,6 +1171,9 @@
     }
 }
 -(void)addROI2Pix:(ROI *)roi2add atSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
+    //override HIDDEN as it makes things locked
+    hidden = NO;
+
     if (slice <[[viewer pixList] count] && slice <[[viewer roiList] count])
     {
         //Correct the origin only if the orientation is the same
@@ -1180,6 +1191,9 @@
     }
 }
 -(void)replaceROIInPix:(ROI *)roi2add atIndex:(NSUInteger)index inSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
+    //override HIDDEN as it makes things locked
+    hidden = NO;
+
     if (slice <[[viewer pixList] count] && slice <[[viewer roiList] count]
         && index<[[[viewer roiList] objectAtIndex:slice] count])
     {
@@ -1212,6 +1226,29 @@
 #pragma mark - Delete Rename ROIs
 +(BOOL)roiOKtoDelete:(ROI *)r {
     return (r.type != tText && r.type != tROI);
+}
+-(void)deleteTransformsFromViewer:(ViewerController *)viewer {
+    [self unlockROIsIn2DViewer:viewer withSeriesName:nil];
+    NSMutableArray *rois2delete = [NSMutableArray array];
+    NSUInteger count1 = 0, count2 = 0;
+    for (NSMutableArray *roisinslice in [viewer roiList]) {
+        for (ROI *roi in roisinslice) {
+            if (roi.type == tMesure) {
+                [MirrorROIPluginFilterOC unlockROI:roi];
+                [rois2delete addObject:roi];
+                count1++;
+            }
+        }
+    }
+    [ROI deleteROIs:rois2delete];
+    for (NSMutableArray *roisinslice in [viewer roiList]) {
+        for (ROI *roi in roisinslice) {
+            if (roi.type == tMesure) {
+                count2++;
+            }
+        }
+    }
+    NSLog(@"pre: %lu  post: %lu",(unsigned long)count1,(unsigned long)count2);
 }
 
 - (IBAction)deleteActiveViewerROIsOfType:(NSButton *)sender {
@@ -1250,11 +1287,15 @@
             break;
     }
 }
++(void)unlockROI:(ROI*)roi {
+    roi.locked = NO;
+    roi.hidden = NO;//triggers locked!!!
+}
 -(void)unlockROIsIn2DViewer:(ViewerController *)viewer withSeriesName:(NSString *)name{
-    for (NSUInteger roiIndex =0; roiIndex<viewer.roiList.count;roiIndex++) {
-        for (ROI *roi in [viewer.roiList objectAtIndex:roiIndex]) {
+    for (NSMutableArray *roiIndex in viewer.roiList) {
+        for (ROI *roi in roiIndex) {
             if (name == nil || [roi.name isEqualToString:name]) {
-                roi.locked = NO;
+                [MirrorROIPluginFilterOC unlockROI:roi];
             }
         }
     }
@@ -1264,6 +1305,7 @@
     for (NSUInteger roiIndex =0; roiIndex<active2Dwindow.roiList.count;roiIndex++) {
         for (ROI *roi in [active2Dwindow.roiList objectAtIndex:roiIndex]) {
             if (roi.type == tText || roi.type == tROI ) {
+                [MirrorROIPluginFilterOC unlockROI:roi];
                 [roisToDelete addObject:roi];
             }
         }
@@ -1292,6 +1334,7 @@
         for (NSUInteger i = 0; i<[roisInSlice count];i++) {
             ROI *roi = [roisInSlice objectAtIndex:i];
             if ([roi.name isEqualToString:name]) {
+                [MirrorROIPluginFilterOC unlockROI:roi];
                 [roisToDelete addObject:roi];
             }
         }
@@ -1313,6 +1356,7 @@
             {
                 BOOL ok = [MirrorROIPluginFilterOC roiOKtoDelete:curROI];
                 if (ok) {
+                    [MirrorROIPluginFilterOC unlockROI:curROI];
                     [roisToDelete addObject: curROI];
                 }
             }
@@ -1496,40 +1540,50 @@
 -(NSString *)participantID {
     return [[self.viewerPET currentStudy] patientID];
 }
+-(NSString *)correctedStringForNullString:(NSString *)string {
+    if (string == nil) {return @"-";}
+    return string;
+}
 -(IBAction)clearTreatmentFieldsTapped:(id)sender {
     [self clearTreatmentFields];
 }
 -(void)clearTreatmentFields {
+    self.labelDicomStudy.stringValue = @"";
     self.comboVaccines.stringValue = @"";
     self.comboTreatmentSite.stringValue = @"";
     self.textFieldVaccineDayOffset.stringValue = @"";
     self.comboPlaceboUsed.stringValue = @"";
 
 }
--(void)populateTreatmentFieldsFromComments {
-    NSArray *commentsArray = [[[self.viewerPET currentStudy] comment] componentsSeparatedByString:@"\t"];
+-(void)populateTreatmentFieldsFromCommentsWithStudy:(DicomStudy *)selectedStudy {
+    if (selectedStudy == nil) { selectedStudy = [[BrowserController currentBrowser] selectedStudy];}
+    self.labelDicomStudy.stringValue = selectedStudy.name;
+    NSArray *commentsArray = [[selectedStudy comment] componentsSeparatedByString:@"\t"];
     if (commentsArray.count >= 4) {
         self.comboVaccines.stringValue = [commentsArray objectAtIndex:0];
-        self.comboTreatmentSite.stringValue = [commentsArray objectAtIndex:1];
-        self.textFieldVaccineDayOffset.stringValue = [commentsArray objectAtIndex:2];
+        self.textFieldVaccineDayOffset.stringValue = [commentsArray objectAtIndex:1];
+        self.comboTreatmentSite.stringValue = [commentsArray objectAtIndex:2];
         self.comboPlaceboUsed.stringValue = [commentsArray objectAtIndex:3];
     }
-}
--(NSString *)correctedStringForNullString:(NSString *)string {
-    if (string == nil) {return @"-";}
-    return string;
+    if (self.viewerPET != nil && ![selectedStudy.name isEqualToString:[[self.viewerPET currentStudy] name]]) {
+        [MirrorROIPluginFilterOC alertWithMessage:@"The DICOM study selected in the Browser does not match the study to which the assigned PET/CT Windows belong. The vaccine treatment assignments and Patient IDs may be incorrect." andTitle:@"Studies Do Not Match" critical:YES];
+    }
 }
 -(IBAction)readWriteCommentsFromFieldsTapped:(NSButton *)sender {
     switch (sender.tag) {
         case WriteComments:
-            [[self.viewerPET currentStudy] setComment:[NSString stringWithFormat:@"%@\t%@\t+%@\t%@",
-                                                       [self correctedStringForNullString:self.comboVaccines.stringValue],
-                                                       [self correctedStringForNullString:self.comboTreatmentSite.stringValue],
-                                                       [self correctedStringForNullString:self.textFieldVaccineDayOffset.stringValue],
-                                                       [self correctedStringForNullString:self.comboPlaceboUsed.stringValue]]];
+        {
+            DicomStudy *selectedStudy = [[BrowserController currentBrowser] selectedStudy];//[self.viewerPET currentStudy]
+            [selectedStudy setComment:[NSString stringWithFormat:@"%@\t%@\t%@\t%@",
+                                        [self correctedStringForNullString:self.comboVaccines.stringValue],
+                                        [self correctedStringForNullString:self.textFieldVaccineDayOffset.stringValue],
+                                        [self correctedStringForNullString:self.comboTreatmentSite.stringValue],
+                                        [self correctedStringForNullString:self.comboPlaceboUsed.stringValue]
+                                       ]];
+        }
             break;
         case ReadComments:
-            [self populateTreatmentFieldsFromComments];
+            [self populateTreatmentFieldsFromCommentsWithStudy:[[BrowserController currentBrowser] selectedStudy]];
             break;
             
         default:
@@ -1693,6 +1747,7 @@
     NSOpenPanel* panel = [NSOpenPanel openPanel];
     [panel setCanChooseDirectories:NO];
     [panel setAllowsMultipleSelection:NO];
+    [panel setRequiredFileType:@"plist"];
     [panel setMessage:@"Import '.plist' file with bookmarked data.\nWARNING ! This will overwrite  existing data with the same anatomical site name"];
     
     // Display the panel attached to the document's window.
@@ -1771,18 +1826,18 @@
     //kDeltaNameDividedPix1Line is an array of values
     if ([[dict objectForKey:kDeltaNameDividedPix1Line] count]>0) {
         calculatedRowsString = [NSString stringWithFormat:
-                                @"%@\n%@\n%@\n%@\n%@\n%@",
-                                kDeltaNameDividedPix1Line,
+                                @"%@\t%@\n%@\t%@\n%@\t%@",
+                                @"Divided",
                                 [[dict objectForKey:kDeltaNameDividedPix1Line] componentsJoinedByString:@"\t"],
-                                kDeltaNameSubtractedPix1Line,
+                                @"Subtracted",
                                 [[dict objectForKey:kDeltaNameSubtractedPix1Line] componentsJoinedByString:@"\t"],
-                                kDeltaNameMirroredPix1Line,
+                                @"Mirrored",
                                 [[dict objectForKey:kDeltaNameMirroredPix1Line] componentsJoinedByString:@"\t"]
                                 ];
     }
     return [NSString stringWithFormat:
-            @"%@\n%@\n%@",
-            kDeltaNameActivePix1Line,
+            @"%@\t%@\n%@",
+            @"Active",
             [[dict objectForKey:kDeltaNameActivePix1Line] componentsJoinedByString:@"\t"],
             calculatedRowsString
             ];
@@ -1939,7 +1994,6 @@
 #pragma clang diagnostic pop
     }
 }
-
 #pragma mark -  Export Jiggle
 - (void)exportJiggleValues:(ExportDataHow)exportHow {
     switch (exportHow) {
