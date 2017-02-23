@@ -984,7 +984,7 @@
         /*
          Y is not mirrored and must only move by the translation to keep the floor of the texture aligned with the anchor translation.
          */
-        deltaPoint.y = floorf(contra.y-ipsi.y);
+        deltaPoint.y = floorf(ipsi.y-contra.y);
         NSLog(@"ipsi %f contra %f delta %f",ipsi.y,contra.y,deltaPoint.y);
         
     }
@@ -1535,7 +1535,7 @@
 }
 -(NSString *)participantDetailsString {
     DicomStudy *study = [self.viewerPET currentStudy];
-    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tActive Site\tScan Day\tPlacebo\n%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,self.viewerPET.window.title];
+    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tPlacebo\tActive Site\n%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,self.viewerPET.window.title];
 }
 -(NSString *)participantID {
     return [[self.viewerPET currentStudy] patientID];
@@ -1812,8 +1812,8 @@
                 "%@ %@ Mirrored:\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
                 "%@ %@ Mirrored (3D):\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
                 ,
-                [self participantID],anatSite, dictRaw[kDeltaNameDividedMean],dictRaw[kDeltaNameDividedSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameDividedSD],@"",@"",@"",@"",
-                [self participantID],anatSite, dictRaw[kDeltaNameSubtractedMean],dictRaw[kDeltaNameSubtractedSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameSubtractedSD],@"",@"",@"",@"",
+                [self participantID],anatSite, dictRaw[kDeltaNameDividedMean],dictRaw[kDeltaNameDividedSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameDividedSD],dictRaw[kDeltaNameDividedPixMax],dictRaw[kDeltaNameDividedPixMin],dictRaw[kDeltaNameDividedPixTotal],@"",
+                [self participantID],anatSite, dictRaw[kDeltaNameSubtractedMean],dictRaw[kDeltaNameSubtractedSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameSubtractedSD],dictRaw[kDeltaNameSubtractedPixMax],dictRaw[kDeltaNameSubtractedPixMin],dictRaw[kDeltaNameSubtractedPixTotal],@"",
                 [self participantID],anatSite, dictRaw[kDeltaNameMirroredMean],dictRaw[kDeltaNameMirroredSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameMirroredSD],dictRaw[kDeltaNameMirroredMax],dictRaw[kDeltaNameMirroredMin],dictRaw[kDeltaNameMirroredSum],@"",
                 [self participantID],anatSite, data3D_M[@"mean"],@"",@"",data3D_M[@"dev"],data3D_M[@"max"],data3D_M[@"min"],data3D_M[@"total"],data3D_M[@"volume"]
                 
@@ -2027,7 +2027,11 @@
     NSMutableArray *divided = [NSMutableArray array];
     NSUInteger countOfPixels = 0;
     CGFloat sumOfSubtract = 0.0;
+    CGFloat maxOfSubtract = -INT_MAX;
+    CGFloat minOfSubtract = INT_MAX;
     CGFloat sumOfDivide = 0.0;
+    CGFloat maxOfDivide = -INT_MAX;
+    CGFloat minOfDivide = INT_MAX;
     CGFloat sumOfA = 0.0;
     CGFloat maxOfA = -INT_MAX;
     CGFloat minOfA = INT_MAX;
@@ -2066,6 +2070,10 @@
                     
                     CGFloat subtraction = A-M;
                     CGFloat division = A/M;
+                    maxOfDivide = fmaxf(maxOfDivide, division);
+                    minOfDivide = fminf(minOfDivide, division);
+                    maxOfSubtract = fmaxf(maxOfSubtract, subtraction);
+                    minOfSubtract = fminf(minOfSubtract, subtraction);
                     sumOfSubtract += subtraction;
                     sumOfDivide += division;
                     //add the results to our 1D rows also reflecting the reversed M
@@ -2149,6 +2157,12 @@
         
         [dict setObject:subtracted forKey:kDeltaNameSubtractedPix];
         [dict setObject:divided forKey:kDeltaNameDividedPix];
+        [dict setObject:[NSNumber numberWithFloat:sumOfSubtract] forKey:kDeltaNameSubtractedPixTotal];
+        [dict setObject:[NSNumber numberWithFloat:sumOfDivide] forKey:kDeltaNameDividedPixTotal];
+        [dict setObject:[NSNumber numberWithFloat:minOfSubtract] forKey:kDeltaNameSubtractedPixMin];
+        [dict setObject:[NSNumber numberWithFloat:maxOfSubtract] forKey:kDeltaNameSubtractedPixMax];
+        [dict setObject:[NSNumber numberWithFloat:minOfDivide] forKey:kDeltaNameDividedPixMin];
+        [dict setObject:[NSNumber numberWithFloat:maxOfDivide] forKey:kDeltaNameDividedPixMax];
         CGFloat subtractedMean = sumOfSubtract/countOfPixelsF;
         [dict setObject:[NSNumber numberWithFloat:subtractedMean] forKey:kDeltaNameSubtractedMean];
         CGFloat dividedMean = sumOfDivide/countOfPixelsF;
@@ -2177,6 +2191,12 @@
         
         [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix];
         [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix];
+        [dict setObject:@"" forKey:kDeltaNameSubtractedPixTotal];
+        [dict setObject:@"" forKey:kDeltaNameDividedPixTotal];
+        [dict setObject:@"" forKey:kDeltaNameSubtractedPixMin];
+        [dict setObject:@"" forKey:kDeltaNameSubtractedPixMax];
+        [dict setObject:@"" forKey:kDeltaNameDividedPixMin];
+        [dict setObject:@"" forKey:kDeltaNameDividedPixMax];
         [dict setObject:@"" forKey:kDeltaNameSubtractedMean];
         [dict setObject:@"" forKey:kDeltaNameDividedMean];
         // SDEVs
