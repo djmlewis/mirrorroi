@@ -137,7 +137,7 @@
                         <font key="font" metaFont="system"/>
                         <tabViewItems>
                             <tabViewItem label="💉" identifier="" id="vAQ-0r-kBQ">
-                                <view key="view" ambiguous="YES" id="pFX-kX-Zyw">
+                                <view key="view" id="pFX-kX-Zyw">
                                     <rect key="frame" x="10" y="33" width="230" height="253"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -1148,7 +1148,7 @@
                                 </view>
                             </tabViewItem>
                             <tabViewItem label="⚙" identifier="2" id="2bk-cT-0C5">
-                                <view key="view" id="uZV-FV-cp0">
+                                <view key="view" ambiguous="YES" id="uZV-FV-cp0">
                                     <rect key="frame" x="10" y="33" width="230" height="253"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -1216,21 +1216,6 @@
                                                 </binding>
                                             </connections>
                                         </colorWell>
-                                        <segmentedControl verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="88u-5a-rgk">
-                                            <rect key="frame" x="39" y="199" width="74" height="24"/>
-                                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                            <segmentedCell key="cell" borderStyle="border" alignment="left" style="rounded" trackingMode="selectOne" id="JTM-tf-7P8">
-                                                <font key="font" metaFont="system"/>
-                                                <segments>
-                                                    <segment label="←" imageScaling="proportionallyUpOrDown" width="22"/>
-                                                    <segment label="→" width="22" tag="1"/>
-                                                    <segment label="↔︎" width="22" selected="YES"/>
-                                                </segments>
-                                            </segmentedCell>
-                                            <connections>
-                                                <binding destination="fUA-5u-y3G" name="selectedIndex" keyPath="values.kExtendSingleTransformDefault" id="Wrt-Eg-aH7"/>
-                                            </connections>
-                                        </segmentedControl>
                                         <textField verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8jC-GY-IP6">
                                             <rect key="frame" x="40" y="230" width="70" height="22"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>

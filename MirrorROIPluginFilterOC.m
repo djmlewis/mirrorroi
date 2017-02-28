@@ -78,7 +78,7 @@
     [defaults setValue:[NSNumber numberWithInteger:0] forKey:kSegmentFusedOrPETSegmentDefault];
     [defaults setValue:[NSNumber numberWithInteger:1] forKey:kMirrorMoveByPixels];
     [defaults setValue:[NSNumber numberWithInteger:1] forKey:kJiggleBoundsPixels];
-    [defaults setValue:[NSNumber numberWithInteger:2] forKey:kExtendSingleTransformDefault];
+    //[defaults setValue:[NSNumber numberWithInteger:2] forKey:kExtendSingleTransformDefault];
     
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kTransposeExportedDataDefault];
     [defaults setValue:[NSNumber numberWithBool:YES] forKey:kAddReportWhenSaveBookmarkedDataDefault];
@@ -660,17 +660,14 @@
         NSMutableArray  *allROIsList = [viewerToAdd roiList];
         NSMutableArray *indicesOfDCMPixWithMeasureROI = [NSMutableArray arrayWithCapacity:allROIsList.count];
         NSMutableArray *measureROIs = [NSMutableArray arrayWithCapacity:allROIsList.count];
-        NSString *measureROIname;
-        measureROIname = [self ROInameForType:Transform_ROI_Placed];
         
         //collect up the ROIs
         for (int index = 0;index<allROIsList.count; index++) {
             ROI *measureROI = [MirrorROIPluginFilterOC roiFromList:[allROIsList objectAtIndex:index] WithType:tMesure];
             if (measureROI != nil) {
-                //measureROI.hidden = true;//self.segmentShowHideTransformMarkers.selectedSegment;
+                //do this here as completeLengthROIseriesForViewerController ignores the first / last
                 measureROI.offsetTextBox_x = 10000.0;
-                //rename the ROIS
-                measureROI.name = measureROIname;
+                measureROI.name = [self ROInameForType:Transform_ROI_Placed];
                 [measureROIs addObject:measureROI];
                 [indicesOfDCMPixWithMeasureROI addObject:[NSNumber numberWithInt:index]];
             }
@@ -681,37 +678,17 @@
                 [MirrorROIPluginFilterOC alertWithMessage:@"No bounding transforms detected" andTitle:@"Completing transform series" critical:YES];
                 break;
             case 1:
-            {
-                ROI *roi = [[measureROIs firstObject] copy];
-                roi.locked = NO;
-                switch ([[NSUserDefaults standardUserDefaults] integerForKey:kExtendSingleTransformDefault])
-                {
-                    case ExtendSingleLengthUp:
-                        [self extendROI:roi withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:viewerToAdd];
-                        break;
-                    case ExtendSingleLengthDown:
-                        [self extendROI:roi withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:viewerToAdd];
-                        break;
-                    case ExtendSingleLengthBoth:
-                        [self extendROI:roi withinSeriesFromStart:[[indicesOfDCMPixWithMeasureROI firstObject] intValue]+1 toEnd:allROIsList.count inViewerController:viewerToAdd];
-                        [self extendROI:roi withinSeriesFromStart:0 toEnd:[[indicesOfDCMPixWithMeasureROI firstObject] intValue] inViewerController:viewerToAdd];
-                        break;
-                }
-            }
+                [MirrorROIPluginFilterOC alertWithMessage:@"Only 1 bounding transform detected" andTitle:@"Completing transform series" critical:YES];
+                break;
             default:
-                //-1 as we go in pairs and so skip the last one
-                for (int roiNumber=0; roiNumber<indicesOfDCMPixWithMeasureROI.count-1; roiNumber++)
+                //-1 as we go in pairs and so skip the last one as it gets picked up below as [indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber+1] unsignedIntegerValue]
+                for (int i=0; i<indicesOfDCMPixWithMeasureROI.count-1; i++)
                 {
                     [self completeLengthROIseriesForViewerController:viewerToAdd
-                    betweenROI1:[measureROIs objectAtIndex:roiNumber]
-                    andROI2:[measureROIs objectAtIndex:roiNumber+1]
-                    inThisRange:NSMakeRange(
-                        //skip the start index it already has aROI
-                        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]+1,
-                        //length = difference between end and start minus 1 to skip last one
-                        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber+1] unsignedIntegerValue]-
-                        [[indicesOfDCMPixWithMeasureROI objectAtIndex:roiNumber] unsignedIntegerValue]-1)
-                     ];
+                    betweenROI1:[measureROIs objectAtIndex:i]
+                    andROI2:[measureROIs objectAtIndex:i+1]
+                    fromSlice1:[[indicesOfDCMPixWithMeasureROI objectAtIndex:i] unsignedIntegerValue]
+                    toSlice2:[[indicesOfDCMPixWithMeasureROI objectAtIndex:i+1] unsignedIntegerValue]];
                 }
                 break;
         }
@@ -722,33 +699,31 @@
         [MirrorROIPluginFilterOC alertWithMessage:@"Invalid viewer" andTitle:@"Completing transform series" critical:YES];
     }
 }
--(void)completeLengthROIseriesForViewerController:(ViewerController *)active2Dwindow betweenROI1:(ROI *)roi1 andROI2:(ROI *)roi2 inThisRange:(NSRange)rangeOfIndices{
-    //not needed right way NSMutableArray  *allROIsList = [active2Dwindow roiList];
-    MyPoint *roi1_Point1 = [roi1.points objectAtIndex:0];
-    MyPoint *roi1_Point2 = [roi1.points objectAtIndex:1];
-    MyPoint *roi2_Point1 = [roi2.points objectAtIndex:0];
-    MyPoint *roi2_Point2 = [roi2.points objectAtIndex:1];
-    float numberOfSlices = rangeOfIndices.length;//-rangeOfIndices.location;
-    float Xincrement1 = (roi2_Point1.point.x - roi1_Point1.point.x)/numberOfSlices;
-    float Xincrement2 = (roi2_Point2.point.x - roi1_Point2.point.x)/numberOfSlices;
+-(void)completeLengthROIseriesForViewerController:(ViewerController *)active2Dwindow betweenROI1:(ROI *)roi1 andROI2:(ROI *)roi2 fromSlice1:(NSUInteger)firstSlice toSlice2:(NSUInteger)lastSlice{
+    
+    MyPoint *roi1_Point0 = [roi1.points objectAtIndex:0];
+    MyPoint *roi1_Point1 = [roi1.points objectAtIndex:1];
+    MyPoint *roi2_Point0 = [roi2.points objectAtIndex:0];
+    MyPoint *roi2_Point1 = [roi2.points objectAtIndex:1];
+    float numberOfSliceIntervals = lastSlice-firstSlice;
+    float Xincrement1 = (roi2_Point0.point.x - roi1_Point0.point.x)/numberOfSliceIntervals;
+    float Xincrement2 = (roi2_Point1.point.x - roi1_Point1.point.x)/numberOfSliceIntervals;
     float XincrementCurrent1 = Xincrement1;
     float XincrementCurrent2 = Xincrement2;
-    float Yincrement1 = (roi2_Point1.point.y - roi1_Point1.point.y)/numberOfSlices;
-    float Yincrement2 = (roi2_Point2.point.y - roi1_Point2.point.y)/numberOfSlices;
+    float Yincrement1 = (roi2_Point0.point.y - roi1_Point0.point.y)/numberOfSliceIntervals;
+    float Yincrement2 = (roi2_Point1.point.y - roi1_Point1.point.y)/numberOfSliceIntervals;
     float YincrementCurrent1 = Yincrement1;
     float YincrementCurrent2 = Yincrement2;
     //skip first and last index
-    for (NSUInteger nextIndex = rangeOfIndices.location; nextIndex<rangeOfIndices.location+rangeOfIndices.length; nextIndex++)
+    for (NSUInteger nextIndex = firstSlice+1; nextIndex<lastSlice; nextIndex++)
     {
         ROI *newROI = [roi1 copy];
         newROI.locked = NO;
         [MirrorROIPluginFilterOC  setROIcolour:newROI forType:Transform_Intercalated];
         [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
         [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
-        //wrong way[[allROIsList objectAtIndex:nextIndex] addObject:newROI];
         [self addROI2Pix:newROI atSlice:nextIndex inViewer:active2Dwindow hidden:NO];
 
-        newROI.offsetTextBox_x = 10000.0;
         XincrementCurrent1 += Xincrement1;
         XincrementCurrent2 += Xincrement2;
         YincrementCurrent1 += Yincrement1;
@@ -921,7 +896,7 @@
                                       textHeight:roi2Clone.textureHeight
                                       textName:[self ROInameForType:Mirrored_ROI]
                                       positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
-                                      positionY:roi2Clone.textureUpLeftCornerY+deltaXY.y
+                                      positionY:roi2Clone.textureUpLeftCornerY-deltaXY.y // must be minus to correctly invert the negatives
                                       spacingX:roi2Clone.pixelSpacingX
                                       spacingY:roi2Clone.pixelSpacingY
                                       imageOrigin:roi2Clone.imageOrigin];
@@ -960,8 +935,10 @@
     NSPoint deltaPoint = [self invalidDeltaPoint];
     
     if (roi2Clone && lengthROI) {
+        //assume point 1 is ipsi, its OK for x calculations
         NSPoint ipsi = [(MyPoint *)[lengthROI.points objectAtIndex:0] point];
-        NSPoint contra = [(MyPoint *)[lengthROI.points objectAtIndex:1] point];
+        NSPoint contra  = [(MyPoint *)[lengthROI.points objectAtIndex:1] point];
+
         //magic adds +1 to the delta to fudge edges. But + / - depends o
         /*
          X must be mirrored, so left edge [ must move thus (mirroring is along X axis and within the edges, so left edge stays where it is.
@@ -984,9 +961,19 @@
         /*
          Y is not mirrored and must only move by the translation to keep the floor of the texture aligned with the anchor translation.
          */
-        deltaPoint.y = floorf(ipsi.y-contra.y);
-        NSLog(@"ipsi %f contra %f delta %f",ipsi.y,contra.y,deltaPoint.y);
-        
+        // now check ipsi is ipsi
+        NSPoint centre = roi2Clone.centroid;
+        NSLog(@"centre X %.2f ipsi X %.2f contra X %.2f delta ipsi %.2f delta contra %.2f",centre.x, ipsi.x,contra.x,fabs(centre.x-ipsi.x),fabs(centre.x-contra.x));
+        if (fabs(centre.x-ipsi.x)<fabs(centre.x-contra.x))
+        {// ipsi is ipsi
+           deltaPoint.y = floorf(ipsi.y-contra.y);
+            NSLog(@"ipsi is ipsi %.2f contra %.2f delta %.2f",ipsi.y,contra.y,deltaPoint.y);
+        } else
+        {//ipsi is really contra
+            deltaPoint.y = floorf(contra.y-ipsi.y);
+            NSLog(@"contra is ipsi %.2f contra %.2f delta %.2f",ipsi.y,contra.y,deltaPoint.y);
+       }
+
     }
     return deltaPoint;
 }

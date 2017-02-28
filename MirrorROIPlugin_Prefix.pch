@@ -30,7 +30,7 @@
 #define kTransformROInameDefault @"kTransformROInameDefault"
 #define kMirroredROInameDefault @"kMirroredROInameDefault"
 #define kActiveROInameDefault @"kActiveROInameDefault"
-#define kExtendSingleTransformDefault @"kExtendSingleTransformDefault"
+//#define kExtendSingleTransformDefault @"kExtendSingleTransformDefault"
 #define kTransposeExportedDataDefault @"kTransposeExportedDataDefault"
 #define kIncludeOriginalInJiggleDefault @"kIncludeOriginalInJiggleDefault"
 #define kRankJiggleDefault @"kRankJiggleDefault"
