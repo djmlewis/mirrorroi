@@ -941,8 +941,7 @@
         NSPoint ipsi = [(MyPoint *)[lengthROI.points objectAtIndex:0] point];
         NSPoint contra  = [(MyPoint *)[lengthROI.points objectAtIndex:1] point];
         // now check ipsi is ipsi
-        NSPoint centre = roi2Clone.centroid;
-        if (fabs(centre.x-ipsi.x)>fabs(centre.x-contra.x))
+        if (fabs(roi2Clone.textureUpLeftCornerX-ipsi.x)>fabs(roi2Clone.textureUpLeftCornerX-contra.x))
         {//ipsi is really contra so swap
             NSPoint ipsiCopy = ipsi;
             ipsi = contra;
@@ -972,16 +971,6 @@
          Y is not mirrored and must only move by the translation to keep the floor of the texture aligned with the anchor translation.
          */
         deltaPoint.y = floorf(ipsi.y-contra.y);
-
-//        // now check ipsi is ipsi
-//        NSPoint centre = roi2Clone.centroid;
-//        if (fabs(centre.x-ipsi.x)<fabs(centre.x-contra.x))
-//        {// ipsi is ipsi
-//           deltaPoint.y = floorf(ipsi.y-contra.y);
-//        } else
-//        {//ipsi is really contra
-//            deltaPoint.y = floorf(contra.y-ipsi.y);
-//       }
 
     }
     return deltaPoint;
