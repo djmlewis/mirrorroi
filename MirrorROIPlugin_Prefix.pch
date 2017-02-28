@@ -27,6 +27,8 @@
 #define kColor_TransformIntercalated @"kColour_TransformIntercalated"
 #define kColor_Jiggle @"kColour_Jiggle"
 #define kGrowingRegionROInameDefault @"growingRegionROIName"
+#define kGrowingRegionROILowerThresholdDefault @"growingRegionLowerThreshold"
+#define kGrowingRegionROIUpperThresholdDefault @"growingRegionUpperThreshold"
 #define kTransformROInameDefault @"kTransformROInameDefault"
 #define kMirroredROInameDefault @"kMirroredROInameDefault"
 #define kActiveROInameDefault @"kActiveROInameDefault"

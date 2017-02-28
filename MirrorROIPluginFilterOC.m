@@ -547,12 +547,14 @@
 
 #pragma mark - Create Active
 - (IBAction)growRegionClicked:(id)sender {
-    [self.viewerPET.window makeKeyAndOrderFront:nil];
-
+    if ([self anatomicalSiteDefined])
+    {
+        [self.viewerPET.window makeKeyAndOrderFront:nil];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
     [[NSApplication sharedApplication] sendAction:@selector(segmentationTest:) to:self.viewerPET from:self.viewerPET];
 #pragma clang diagnostic pop
+    }
 }
 
 #pragma mark - Create Transforms
@@ -938,6 +940,14 @@
         //assume point 1 is ipsi, its OK for x calculations
         NSPoint ipsi = [(MyPoint *)[lengthROI.points objectAtIndex:0] point];
         NSPoint contra  = [(MyPoint *)[lengthROI.points objectAtIndex:1] point];
+        // now check ipsi is ipsi
+        NSPoint centre = roi2Clone.centroid;
+        if (fabs(centre.x-ipsi.x)>fabs(centre.x-contra.x))
+        {//ipsi is really contra so swap
+            NSPoint ipsiCopy = ipsi;
+            ipsi = contra;
+            contra = ipsiCopy;
+        }
 
         //magic adds +1 to the delta to fudge edges. But + / - depends o
         /*
@@ -961,18 +971,17 @@
         /*
          Y is not mirrored and must only move by the translation to keep the floor of the texture aligned with the anchor translation.
          */
-        // now check ipsi is ipsi
-        NSPoint centre = roi2Clone.centroid;
-        NSLog(@"centre X %.2f ipsi X %.2f contra X %.2f delta ipsi %.2f delta contra %.2f",centre.x, ipsi.x,contra.x,fabs(centre.x-ipsi.x),fabs(centre.x-contra.x));
-        if (fabs(centre.x-ipsi.x)<fabs(centre.x-contra.x))
-        {// ipsi is ipsi
-           deltaPoint.y = floorf(ipsi.y-contra.y);
-            NSLog(@"ipsi is ipsi %.2f contra %.2f delta %.2f",ipsi.y,contra.y,deltaPoint.y);
-        } else
-        {//ipsi is really contra
-            deltaPoint.y = floorf(contra.y-ipsi.y);
-            NSLog(@"contra is ipsi %.2f contra %.2f delta %.2f",ipsi.y,contra.y,deltaPoint.y);
-       }
+        deltaPoint.y = floorf(ipsi.y-contra.y);
+
+//        // now check ipsi is ipsi
+//        NSPoint centre = roi2Clone.centroid;
+//        if (fabs(centre.x-ipsi.x)<fabs(centre.x-contra.x))
+//        {// ipsi is ipsi
+//           deltaPoint.y = floorf(ipsi.y-contra.y);
+//        } else
+//        {//ipsi is really contra
+//            deltaPoint.y = floorf(contra.y-ipsi.y);
+//       }
 
     }
     return deltaPoint;
