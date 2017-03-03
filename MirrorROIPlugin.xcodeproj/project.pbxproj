@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6362A9C21E69A94300469163 /* openfile.png in Resources */ = {isa = PBXBuildFile; fileRef = 6362A9C11E69A94300469163 /* openfile.png */; };
+		6362A9C51E69AAFF00469163 /* PET 20.png in Resources */ = {isa = PBXBuildFile; fileRef = 6362A9C31E69AAFF00469163 /* PET 20.png */; };
+		6362A9C61E69AAFF00469163 /* yingyang 20.png in Resources */ = {isa = PBXBuildFile; fileRef = 6362A9C41E69AAFF00469163 /* yingyang 20.png */; };
 		8420023212E829A200E1E9CE /* OsiriXAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8420023112E829A200E1E9CE /* OsiriXAPI.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
@@ -39,7 +42,6 @@
 		8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF41DB80A7500D7B0CA /* growRegion.png */; };
 		8EC3A55E1E0BE8F10019108E /* TDWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8EC3A55D1E0BE8F10019108E /* TDWindow.xib */; };
 		8EC532661E05A2A6006B74E5 /* Flip Vertical Filled-24.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */; };
-		8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ECAD5EF1DDA57B20079DB97 /* yingyang.png */; };
 		8ED16B231DF99F890043A74C /* TextDisplayWindow.h in Headers */ = {isa = PBXBuildFile; fileRef = 8ED16B211DF99F890043A74C /* TextDisplayWindow.h */; };
 		8ED16B241DF99F890043A74C /* TextDisplayWindow.m in Sources */ = {isa = PBXBuildFile; fileRef = 8ED16B221DF99F890043A74C /* TextDisplayWindow.m */; };
 		8ED5349B1E449D2C003B1E8A /* keyImageSquare deleteAll.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED5349A1E449D2C003B1E8A /* keyImageSquare deleteAll.png */; };
@@ -50,7 +52,6 @@
 		8ED845FA1DC6295D008399F1 /* NE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F61DC6295D008399F1 /* NE.png */; };
 		8ED845FB1DC6295D008399F1 /* NW.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F71DC6295D008399F1 /* NW.png */; };
 		8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE41DAE6039007C14A9 /* CT.png */; };
-		8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE51DAE6039007C14A9 /* PET.png */; };
 		8EE534A91E4DE11E007DA1E1 /* AnatomicalSites.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A51E4DE11E007DA1E1 /* AnatomicalSites.txt */; };
 		8EE534AA1E4DE11E007DA1E1 /* Vaccines.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A61E4DE11E007DA1E1 /* Vaccines.txt */; };
 		8EE534AB1E4DE11E007DA1E1 /* Placebos.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A71E4DE11E007DA1E1 /* Placebos.txt */; };
@@ -70,6 +71,9 @@
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		089C167FFE841241C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		6362A9C11E69A94300469163 /* openfile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = openfile.png; path = PNGs/openfile.png; sourceTree = "<group>"; };
+		6362A9C31E69AAFF00469163 /* PET 20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "PET 20.png"; path = "PNGs/PET 20.png"; sourceTree = "<group>"; };
+		6362A9C41E69AAFF00469163 /* yingyang 20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "yingyang 20.png"; path = "PNGs/yingyang 20.png"; sourceTree = "<group>"; };
 		8420023112E829A200E1E9CE /* OsiriXAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OsiriXAPI.framework; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E15CE351E45F95F0009E1A5 /* vaccines.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = vaccines.plist; path = arrays/vaccines.plist; sourceTree = "<group>"; };
@@ -100,7 +104,6 @@
 		8EB2BDF41DB80A7500D7B0CA /* growRegion.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = growRegion.png; path = PNGs/growRegion.png; sourceTree = "<group>"; };
 		8EC3A55D1E0BE8F10019108E /* TDWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TDWindow.xib; sourceTree = "<group>"; };
 		8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled-24.png"; path = "PNGs/Flip Vertical Filled-24.png"; sourceTree = "<group>"; };
-		8ECAD5EF1DDA57B20079DB97 /* yingyang.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = yingyang.png; path = PNGs/yingyang.png; sourceTree = "<group>"; };
 		8ED16B211DF99F890043A74C /* TextDisplayWindow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextDisplayWindow.h; sourceTree = "<group>"; };
 		8ED16B221DF99F890043A74C /* TextDisplayWindow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextDisplayWindow.m; sourceTree = "<group>"; };
 		8ED5349A1E449D2C003B1E8A /* keyImageSquare deleteAll.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "keyImageSquare deleteAll.png"; path = "PNGs/keyImageSquare deleteAll.png"; sourceTree = "<group>"; };
@@ -112,7 +115,6 @@
 		8ED845F71DC6295D008399F1 /* NW.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NW.png; path = PNGs/NW.png; sourceTree = "<group>"; };
 		8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled-50.png"; path = "PNGs/Flip Vertical Filled-50.png"; sourceTree = "<group>"; };
 		8EDB8BE41DAE6039007C14A9 /* CT.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = CT.png; path = PNGs/CT.png; sourceTree = "<group>"; };
-		8EDB8BE51DAE6039007C14A9 /* PET.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = PET.png; path = PNGs/PET.png; sourceTree = "<group>"; };
 		8EE534A51E4DE11E007DA1E1 /* AnatomicalSites.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AnatomicalSites.txt; sourceTree = "<group>"; };
 		8EE534A61E4DE11E007DA1E1 /* Vaccines.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Vaccines.txt; sourceTree = "<group>"; };
 		8EE534A71E4DE11E007DA1E1 /* Placebos.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Placebos.txt; sourceTree = "<group>"; };
@@ -245,6 +247,9 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				6362A9C31E69AAFF00469163 /* PET 20.png */,
+				6362A9C41E69AAFF00469163 /* yingyang 20.png */,
+				6362A9C11E69A94300469163 /* openfile.png */,
 				8ED6E2711E50C759006F68B5 /* icon64.png */,
 				8E6571B71E4FB1E500E0E223 /* addrects.png */,
 				C52843BB1DC250C600371742 /* adownward.png */,
@@ -272,12 +277,10 @@
 				8E3F944C1DDB491F0085A162 /* Marker-50.png */,
 				8ED845F61DC6295D008399F1 /* NE.png */,
 				8ED845F71DC6295D008399F1 /* NW.png */,
-				8EDB8BE51DAE6039007C14A9 /* PET.png */,
 				8ED845F51DC6295D008399F1 /* SE.png */,
 				8EF296501DC4D2FB00CC638E /* start.png */,
 				8ED845F41DC6295D008399F1 /* SW.png */,
 				8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */,
-				8ECAD5EF1DDA57B20079DB97 /* yingyang.png */,
 			);
 			name = PNGs;
 			sourceTree = "<group>";
@@ -370,7 +373,7 @@
 				8E15CE3B1E4628420009E1A5 /* anatomicalsites.plist in Resources */,
 				8E1D23C41DE6386800469190 /* increase.png in Resources */,
 				8E15CE411E466EBA0009E1A5 /* DatabaseRead.png in Resources */,
-				8EDB8BE71DAE6039007C14A9 /* PET.png in Resources */,
+				6362A9C51E69AAFF00469163 /* PET 20.png in Resources */,
 				8ED6E2701E50C5D8006F68B5 /* icon.icns in Resources */,
 				C52843BA1DC250BA00371742 /* aup.png in Resources */,
 				8ED845F91DC6295D008399F1 /* SE.png in Resources */,
@@ -387,8 +390,8 @@
 				8EE534AB1E4DE11E007DA1E1 /* Placebos.txt in Resources */,
 				8E15CE391E4628070009E1A5 /* treamentsites.plist in Resources */,
 				8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */,
+				6362A9C21E69A94300469163 /* openfile.png in Resources */,
 				8ED6E2721E50C759006F68B5 /* icon64.png in Resources */,
-				8ECAD5F01DDA57B20079DB97 /* yingyang.png in Resources */,
 				8ED845FB1DC6295D008399F1 /* NW.png in Resources */,
 				8E6571B81E4FB1E500E0E223 /* addrects.png in Resources */,
 				8E15CE421E466EBA0009E1A5 /* DatabaseWrite.png in Resources */,
@@ -398,6 +401,7 @@
 				C52843BF1DC250C600371742 /* aleft.png in Resources */,
 				8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */,
 				8E172CFE1DDD03F100F33DE5 /* JiggleSelect.png in Resources */,
+				6362A9C61E69AAFF00469163 /* yingyang 20.png in Resources */,
 				8EC532661E05A2A6006B74E5 /* Flip Vertical Filled-24.png in Resources */,
 				8E6F81391E420A97002E5631 /* keyImageSquare.png in Resources */,
 				8EE534A91E4DE11E007DA1E1 /* AnatomicalSites.txt in Resources */,

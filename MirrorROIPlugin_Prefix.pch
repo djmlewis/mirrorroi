@@ -14,6 +14,7 @@
 
 #define kBookmarkStringKey @"kBookmarkStringKey"
 #define kBookmarkKeySummary @"kBookmarkKeySummary"
+#define kBookmarkKeyAMTrois @"kBookmarkKeyAMTrois"
 #define kBookmarkKeyPixelsGrids @"kBookmarkKeyPixelsGrids"
 
 

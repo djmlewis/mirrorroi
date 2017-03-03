@@ -80,7 +80,8 @@ typedef enum : NSInteger {
 } FusedOrPetAloneWindowSetting;
 
 typedef enum : NSInteger {
-    JiggleRoi,
+    JiggleRoi_View,
+    JiggleRoi_Save,
     PETRois,
     //not on menu:
     AllROIdata,

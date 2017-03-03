@@ -19,13 +19,13 @@
 #import <OsiriXAPI/BrowserController.h>
 
 -(BOOL)roiIsActiveMirrorOrTransform:(ROI *)roi {
-    return [roi.name isEqualToString:[self ROInameForType:Active_ROI]] || [roi.name isEqualToString:[self ROInameForType:Mirrored_ROI]] || [roi.name isEqualToString:[self ROInameForType:Transform_ROI_Placed]];
+    return [roi.name isEqualToString:[self roiNameForType:Active_ROI]] || [roi.name isEqualToString:[self roiNameForType:Mirrored_ROI]] || [roi.name isEqualToString:[self roiNameForType:Transform_ROI_Placed]];
 }
 
 -(NSString *)dataStringFor2DpixelDataForROIType:(ROI_Type)type {
     NSMutableDictionary *dictOfRoiGrids = [self dictOfrawPixelsDelta_make2DarrayWithPixelsFromROIsForType:type];
     NSMutableArray *arrayOfRows = [NSMutableArray array];
-    [arrayOfRows addObject:[NSString stringWithFormat:@"2D grids of Pixel Data For %@ without mirroring",[self ROInameForType:type]]];
+    [arrayOfRows addObject:[NSString stringWithFormat:@"2D grids of Pixel Data For %@ without mirroring",[self roiNameForType:type]]];
     if (dictOfRoiGrids.count>0) {
         NSArray *keys = [dictOfRoiGrids.allKeys sortedArrayUsingSelector:@selector(compare:)];
         for (int k=0; k<keys.count; k++) {
@@ -125,10 +125,10 @@
             else
             {
                 if (dataStringA.length>0) {
-                    [self saveData:dataStringA withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
+                    [self saveData:dataStringA withName:[NSString stringWithFormat:@"%@-%@-%@", [self roiNameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
                 }
                 if (dataStringM.length>0) {
-                    [self saveData:dataStringM withName:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
+                    [self saveData:dataStringM withName:[NSString stringWithFormat:@"%@-%@-%@", [self roiNameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
                 }
             }
             break;
@@ -144,10 +144,10 @@
             else
             {
                 if (dataStringA.length>0) {
-                    [MirrorROIPluginFilterOC showStringInWindow:dataStringA withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
+                    [MirrorROIPluginFilterOC showStringInWindow:dataStringA withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self roiNameForType:Active_ROI],fileTypeName,self.viewerPET.window.title]];
                 }
                 if (dataStringM.length>0) {
-                    [MirrorROIPluginFilterOC showStringInWindow:dataStringM withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self ROInameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
+                    [MirrorROIPluginFilterOC showStringInWindow:dataStringM withTitle:[NSString stringWithFormat:@"%@-%@-%@", [self roiNameForType:Mirrored_ROI],fileTypeName,self.viewerPET.window.title]];
                 }
             }
         }
@@ -174,7 +174,7 @@
 -(NSString *)dataStringForSummaryROIdataForType:(ROI_Type)type {
     NSUInteger capacity = self.viewerPET.roiList.count;
     NSMutableDictionary *dictOfRows = [NSMutableDictionary dictionaryWithCapacity:capacity];
-    NSString *roiname = [self ROInameForType:type];
+    NSString *roiname = [self roiNameForType:type];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
         NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
         for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
@@ -221,7 +221,7 @@
     //each row has the data for one roi
     //add the headings
     [arrayOfRows addObject:@"index\tmean\tsdev\tmax\tmin\tcount"];
-    NSString *roiname = [self ROInameForType:type];
+    NSString *roiname = [self roiNameForType:type];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
         NSMutableArray *roiList = [self.viewerPET.roiList objectAtIndex:pix];
         for (int roiIndex = 0; roiIndex<roiList.count; roiIndex++) {
@@ -248,7 +248,7 @@
 
 -(NSString *)dataStringFor3DROIdataForType:(ROI_Type)type {
     [self.viewerPET roiSelectDeselectAll: nil];
-    NSString *roiname = [self ROInameForType:type];
+    NSString *roiname = [self roiNameForType:type];
     ROI *roi = [self ROIfromFirstMatchedSliceInViewer:self.viewerPET withName:roiname];
     NSString *error = nil;
     NSMutableDictionary *dataDict = [NSMutableDictionary dictionary];
@@ -285,11 +285,11 @@
 }
 
 -(NSString *)combinedAandMstringsForExportROIdata_A:(NSString *)dataStringA M:(NSString *)dataStringM {
-    return [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self ROInameForType:Active_ROI],dataStringA,[self ROInameForType:Mirrored_ROI],dataStringM];
+    return [NSString stringWithFormat:@"%@\n%@\n\n%@\n%@",[self roiNameForType:Active_ROI],dataStringA,[self roiNameForType:Mirrored_ROI],dataStringM];
 }
 
 -(NSMutableArray *)dataValuesArrayFromROIsOfType:(ROI_Type)type addHeader:(BOOL)addHeader{
-    NSString *roiname = [self ROInameForType:type];
+    NSString *roiname = [self roiNameForType:type];
     NSMutableArray *arrayOfRows = [NSMutableArray array];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
         BOOL foundROI = NO;
@@ -320,6 +320,14 @@
     return nil;
 }
 
+-(void)exportAMTroi {
+    if ([self valid2DViewer:self.viewerPET]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+        [[NSApplication sharedApplication] sendAction:@selector(roiSaveSeries:) to:self.viewerPET from:self.viewerPET];
+#pragma clang diagnostic pop
+    }
+}
 
 // OTHER STUFF
 #pragma mark - Other Stuff
@@ -468,8 +476,8 @@
                 [self doPasteBrushROIsAsPolygonsFromPET2CT:Active_ROI];
                 break;
             case Transform_ROI_Placed:
-                [self copyROIsFromViewerController:self.viewerPET ofType:tMesure withOptionalName:[self ROInameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
-                [self pasteROIsForViewerController:self.viewerCT ofType:tMesure withOptionalName:[self ROInameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
+                [self copyROIsFromViewerController:self.viewerPET ofType:tMesure withOptionalName:[self roiNameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
+                [self pasteROIsForViewerController:self.viewerCT ofType:tMesure withOptionalName:[self roiNameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
                 break;
             default:
                 break;
@@ -487,8 +495,8 @@
                 [self doPasteBrushROIsAsPolygonsFromCT2PET:Active_ROI];
                 break;
             case Transform_ROI_Placed:
-                [self copyROIsFromViewerController:self.viewerCT ofType:tMesure withOptionalName:[self ROInameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
-                [self pasteROIsForViewerController:self.viewerPET ofType:tMesure withOptionalName:[self ROInameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
+                [self copyROIsFromViewerController:self.viewerCT ofType:tMesure withOptionalName:[self roiNameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
+                [self pasteROIsForViewerController:self.viewerPET ofType:tMesure withOptionalName:[self roiNameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
                 break;
             default:
                 break;
@@ -501,10 +509,10 @@
     [self.viewerPET revertSeries:nil];
     
     ROI *aROI = [self.viewerPET newROI:tPlain];
-    aROI.name = [self ROInameForType:Mirrored_ROI];
+    aROI.name = [self roiNameForType:Mirrored_ROI];
     //roiSetPixels:(ROI*)aROI :(short)allRois :(BOOL)propagateIn4D :(BOOL)outside :(float)minValue :(float)maxValue :(float)newValue;
     [self.viewerPET roiSetPixels: aROI :SetPixels_SameName :NO :NO :-FLT_MAX :FLT_MAX :FLT_MAX :YES];
-    aROI.name = [self ROInameForType:Active_ROI];
+    aROI.name = [self roiNameForType:Active_ROI];
     [self.viewerPET roiSetPixels: aROI :SetPixels_SameName :NO :NO :-FLT_MAX :FLT_MAX :FLT_MAX :YES];
     [self.viewerPET needsDisplayUpdate];
     [self.viewerCT needsDisplayUpdate];
@@ -515,20 +523,20 @@
 -(IBAction)buttonAction:(NSButton *)sender {
     //Transform Front
     if ([sender.identifier isEqualToString:@"pasteTransformFront"]) {
-        [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:[self ROInameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
+        [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:[self roiNameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
     }
     else  if ([sender.identifier isEqualToString:@"copyTransformFront"]) {
-        [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:[self ROInameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
+        [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:[self roiNameForType:Transform_ROI_Placed] ofROIMirrorType:Transform_ROI_Placed];
     }
     else  if ([sender.identifier isEqualToString:@"deleteTransformFront"]) {
-        [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:[self ROInameForType:Transform_ROI_Placed]];
+        [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tMesure withOptionalName:[self roiNameForType:Transform_ROI_Placed]];
     }
     else  if ([sender.identifier isEqualToString:@"hideTransformFront"]) {
         [self doShowHideTransformMarkersForViewerController:[ViewerController frontMostDisplayed2DViewer]];
     }
     // Transform CT window
     else  if ([sender.identifier isEqualToString:@"deleteTransformCT"]) {
-        [self deleteROIsFromViewerController:self.viewerCT ofType:tMesure withOptionalName:[self ROInameForType:Transform_ROI_Placed]];
+        [self deleteROIsFromViewerController:self.viewerCT ofType:tMesure withOptionalName:[self roiNameForType:Transform_ROI_Placed]];
     }
     else  if ([sender.identifier isEqualToString:@"hideTransformCT"]) {
         [self doShowHideTransformMarkersForViewerController:self.viewerCT];
@@ -538,10 +546,10 @@
 - (IBAction)deleteActiveViewerPolygonROIsOfType:(NSButton *)sender {
     switch (sender.tag) {
         case Mirrored_ROI:
-            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tCPolygon withOptionalName:[self ROInameForType:Mirrored_ROI]];
+            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tCPolygon withOptionalName:[self roiNameForType:Mirrored_ROI]];
             break;
         case Active_ROI:
-            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tCPolygon withOptionalName:[self ROInameForType:Active_ROI]];
+            [self deleteROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tCPolygon withOptionalName:[self roiNameForType:Active_ROI]];
             break;
             
         default:
@@ -551,10 +559,10 @@
 - (IBAction)pasteActiveViewerROIsOfType:(NSButton *)sender {
     switch (sender.tag) {
         case Mirrored_ROI:
-            [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:[self ROInameForType:Mirrored_ROI] ofROIMirrorType:Mirrored_ROI];
+            [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:[self roiNameForType:Mirrored_ROI] ofROIMirrorType:Mirrored_ROI];
             break;
         case Active_ROI:
-            [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:[self ROInameForType:Active_ROI] ofROIMirrorType:Active_ROI];
+            [self pasteROIsForViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:[self roiNameForType:Active_ROI] ofROIMirrorType:Active_ROI];
             break;
             
         default:
@@ -564,10 +572,10 @@
 - (IBAction)copyActiveViewerROIsOfType:(NSButton *)sender {
     switch (sender.tag) {
         case Mirrored_ROI:
-            [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:[self ROInameForType:Mirrored_ROI] ofROIMirrorType:Mirrored_ROI];
+            [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:[self roiNameForType:Mirrored_ROI] ofROIMirrorType:Mirrored_ROI];
             break;
         case Active_ROI:
-            [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:[self ROInameForType:Active_ROI] ofROIMirrorType:Active_ROI];
+            [self copyROIsFromViewerController:[ViewerController frontMostDisplayed2DViewer] ofType:tPlain withOptionalName:[self roiNameForType:Active_ROI] ofROIMirrorType:Active_ROI];
             break;
             
         default:
@@ -629,10 +637,10 @@
     NSString *ROIname = nil;
     switch (roiMirrorType) {
         case Mirrored_ROI:
-            ROIname = [self ROInameForType:Mirrored_ROI];
+            ROIname = [self roiNameForType:Mirrored_ROI];
             break;
         case Active_ROI:
-            ROIname = [self ROInameForType:Active_ROI];
+            ROIname = [self roiNameForType:Active_ROI];
             break;
         default:
             break;
@@ -647,10 +655,10 @@
     NSString *ROIname = nil;
     switch (roiMirrorType) {
         case Mirrored_ROI:
-            ROIname = [self ROInameForType:Mirrored_ROI];
+            ROIname = [self roiNameForType:Mirrored_ROI];
             break;
         case Active_ROI:
-            ROIname = [self ROInameForType:Active_ROI];
+            ROIname = [self roiNameForType:Active_ROI];
             break;
         default:
             break;
