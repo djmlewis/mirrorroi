@@ -52,6 +52,7 @@
 		8ED845FA1DC6295D008399F1 /* NE.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F61DC6295D008399F1 /* NE.png */; };
 		8ED845FB1DC6295D008399F1 /* NW.png in Resources */ = {isa = PBXBuildFile; fileRef = 8ED845F71DC6295D008399F1 /* NW.png */; };
 		8EDB8BE61DAE6039007C14A9 /* CT.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EDB8BE41DAE6039007C14A9 /* CT.png */; };
+		8EE19C701E6B394E00B40F59 /* Flip Vertical Filled MULTI-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE19C6F1E6B394E00B40F59 /* Flip Vertical Filled MULTI-50.png */; };
 		8EE534A91E4DE11E007DA1E1 /* AnatomicalSites.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A51E4DE11E007DA1E1 /* AnatomicalSites.txt */; };
 		8EE534AA1E4DE11E007DA1E1 /* Vaccines.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A61E4DE11E007DA1E1 /* Vaccines.txt */; };
 		8EE534AB1E4DE11E007DA1E1 /* Placebos.txt in Resources */ = {isa = PBXBuildFile; fileRef = 8EE534A71E4DE11E007DA1E1 /* Placebos.txt */; };
@@ -115,6 +116,7 @@
 		8ED845F71DC6295D008399F1 /* NW.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = NW.png; path = PNGs/NW.png; sourceTree = "<group>"; };
 		8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled-50.png"; path = "PNGs/Flip Vertical Filled-50.png"; sourceTree = "<group>"; };
 		8EDB8BE41DAE6039007C14A9 /* CT.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = CT.png; path = PNGs/CT.png; sourceTree = "<group>"; };
+		8EE19C6F1E6B394E00B40F59 /* Flip Vertical Filled MULTI-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled MULTI-50.png"; path = "PNGs/Flip Vertical Filled MULTI-50.png"; sourceTree = "<group>"; };
 		8EE534A51E4DE11E007DA1E1 /* AnatomicalSites.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AnatomicalSites.txt; sourceTree = "<group>"; };
 		8EE534A61E4DE11E007DA1E1 /* Vaccines.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Vaccines.txt; sourceTree = "<group>"; };
 		8EE534A71E4DE11E007DA1E1 /* Placebos.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Placebos.txt; sourceTree = "<group>"; };
@@ -250,6 +252,7 @@
 				6362A9C31E69AAFF00469163 /* PET 20.png */,
 				6362A9C41E69AAFF00469163 /* yingyang 20.png */,
 				6362A9C11E69A94300469163 /* openfile.png */,
+				8EE19C6F1E6B394E00B40F59 /* Flip Vertical Filled MULTI-50.png */,
 				8ED6E2711E50C759006F68B5 /* icon64.png */,
 				8E6571B71E4FB1E500E0E223 /* addrects.png */,
 				C52843BB1DC250C600371742 /* adownward.png */,
@@ -373,6 +376,7 @@
 				8E15CE3B1E4628420009E1A5 /* anatomicalsites.plist in Resources */,
 				8E1D23C41DE6386800469190 /* increase.png in Resources */,
 				8E15CE411E466EBA0009E1A5 /* DatabaseRead.png in Resources */,
+				8EE19C701E6B394E00B40F59 /* Flip Vertical Filled MULTI-50.png in Resources */,
 				6362A9C51E69AAFF00469163 /* PET 20.png in Resources */,
 				8ED6E2701E50C5D8006F68B5 /* icon.icns in Resources */,
 				C52843BA1DC250BA00371742 /* aup.png in Resources */,

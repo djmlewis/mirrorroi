@@ -1483,13 +1483,12 @@
 
 -(NSString *)dividerForExportFileFromAnatomicalSite:(NSString *)anatomicalSite {
     return [NSString stringWithFormat:
-                         @"**************************************************************\n"
+                         @"***********************************************************************************\n"
                          "%@\n"
-                         "**************************************************************\n"
+                         "*****************************\n"
                          ,anatomicalSite
 ];
     
-    //return [self.comboAnatomicalSite.stringValue stringByAppendingString:@" "];
 }
 
 -(BOOL)anatomicalSiteDefined {
@@ -1882,6 +1881,41 @@
         }
     }
 }
+- (IBAction)amtRoiLoadFromBookmark:(NSButton *)sender {
+    switch (sender.tag) {
+        case 0:
+            [self amtRoiLoadFromSelectedBookmark];
+            break;
+        case 1:
+            [self amtRoiLoadFromAllBookmarks];
+            break;
+            
+        default:
+            break;
+    }
+}
+- (void)amtRoiLoadFromSelectedBookmark {
+    NSInteger index = self.arrayControllerBookmarks.selectionIndex;
+    if (index>=0 && index <self.arrayBookmarkedSites.count) {
+        [self amtRoiLoadFromBookmarkNamed:[self.arrayBookmarkedSites objectAtIndex:index]];
+    }
+}
+- (void)amtRoiLoadFromAllBookmarks {
+    for (NSString *key in self.arrayBookmarkedSites) {
+        [self amtRoiLoadFromBookmarkNamed:key];
+    }
+}
+- (void)amtRoiLoadFromBookmarkNamed:(NSString *)name {
+    NSData *roisPerMovies = [self.dictBookmarks[name] objectForKey:kBookmarkKeyAMTrois];
+    if (roisPerMovies != nil) {
+        NSURL *temporaryDirectory = [[[NSURL fileURLWithPath:NSHomeDirectory()] URLByAppendingPathComponent:@"tempROIexport"] URLByAppendingPathExtension:@"rois_series"];
+        [roisPerMovies writeToURL:temporaryDirectory atomically:YES];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:temporaryDirectory.path]) {
+            [self.viewerPET roiLoadFromSeries: temporaryDirectory.path];
+            [[NSFileManager defaultManager] removeItemAtURL:temporaryDirectory error:NULL];
+        }
+    }
+}
 
 #pragma mark -  Export
 -(NSString *)fileNamePrefixForExportType:(ExportDataType)type withAnatomicalSite:(BOOL)withSite {
@@ -2017,7 +2051,6 @@
         savePanel.nameFieldStringValue = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self anatomicalSiteName],self.viewerPET.window.title]];
         if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
             [roisPerMovies writeToURL:savePanel.URL atomically:YES];
-            //[NSArchiver archiveRootObject: roisPerMovies toFile :[savePanel filename]];
         }
     }
     else
@@ -2026,8 +2059,7 @@
     }
     
 }
-- (IBAction) importROIFromFiles: (id) sender
-{
+- (IBAction) importROIFromFiles: (id) sender {
     
     NSOpenPanel *oPanel = [NSOpenPanel openPanel];
     [oPanel setAllowsMultipleSelection:NO];
