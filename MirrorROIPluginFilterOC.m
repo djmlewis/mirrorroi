@@ -2275,6 +2275,7 @@
 }
 
 -(NSMutableArray *)rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:(ROI_Type)type{
+    //before changing to allow all ROIS with name in slice
     NSString *roiname = [self roiNameForType:type];
     NSMutableArray *arrayOfROIgrids = [NSMutableArray array];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
