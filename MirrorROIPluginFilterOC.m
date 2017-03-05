@@ -1823,7 +1823,8 @@
 -(NSString *)bookMarkStringsForAllSitesConjoined {
     NSMutableArray *summaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
-    for (NSString *key in self.dictBookmarks) {
+    NSArray *keys = [self.dictBookmarks.allKeys sortedArrayUsingSelector:@selector(compare:)];
+    for (NSString *key in keys) {
         [pixelGridRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [pixelGridRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyPixelsGrids]];
         [summaryRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
@@ -1836,6 +1837,7 @@
     NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
     return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:fileName];
 }
+#pragma mark - Bookmarks Export
 - (void)exportBookmarkedData:(ExportDataHow)exportHow {
     NSURL *savedLocation = nil;
     switch (exportHow) {
