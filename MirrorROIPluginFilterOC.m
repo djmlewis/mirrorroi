@@ -2282,8 +2282,8 @@
         BOOL foundROI = NO;
         for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
             if ([roi.name isEqualToString:roiname]) {
-                NSMutableArray *roiData = [self rawPixelsDelta_extractPixelsInOrderedRowsFromROI:roi];
                 if (!foundROI) {
+                    NSMutableArray *roiData = [self rawPixelsDelta_extractPixelsInOrderedRowsFromROI:roi];
                     [arrayOfROIgrids addObject:roiData];
                 }
                 foundROI = YES;
