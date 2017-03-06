@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="15G1217" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
         <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="11762"/>
@@ -41,7 +41,7 @@
             <windowStyleMask key="styleMask" titled="YES" closable="YES" utility="YES"/>
             <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
             <rect key="contentRect" x="75" y="87" width="245" height="368"/>
-            <rect key="screenRect" x="0.0" y="0.0" width="2048" height="1257"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
             <view key="contentView" focusRingType="none" id="EMO-X6-lMp">
                 <rect key="frame" x="0.0" y="0.0" width="245" height="368"/>
                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -137,7 +137,7 @@
                         <tabViewItems>
                             <tabViewItem label="💉" identifier="" id="vAQ-0r-kBQ">
                                 <view key="view" id="pFX-kX-Zyw">
-                                    <rect key="frame" x="10" y="33" width="170" height="0.0"/>
+                                    <rect key="frame" x="10" y="33" width="178" height="0.0"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <comboBox verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="IHb-5L-YBO">
@@ -364,7 +364,7 @@
                                 </view>
                             </tabViewItem>
                             <tabViewItem label="🛠" identifier="" id="zvN-dk-QnY">
-                                <view key="view" ambiguous="YES" id="PXW-jY-KX0">
+                                <view key="view" id="PXW-jY-KX0">
                                     <rect key="frame" x="10" y="33" width="230" height="253"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -648,7 +648,7 @@
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <clipView key="contentView" ambiguous="YES" id="5UY-Dr-y9r">
                                                                     <rect key="frame" x="1" y="1" width="217" height="93"/>
-                                                                    <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                                    <autoresizingMask key="autoresizingMask"/>
                                                                     <subviews>
                                                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" id="CPe-Ew-PpY">
                                                                             <rect key="frame" x="0.0" y="0.0" width="220" height="93"/>
@@ -1172,7 +1172,7 @@
                                 </view>
                             </tabViewItem>
                             <tabViewItem label="⚙" identifier="2" id="2bk-cT-0C5">
-                                <view key="view" id="uZV-FV-cp0">
+                                <view key="view" ambiguous="YES" id="uZV-FV-cp0">
                                     <rect key="frame" x="10" y="33" width="230" height="253"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -1278,7 +1278,7 @@
                                             </connections>
                                         </textField>
                                         <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="HiA-Ci-29d">
-                                            <rect key="frame" x="153" y="172" width="60" height="27"/>
+                                            <rect key="frame" x="153" y="172" width="60" height="24"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="1" maxValue="5" doubleValue="1" tickMarkPosition="below" numberOfTickMarks="5" allowsTickMarkValuesOnly="YES" sliderType="linear" id="3Yw-rs-Y5a"/>
                                             <connections>
@@ -1287,7 +1287,7 @@
                                             </connections>
                                         </slider>
                                         <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="OPC-sY-fTe">
-                                            <rect key="frame" x="50" y="172" width="50" height="27"/>
+                                            <rect key="frame" x="50" y="172" width="50" height="24"/>
                                             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                             <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="1" maxValue="3" doubleValue="1" tickMarkPosition="below" numberOfTickMarks="3" allowsTickMarkValuesOnly="YES" sliderType="linear" id="tOZ-Kd-LGF"/>
                                             <connections>
