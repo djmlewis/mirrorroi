@@ -29,6 +29,7 @@
 		8E4FBD211DFB2D9D00E54D6F /* TextDisplayWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4FBD1E1DFB2D9D00E54D6F /* TextDisplayWindowController.m */; };
 		8E613DFE1DECCA7F0021049A /* JiggleAll.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E613DFD1DECCA7F0021049A /* JiggleAll.png */; };
 		8E6571B81E4FB1E500E0E223 /* addrects.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E6571B71E4FB1E500E0E223 /* addrects.png */; };
+		8E6EA9561E6EA352009501EB /* Tiling2x1.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E6EA9551E6EA352009501EB /* Tiling2x1.png */; };
 		8E6F81391E420A97002E5631 /* keyImageSquare.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E6F81381E420A97002E5631 /* keyImageSquare.png */; };
 		8E8838371DDA209400AE9166 /* ROIValues.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E8838351DDA209400AE9166 /* ROIValues.h */; };
 		8E8838381DDA209400AE9166 /* ROIValues.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E8838361DDA209400AE9166 /* ROIValues.m */; };
@@ -38,7 +39,6 @@
 		8E9C42641DCE03C600E2A40C /* MirrorROIPluginFilterOC.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */; };
 		8EB2BDEF1DB7A03900D7B0CA /* Length extend.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDEE1DB7A03900D7B0CA /* Length extend.png */; };
 		8EB2BDF11DB7A2AF00D7B0CA /* Length +.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */; };
-		8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */; };
 		8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EB2BDF41DB80A7500D7B0CA /* growRegion.png */; };
 		8EC3A55E1E0BE8F10019108E /* TDWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8EC3A55D1E0BE8F10019108E /* TDWindow.xib */; };
 		8EC532661E05A2A6006B74E5 /* Flip Vertical Filled-24.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */; };
@@ -93,6 +93,7 @@
 		8E4FBD1E1DFB2D9D00E54D6F /* TextDisplayWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextDisplayWindowController.m; sourceTree = "<group>"; };
 		8E613DFD1DECCA7F0021049A /* JiggleAll.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = JiggleAll.png; path = PNGs/JiggleAll.png; sourceTree = "<group>"; };
 		8E6571B71E4FB1E500E0E223 /* addrects.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = addrects.png; path = PNGs/addrects.png; sourceTree = "<group>"; };
+		8E6EA9551E6EA352009501EB /* Tiling2x1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = Tiling2x1.png; path = PNGs/Tiling2x1.png; sourceTree = "<group>"; };
 		8E6F81381E420A97002E5631 /* keyImageSquare.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = keyImageSquare.png; path = PNGs/keyImageSquare.png; sourceTree = "<group>"; };
 		8E8838351DDA209400AE9166 /* ROIValues.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ROIValues.h; sourceTree = "<group>"; };
 		8E8838361DDA209400AE9166 /* ROIValues.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ROIValues.m; sourceTree = "<group>"; };
@@ -101,7 +102,6 @@
 		8E90FA501DCA905D006B2086 /* MirrorROIPluginFilterOC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = MirrorROIPluginFilterOC.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		8EB2BDEE1DB7A03900D7B0CA /* Length extend.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length extend.png"; path = "PNGs/Length extend.png"; sourceTree = "<group>"; };
 		8EB2BDF01DB7A2AF00D7B0CA /* Length +.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Length +.png"; path = "PNGs/Length +.png"; sourceTree = "<group>"; };
-		8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; name = Tiling2x1.pdf; path = PNGs/Tiling2x1.pdf; sourceTree = "<group>"; };
 		8EB2BDF41DB80A7500D7B0CA /* growRegion.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = growRegion.png; path = PNGs/growRegion.png; sourceTree = "<group>"; };
 		8EC3A55D1E0BE8F10019108E /* TDWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TDWindow.xib; sourceTree = "<group>"; };
 		8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Flip Vertical Filled-24.png"; path = "PNGs/Flip Vertical Filled-24.png"; sourceTree = "<group>"; };
@@ -249,6 +249,7 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				8E6EA9551E6EA352009501EB /* Tiling2x1.png */,
 				6362A9C31E69AAFF00469163 /* PET 20.png */,
 				6362A9C41E69AAFF00469163 /* yingyang 20.png */,
 				6362A9C11E69A94300469163 /* openfile.png */,
@@ -283,7 +284,6 @@
 				8ED845F51DC6295D008399F1 /* SE.png */,
 				8EF296501DC4D2FB00CC638E /* start.png */,
 				8ED845F41DC6295D008399F1 /* SW.png */,
-				8EB2BDF21DB7FF8F00D7B0CA /* Tiling2x1.pdf */,
 			);
 			name = PNGs;
 			sourceTree = "<group>";
@@ -384,7 +384,6 @@
 				8EC3A55E1E0BE8F10019108E /* TDWindow.xib in Resources */,
 				8E172CFD1DDD03F100F33DE5 /* Jiggle.png in Resources */,
 				8E1D23C31DE6386800469190 /* decrease.png in Resources */,
-				8EB2BDF31DB7FF8F00D7B0CA /* Tiling2x1.pdf in Resources */,
 				8E15CE361E45F95F0009E1A5 /* vaccines.plist in Resources */,
 				8EF296521DC4D2FB00CC638E /* start.png in Resources */,
 				8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */,
@@ -398,6 +397,7 @@
 				8ED6E2721E50C759006F68B5 /* icon64.png in Resources */,
 				8ED845FB1DC6295D008399F1 /* NW.png in Resources */,
 				8E6571B81E4FB1E500E0E223 /* addrects.png in Resources */,
+				8E6EA9561E6EA352009501EB /* Tiling2x1.png in Resources */,
 				8E15CE421E466EBA0009E1A5 /* DatabaseWrite.png in Resources */,
 				8EE534AC1E4DE11E007DA1E1 /* TreatmentSites.txt in Resources */,
 				8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */,

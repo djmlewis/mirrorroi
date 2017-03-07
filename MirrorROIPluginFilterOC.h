@@ -114,6 +114,12 @@ typedef enum : NSInteger {
     KeyImageOn = 1
 } KeyImageSetting;
 
+typedef enum : NSUInteger {
+    NoActive = 0,
+    ActiveOnly = 1,
+    ActiveAndMirrored = 2
+} PixelDataStatus;
+
 typedef enum : NSInteger {
     WriteComments = -1,
     ReadComments = 1

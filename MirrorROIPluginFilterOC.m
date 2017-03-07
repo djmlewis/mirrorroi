@@ -1482,13 +1482,7 @@
 }
 
 -(NSString *)dividerForExportFileFromAnatomicalSite:(NSString *)anatomicalSite {
-    return [NSString stringWithFormat:
-                         @"***********************************************************************************\n"
-                         "%@\n"
-                         "*****************************\n"
-                         ,anatomicalSite
-];
-    
+    return [NSString stringWithFormat:@"#   %@   ############################################",anatomicalSite];
 }
 
 -(BOOL)anatomicalSiteDefined {
@@ -1830,7 +1824,7 @@
         [summaryRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [summaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeySummary]];
     }
-    return [NSString stringWithFormat:@"%@\n%@\n\n%@\n",[self participantDetailsString],[summaryRows componentsJoinedByString:@"\n"],[pixelGridRows componentsJoinedByString:@"\n"]];
+    return [NSString stringWithFormat:@"%@\n%@%@",[self participantDetailsString],[summaryRows componentsJoinedByString:@"\n"],[pixelGridRows componentsJoinedByString:@"\n"]];
 }
 -(NSString *)bookmarkedDataFilename {
     NSString *fileTypeName = [self fileNamePrefixForExportType:BookmarkedData withAnatomicalSite:NO];
@@ -2074,6 +2068,25 @@
     }
 }
 #pragma mark -  Calculate delta from raw pixels
+-(PixelDataStatus)active:(NSMutableArray *)active matchesMirrored:(NSMutableArray *)mirrored {
+    //check number of slices
+    if (active.count == 0) {
+        return NoActive;
+    }
+    NSUInteger aC = 0, mC = 0;
+    for (NSUInteger i=0; i<active.count; i++) {
+        // asinle bad slice triggers fail
+        aC += [[active objectAtIndex:i] count];
+        mC += [[mirrored objectAtIndex:i] count];
+    }
+    if (aC > 0 && aC == mC) {
+        return ActiveAndMirrored;
+    }
+    if (aC >0) {
+        return ActiveOnly;
+    }
+    return NoActive;
+}
 -(NSMutableDictionary *)dataDictForRawPixelsDelta {
     NSMutableArray *dataAflat = [NSMutableArray array];
     NSMutableArray *dataMflat = [NSMutableArray array];
@@ -2082,9 +2095,14 @@
     NSMutableArray *dataD_1Line = [NSMutableArray array];
     NSMutableArray *dataS_1Line = [NSMutableArray array];
     
-    NSMutableArray *dataA2D = [self rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:Active_ROI];
-    NSMutableArray *dataM2D = [self rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:Mirrored_ROI];
-    
+    NSMutableArray *dataA2D = [self makeArrayBySliceOf2DarraysWithPixelsFromROIsInSliceOfType:Active_ROI];
+    NSMutableArray *dataM2D = [self makeArrayBySliceOf2DarraysWithPixelsFromROIsInSliceOfType:Mirrored_ROI];
+    /* makeArrayBySliceOf2DarraysWithPixelsFromROIsInSliceOfType
+     returns an array. Each object is from each pix image in the series. dataA2D.count == number of slices with matched rois
+     There is a risk that one slice may contain a roi only A or M but this is unlikely. If so it fails the test A.count == M.count and only A is analysed.
+     Within each slice object is an array of 2D grids from each of the ROIs matching the search within that slice PixImage, one grid per ROI
+     Within the grid object is an array of rows X wide and Y long
+     */
     NSMutableArray *subtracted = [NSMutableArray array];
     NSMutableArray *divided = [NSMutableArray array];
     NSUInteger countOfPixels = 0;
@@ -2102,94 +2120,111 @@
     CGFloat minOfM = INT_MAX;
     
     //check if we have A and M or just A
-    if (dataA2D.count>0 && dataA2D.count == dataM2D.count) {
-        //each roiIndex has a 2D array of Y axis rows of pixels for that roi in a 2D grid
-        //so we have to unpack those and mirror the final Y rows for the mirrored roi
-        for (int roiIndex=0; roiIndex<dataA2D.count; roiIndex++) {
-            //these are our 2D arrays of rows with pixels, y = row index on Y axis
-            NSMutableArray *pixelsGridA = [dataA2D objectAtIndex:roiIndex];
-            NSMutableArray *pixelsGridM = [dataM2D objectAtIndex:roiIndex];
-            //we make flat arrays to hold the same pixels but in a flat 1D row for that ROI
-            NSMutableArray *dataForROIflatA = [NSMutableArray array];
-            NSMutableArray *dataForROIflatM = [NSMutableArray array];
-            NSMutableArray *roiSubtract = [NSMutableArray array];
-            NSMutableArray *roiDivide = [NSMutableArray array];
-            for (int y=0; y<pixelsGridA.count;y++) {
-                NSMutableArray *rowAatY = [pixelsGridA objectAtIndex:y];
-                NSMutableArray *rowMatY = [pixelsGridM objectAtIndex:y];
-                countOfPixels += rowAatY.count;
-                for (int col=0; col<rowAatY.count; col++) {
-                    //Do the maths on the actual floats
-                    CGFloat A = [[rowAatY objectAtIndex:col] floatValue];
-                    //reversed - we use rowMatY.count-col-1 to take the last pixel first in M
-                    CGFloat M = [[rowMatY objectAtIndex:rowMatY.count-col-1] floatValue];
-                    sumOfA += A;
-                    maxOfA = fmaxf(maxOfA, A);
-                    minOfA = fminf(minOfA, A);
-                    sumOfM += M;
-                    maxOfM = fmaxf(maxOfM, M);
-                    minOfM = fminf(minOfM, M);
-                    
-                    CGFloat subtraction = A-M;
-                    CGFloat division = A/M;
-                    maxOfDivide = fmaxf(maxOfDivide, division);
-                    minOfDivide = fminf(minOfDivide, division);
-                    maxOfSubtract = fmaxf(maxOfSubtract, subtraction);
-                    minOfSubtract = fminf(minOfSubtract, subtraction);
-                    sumOfSubtract += subtraction;
-                    sumOfDivide += division;
-                    //add the results to our 1D rows also reflecting the reversed M
-                    [roiSubtract addObject:[NSNumber numberWithFloat:subtraction]];
-                    [roiDivide addObject:[NSNumber numberWithFloat:division]];
-                    
-                    //add the results to our 1 Line also reflecting the reversed M
-                    [dataS_1Line addObject:[NSNumber numberWithFloat:subtraction]];
-                    [dataD_1Line addObject:[NSNumber numberWithFloat:division]];
-
-                    //add the NSNumbers to our flat 1D row, we note the reversal
-                    [dataForROIflatA addObject:[rowAatY objectAtIndex:col]];
-                    [dataForROIflatM addObject:[rowMatY objectAtIndex:rowMatY.count-col-1]];//reversed for mirrored ROI
-                    
-                    //add the NSNumbers to our 1Line, we note the reversal but its irrelevant, could do straight div/subtractions tho
-                    [dataA_1Line addObject:[rowAatY objectAtIndex:col]];
-                    [dataM_1Line addObject:[rowMatY objectAtIndex:rowMatY.count-col-1]];//reversed for mirrored ROI
-
-                }//end of row at Y
-            }//end of Pixels grid for ROI
-            //we finished all the pixels in this grid for this ROI so update the flat arrays
-            [subtracted addObject:roiSubtract];
-            [divided addObject:roiDivide];
-            [dataAflat addObject:dataForROIflatA];
-            [dataMflat addObject:dataForROIflatM];
-        }//end of all the ROIs
+    PixelDataStatus activeAndMirroredStatus = [self active:dataA2D matchesMirrored:dataM2D];
+    if (activeAndMirroredStatus == ActiveAndMirrored) {
+        //we step over the first level of array, by slice
+        for (int pixIndex=0; pixIndex<dataA2D.count; pixIndex++) {
+            NSMutableArray *roisInSliceArray_A = [dataA2D objectAtIndex:pixIndex];
+            NSMutableArray *roisInSliceArray_M = [dataM2D objectAtIndex:pixIndex];
+            //Now we step thru these to extract the roi, and then the pixel rows for that roi
+            //we check each roisInSliceArray_A.count == roisInSliceArray_M.count
+            //if mismatched we cannot handle this! Go to next slice
+            if (roisInSliceArray_A.count != roisInSliceArray_M.count) {
+                NSLog(@"Number of ROIs unequal in slice %i. Skipped",pixIndex);
+                continue;
+            }
+            //each roiIndex has a 2D array of Y axis rows of pixels for that roi in a 2D grid
+            //so we have to unpack those and mirror the final Y rows for the mirrored roi
+            for (int roiIndex=0; roiIndex<roisInSliceArray_A.count; roiIndex++) {
+                //these are our 2D arrays of rows with pixels, y = row index on Y axis
+                NSMutableArray *pixelsGridA = [roisInSliceArray_A objectAtIndex:roiIndex];
+                NSMutableArray *pixelsGridM = [roisInSliceArray_M objectAtIndex:roiIndex];
+                //we make flat arrays to hold the same pixels but in a flat 1D row for that ROI
+                NSMutableArray *dataForROIflatA = [NSMutableArray array];
+                NSMutableArray *dataForROIflatM = [NSMutableArray array];
+                NSMutableArray *roiSubtract = [NSMutableArray array];
+                NSMutableArray *roiDivide = [NSMutableArray array];
+                for (int y=0; y<pixelsGridA.count;y++) {
+                    NSMutableArray *rowAatY = [pixelsGridA objectAtIndex:y];
+                    NSMutableArray *rowMatY = [pixelsGridM objectAtIndex:y];
+                    countOfPixels += rowAatY.count;
+                    for (int col=0; col<rowAatY.count; col++) {
+                        //Do the maths on the actual floats
+                        CGFloat A = [[rowAatY objectAtIndex:col] floatValue];
+                        //reversed - we use rowMatY.count-col-1 to take the last pixel first in M
+                        CGFloat M = [[rowMatY objectAtIndex:rowMatY.count-col-1] floatValue];
+                        sumOfA += A;
+                        maxOfA = fmaxf(maxOfA, A);
+                        minOfA = fminf(minOfA, A);
+                        sumOfM += M;
+                        maxOfM = fmaxf(maxOfM, M);
+                        minOfM = fminf(minOfM, M);
+                        
+                        CGFloat subtraction = A-M;
+                        CGFloat division = A/M;
+                        maxOfDivide = fmaxf(maxOfDivide, division);
+                        minOfDivide = fminf(minOfDivide, division);
+                        maxOfSubtract = fmaxf(maxOfSubtract, subtraction);
+                        minOfSubtract = fminf(minOfSubtract, subtraction);
+                        sumOfSubtract += subtraction;
+                        sumOfDivide += division;
+                        //add the results to our 1D rows also reflecting the reversed M
+                        [roiSubtract addObject:[NSNumber numberWithFloat:subtraction]];
+                        [roiDivide addObject:[NSNumber numberWithFloat:division]];
+                        
+                        //add the results to our 1 Line also reflecting the reversed M
+                        [dataS_1Line addObject:[NSNumber numberWithFloat:subtraction]];
+                        [dataD_1Line addObject:[NSNumber numberWithFloat:division]];
+                        
+                        //add the NSNumbers to our flat 1D row, we note the reversal
+                        [dataForROIflatA addObject:[rowAatY objectAtIndex:col]];
+                        [dataForROIflatM addObject:[rowMatY objectAtIndex:rowMatY.count-col-1]];//reversed for mirrored ROI
+                        
+                        //add the NSNumbers to our 1Line, we note the reversal but its irrelevant, could do straight div/subtractions tho
+                        [dataA_1Line addObject:[rowAatY objectAtIndex:col]];
+                        [dataM_1Line addObject:[rowMatY objectAtIndex:rowMatY.count-col-1]];//reversed for mirrored ROI
+                        
+                    }//end of row at Y
+                }//end of Pixels grid for ROI
+                //we finished all the pixels in this grid for this ROI so update the flat arrays
+                [subtracted addObject:roiSubtract];
+                [divided addObject:roiDivide];
+                [dataAflat addObject:dataForROIflatA];
+                [dataMflat addObject:dataForROIflatM];
+            }//end of all the ROIs in this slice
+        }//end of the slices
     }
     // lets do maths for A at least
-    else if (dataA2D.count>0) {
-        for (int roiIndex=0; roiIndex<dataA2D.count; roiIndex++) {
-            //these are our 2D arrays of rows with pixels, y = row index on Y axis
-            NSMutableArray *pixelsGridA = [dataA2D objectAtIndex:roiIndex];
-            //we make flat arrays to hold the same pixels but in a flat 1D row for that ROI
-            NSMutableArray *dataForROIflatA = [NSMutableArray array];
-            for (int y=0; y<pixelsGridA.count;y++) {
-                NSMutableArray *rowAatY = [pixelsGridA objectAtIndex:y];
-                countOfPixels += rowAatY.count;
-                for (int col=0; col<rowAatY.count; col++) {
-                    //Do the maths on the actual floats
-                    CGFloat A = [[rowAatY objectAtIndex:col] floatValue];
-                    sumOfA += A;
-                    maxOfA = fmaxf(maxOfA, A);
-                    minOfA = fminf(minOfA, A);
-                    //add the NSNumbers to our flat 1D row, we note the reversal
-                    [dataForROIflatA addObject:[rowAatY objectAtIndex:col]];
-                    //add the NSNumbers to our 1Line,
-                    [dataA_1Line addObject:[rowAatY objectAtIndex:col]];
-               }//end of row at Y
-            }//end of Pixels grid for ROI
-            //we finished all the pixels in this grid for this ROI so update the flat arrays
-            [dataAflat addObject:dataForROIflatA];
-        }//end of all the ROIs
+    else if (activeAndMirroredStatus == ActiveOnly) {
+        //we step over the first level of array, by slice
+        for (int pixIndex=0; pixIndex<dataA2D.count; pixIndex++) {
+            NSMutableArray *roisInSliceArray_A = [dataA2D objectAtIndex:pixIndex];
+            //Now we step thru these to extract the roi, and then the pixel rows for that roi
+            for (int roiIndex=0; roiIndex<roisInSliceArray_A.count; roiIndex++) {
+                //these are our 2D arrays of rows with pixels, y = row index on Y axis
+                NSMutableArray *pixelsGridA = [roisInSliceArray_A objectAtIndex:roiIndex];
+                //we make flat arrays to hold the same pixels but in a flat 1D row for that ROI
+                NSMutableArray *dataForROIflatA = [NSMutableArray array];
+                for (int y=0; y<pixelsGridA.count;y++) {
+                    NSMutableArray *rowAatY = [pixelsGridA objectAtIndex:y];
+                    countOfPixels += rowAatY.count;
+                    for (int col=0; col<rowAatY.count; col++) {
+                        //Do the maths on the actual floats
+                        CGFloat A = [[rowAatY objectAtIndex:col] floatValue];
+                        sumOfA += A;
+                        maxOfA = fmaxf(maxOfA, A);
+                        minOfA = fminf(minOfA, A);
+                        //add the NSNumbers to our flat 1D row, we note the reversal
+                        [dataForROIflatA addObject:[rowAatY objectAtIndex:col]];
+                        //add the NSNumbers to our 1Line,
+                        [dataA_1Line addObject:[rowAatY objectAtIndex:col]];
+                    }//end of row at Y
+                }//end of Pixels grid for ROI
+                //we finished all the pixels in this grid for this ROI so update the flat arrays
+                [dataAflat addObject:dataForROIflatA];
+            }//end of all the ROIs in slice
+        } // end of slices
     }
-    
     
     NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     CGFloat sd;
@@ -2206,7 +2241,7 @@
     [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameActiveSD];
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameActiveSEM];
 
-    if (dataM2D.count > 0) {
+    if (activeAndMirroredStatus == ActiveAndMirrored) {
         [dict setObject:dataMflat forKey:kDeltaNameMirroredPixFlatAndMirroredInRows];
         [dict setObject:dataM2D forKey:kDeltaNameMirroredPixGrid];
         [dict setObject:[NSNumber numberWithFloat:sumOfM] forKey:kDeltaNameMirroredSum];
@@ -2276,23 +2311,21 @@
     return dict;
 }
 
--(NSMutableArray *)rawPixelsDelta_make2DarrayWithPixelsFromROIsOfType:(ROI_Type)type{
-    //before changing to allow all ROIS with name in slice
+-(NSMutableArray *)makeArrayBySliceOf2DarraysWithPixelsFromROIsInSliceOfType:(ROI_Type)type{
+    //we step thru each pixImage, check the ROIs for ones that match, and build an array that has the 2Dgrids frome ach ROI as objects. This array we add to an umbrella array for the series
     NSString *roiname = [self roiNameForType:type];
-    NSMutableArray *arrayOfROIgrids = [NSMutableArray array];
+    NSMutableArray *arrayOfSlices = [NSMutableArray array];
     for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
-        BOOL foundROI = NO;
+        NSMutableArray *arrayOfROIsInSlice = [NSMutableArray array];;
         for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
             if ([roi.name isEqualToString:roiname]) {
-                if (!foundROI) {
-                    NSMutableArray *roiData = [self rawPixelsDelta_extractPixelsInOrderedRowsFromROI:roi];
-                    [arrayOfROIgrids addObject:roiData];
-                }
-                foundROI = YES;
+                NSMutableArray *roiData = [self rawPixelsDelta_extractPixelsInOrderedRowsFromROI:roi];
+                [arrayOfROIsInSlice addObject:roiData];
             }
-        }
-    }
-    return arrayOfROIgrids;
+        }//end of rois in slice
+        [arrayOfSlices addObject:arrayOfROIsInSlice];
+    }//end of slices
+    return arrayOfSlices;
 }
 -(NSMutableArray *)rawPixelsDelta_extractPixelsInOrderedRowsFromROI:(ROI *)roi{
     NSMutableArray *arrayOfPixelsRows = [NSMutableArray array];

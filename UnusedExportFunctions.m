@@ -23,6 +23,8 @@
 }
 
 -(NSString *)dataStringFor2DpixelDataForROIType:(ROI_Type)type {
+    !! No longer correct as it does not take into account the fact that dictOfrawPixelsDelta_make2DarrayWithPixelsFromROIsForType is now called makeArrayBySliceOf2DarraysWithPixelsFromROIsInSliceOfType and returns an array of pixel grids for all the rois
+    
     NSMutableDictionary *dictOfRoiGrids = [self dictOfrawPixelsDelta_make2DarrayWithPixelsFromROIsForType:type];
     NSMutableArray *arrayOfRows = [NSMutableArray array];
     [arrayOfRows addObject:[NSString stringWithFormat:@"2D grids of Pixel Data For %@ without mirroring",[self roiNameForType:type]]];
