@@ -136,7 +136,7 @@
                         <font key="font" metaFont="system"/>
                         <tabViewItems>
                             <tabViewItem label="💉" identifier="" id="vAQ-0r-kBQ">
-                                <view key="view" ambiguous="YES" id="pFX-kX-Zyw">
+                                <view key="view" id="pFX-kX-Zyw">
                                     <rect key="frame" x="10" y="33" width="230" height="253"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -364,7 +364,7 @@
                                 </view>
                             </tabViewItem>
                             <tabViewItem label="🛠" identifier="" id="zvN-dk-QnY">
-                                <view key="view" id="PXW-jY-KX0">
+                                <view key="view" ambiguous="YES" id="PXW-jY-KX0">
                                     <rect key="frame" x="10" y="33" width="230" height="253"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -753,7 +753,7 @@
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" tag="1" translatesAutoresizingMaskIntoConstraints="NO" id="kYd-jq-37R">
                                                                 <rect key="frame" x="107" y="5" width="18" height="18"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="Flip Vertical Filled MULTI-50" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Bqx-wS-xqK">
+                                                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="Flip Vertical Filled-24" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Bqx-wS-xqK">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                                     <font key="font" metaFont="system"/>
                                                                 </buttonCell>
@@ -1585,7 +1585,6 @@
         <image name="DatabaseRead" width="128" height="128"/>
         <image name="DatabaseWrite" width="128" height="128"/>
         <image name="Erase Filled-50" width="50" height="50"/>
-        <image name="Flip Vertical Filled MULTI-50" width="50" height="50"/>
         <image name="Flip Vertical Filled-24" width="24" height="24"/>
         <image name="Flip Vertical Filled-50" width="50" height="50"/>
         <image name="Jiggle" width="48" height="48"/>
