@@ -1505,7 +1505,7 @@
 }
 -(NSString *)participantDetailsString {
     DicomStudy *study = [self.viewerPET currentStudy];
-    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tPlacebo\tActive Site\n%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,self.viewerPET.window.title];
+    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tActive Site\tPlacebo\tComments\n%@\t%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,study.comment2,self.viewerPET.window.title];
 }
 -(NSString *)participantID {
     return [[self.viewerPET currentStudy] patientID];
@@ -1522,6 +1522,7 @@
     self.comboVaccines.stringValue = @"";
     self.comboTreatmentSite.stringValue = @"";
     self.textFieldVaccineDayOffset.stringValue = @"";
+    self.textFieldComments2.stringValue = @"";
     self.comboPlaceboUsed.stringValue = @"";
 
 }
@@ -1535,6 +1536,7 @@
         self.comboTreatmentSite.stringValue = [commentsArray objectAtIndex:2];
         self.comboPlaceboUsed.stringValue = [commentsArray objectAtIndex:3];
     }
+    self.textFieldComments2.stringValue = [selectedStudy comment2];
     if (self.viewerPET != nil && ![selectedStudy.name isEqualToString:[[self.viewerPET currentStudy] name]]) {
         [MirrorROIPluginFilterOC alertWithMessage:@"The DICOM study selected in the Browser does not match the study to which the assigned PET/CT Windows belong. The vaccine treatment assignments and Patient IDs may be incorrect." andTitle:@"Studies Do Not Match" critical:YES];
     }
@@ -1550,6 +1552,7 @@
                                         [self correctedStringForNullString:self.comboTreatmentSite.stringValue],
                                         [self correctedStringForNullString:self.comboPlaceboUsed.stringValue]
                                        ]];
+            [selectedStudy setComment2:[self correctedStringForNullString:self.textFieldComments2.stringValue]];
         }
             break;
         case ReadComments:
