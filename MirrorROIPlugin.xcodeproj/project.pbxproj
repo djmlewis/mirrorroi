@@ -24,6 +24,7 @@
 		8E1D23C31DE6386800469190 /* decrease.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E1D23C11DE6386800469190 /* decrease.png */; };
 		8E1D23C41DE6386800469190 /* increase.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E1D23C21DE6386800469190 /* increase.png */; };
 		8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E27A7BE1DA1AECD00BDC497 /* MirrorWindow.xib */; };
+		8E28A9A61E708CF900CD2803 /* ROISelector.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E28A9A51E708CF900CD2803 /* ROISelector.png */; };
 		8E3F944D1DDB491F0085A162 /* Marker-50.png in Resources */ = {isa = PBXBuildFile; fileRef = 8E3F944C1DDB491F0085A162 /* Marker-50.png */; };
 		8E4FBD201DFB2D9D00E54D6F /* TextDisplayWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 8E4FBD1D1DFB2D9D00E54D6F /* TextDisplayWindowController.h */; };
 		8E4FBD211DFB2D9D00E54D6F /* TextDisplayWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E4FBD1E1DFB2D9D00E54D6F /* TextDisplayWindowController.m */; };
@@ -88,6 +89,7 @@
 		8E1D23C11DE6386800469190 /* decrease.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = decrease.png; path = PNGs/decrease.png; sourceTree = "<group>"; };
 		8E1D23C21DE6386800469190 /* increase.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = increase.png; path = PNGs/increase.png; sourceTree = "<group>"; };
 		8E27A7BD1DA1AECD00BDC497 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MirrorWindow.xib; sourceTree = "<group>"; };
+		8E28A9A51E708CF900CD2803 /* ROISelector.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = ROISelector.png; path = PNGs/ROISelector.png; sourceTree = "<group>"; };
 		8E3F944C1DDB491F0085A162 /* Marker-50.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Marker-50.png"; path = "PNGs/Marker-50.png"; sourceTree = "<group>"; };
 		8E4FBD1D1DFB2D9D00E54D6F /* TextDisplayWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextDisplayWindowController.h; sourceTree = "<group>"; };
 		8E4FBD1E1DFB2D9D00E54D6F /* TextDisplayWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextDisplayWindowController.m; sourceTree = "<group>"; };
@@ -249,6 +251,7 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
+				8E28A9A51E708CF900CD2803 /* ROISelector.png */,
 				8EBF00FD1E6EA4E400796545 /* Flip Vertical Filled MULTI-50.png */,
 				8E6EA9551E6EA352009501EB /* Tiling2x1.png */,
 				6362A9C31E69AAFF00469163 /* PET 20.png */,
@@ -409,6 +412,7 @@
 				8EC532661E05A2A6006B74E5 /* Flip Vertical Filled-24.png in Resources */,
 				8E6F81391E420A97002E5631 /* keyImageSquare.png in Resources */,
 				8EE534A91E4DE11E007DA1E1 /* AnatomicalSites.txt in Resources */,
+				8E28A9A61E708CF900CD2803 /* ROISelector.png in Resources */,
 				C52843C01DC250C600371742 /* aright.png in Resources */,
 				8E27A7BC1DA1AECD00BDC497 /* MirrorWindow.xib in Resources */,
 			);

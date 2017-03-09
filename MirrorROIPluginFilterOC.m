@@ -353,6 +353,10 @@
     [[NSUserDefaults standardUserDefaults] synchronize];
     [self showHideControlsIfViewersValid];
 }
+- (IBAction)roiSelectorTapped:(id)sender {
+    [self.viewerPET setROIToolTag:tROISelector];
+    [self.viewerCT setROIToolTag:tROISelector];
+}
 
 #pragma mark - Import Lists
 - (IBAction)importComboBoxListFileTapped:(NSButton *)sender {
@@ -1505,7 +1509,7 @@
 }
 -(NSString *)participantDetailsString {
     DicomStudy *study = [self.viewerPET currentStudy];
-    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tActive Site\tPlacebo\tComments\n%@\t%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,study.comment2,self.viewerPET.window.title];
+    return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tActive Site\tPlacebo\tComments\n%@\t%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,study.comment2,[self petSeriesNameWithNoBadCharacters:NO]];
 }
 -(NSString *)participantID {
     return [[self.viewerPET currentStudy] patientID];
@@ -1686,11 +1690,13 @@
     }
 }
 -(void)subtractBookmarkDataForSelectedSite {
-    NSInteger index = self.arrayControllerBookmarks.selectionIndex;
-    if (index>=0 && index <self.arrayBookmarkedSites.count) {
-        NSString *selectedSite = [self.arrayBookmarkedSites objectAtIndex:index];
-        [self.arrayControllerBookmarks removeObjectAtArrangedObjectIndex:index];
-        [self.dictBookmarks removeObjectForKey:selectedSite];
+    if (self.arrayBookmarkedSites.count > 0 && [MirrorROIPluginFilterOC proceedAfterAlert:@"Delete selected bookmarked data? This cannot be undone"]) {
+        [self.arrayControllerBookmarks.selectionIndexes enumerateIndexesUsingBlock:^(NSUInteger index, BOOL *stop) {
+            if (index < self.arrayBookmarkedSites.count) {
+                [self.dictBookmarks removeObjectForKey:[self.arrayBookmarkedSites objectAtIndex:index]];
+            }
+        }];
+        [self.arrayControllerBookmarks removeObjectsAtArrangedObjectIndexes:self.arrayControllerBookmarks.selectionIndexes];
     }
 }
 -(void)trashAllBookmarks {
@@ -1729,8 +1735,9 @@
             NSURL *url = [[panel URLs] objectAtIndex:0];
             if ([[url pathExtension] isEqualToString:@"plist"]) {
                 NSString *corrFn = [[url lastPathComponent] stringByDeletingPathExtension];
-                NSString *viewerN = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:self.viewerPET.window.title];
-                if ([viewerN isEqualToString:corrFn]) {
+                NSString *viewerN = [self petSeriesNameWithNoBadCharacters:YES];
+                if ([viewerN isEqualToString:corrFn] ||
+                    [MirrorROIPluginFilterOC proceedAfterAlert:@"The file name does not match the current PET series name - proceed with the import?"]) {
                     NSMutableDictionary *replaceDict = [NSMutableDictionary dictionaryWithContentsOfURL:url];
                     if (replaceDict.count>0) {
                         for (NSString *key in replaceDict) {
@@ -1740,10 +1747,8 @@
                             [self.arrayControllerBookmarks addObject:key];
                         }
                     } else {
-                        [MirrorROIPluginFilterOC alertWithMessage:@"No data were found to import" andTitle:@"Bookmarked Data Import" critical:YES];
+                        [MirrorROIPluginFilterOC alertWithMessage:@"No bookmarks were found in the file" andTitle:@"Bookmarked Data Import" critical:YES];
                     }
-                } else {
-                    [MirrorROIPluginFilterOC alertWithMessage:[NSString stringWithFormat:@"The file name does not match the current PET series name (%@) and so will not be imported",self.viewerPET.window.title] andTitle:@"Bookmarked Data Import" critical:YES];
                 }
             } else {
                 [MirrorROIPluginFilterOC alertWithMessage:@"The file is not a '.plist' file and so cannot be imported" andTitle:@"Bookmarked Data Import" critical:YES];
@@ -1751,8 +1756,8 @@
         }
     }];
     
-
-
+    
+    
 }
 -(NSMutableDictionary *)bookmarkDictForSite:(NSString *)anatSite {
     //Do 3D calculation FIRST as this resets the pixels nicely
@@ -1831,7 +1836,7 @@
 }
 -(NSString *)bookmarkedDataFilename {
     NSString *fileTypeName = [self fileNamePrefixForExportType:BookmarkedData withAnatomicalSite:NO];
-    NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title];
+    NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,[self petSeriesNameWithNoBadCharacters:YES]];
     return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:fileName];
 }
 #pragma mark - Bookmarks Export
@@ -1863,7 +1868,7 @@
 }
 -(void)exportBookmarkedDataDictToURL:(NSURL *)url {
     if (url != nil) {
-        NSString *fn = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:self.viewerPET.window.title];
+        NSString *fn = [self petSeriesNameWithNoBadCharacters:YES];
         url = [[[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:fn isDirectory:NO] URLByAppendingPathExtension:@"plist"];
         [self.dictBookmarks writeToURL:url atomically:YES];
     }
@@ -1874,7 +1879,7 @@
         //iterate thru the bookmarks extracting the rois and saving by name
         for (NSString *key in self.dictBookmarks) {
             NSData *arrayofrois = [self.dictBookmarks[key] objectForKey:kBookmarkKeyAMTrois];
-            NSString *sitefilename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",key,self.viewerPET.window.title]];
+            NSString *sitefilename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",key,[self petSeriesNameWithNoBadCharacters:YES]]];
             url = [[[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:sitefilename isDirectory:NO] URLByAppendingPathExtension:@"rois_series"];
             [arrayofrois writeToURL:url atomically:YES];
         }
@@ -1894,10 +1899,11 @@
     }
 }
 - (void)amtRoiLoadFromSelectedBookmark {
-    NSInteger index = self.arrayControllerBookmarks.selectionIndex;
-    if (index>=0 && index <self.arrayBookmarkedSites.count) {
-        [self amtRoiLoadFromBookmarkNamed:[self.arrayBookmarkedSites objectAtIndex:index]];
-    }
+    [self.arrayControllerBookmarks.selectionIndexes enumerateIndexesUsingBlock:^(NSUInteger index, BOOL *stop) {
+        if (index < self.arrayBookmarkedSites.count) {
+            [self amtRoiLoadFromBookmarkNamed:[self.arrayBookmarkedSites objectAtIndex:index]];
+        }
+    }];
 }
 - (void)amtRoiLoadFromAllBookmarks {
     for (NSString *key in self.arrayBookmarkedSites) {
@@ -2047,7 +2053,7 @@
     {
         NSSavePanel *savePanel = [NSSavePanel savePanel];
         savePanel.allowedFileTypes = [NSArray arrayWithObject:@"rois_series"];
-        savePanel.nameFieldStringValue = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self anatomicalSiteName],self.viewerPET.window.title]];
+        savePanel.nameFieldStringValue = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self anatomicalSiteName],[self petSeriesNameWithNoBadCharacters:YES]]];
         if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
             [roisPerMovies writeToURL:savePanel.URL atomically:YES];
         }
@@ -2229,7 +2235,7 @@
         } // end of slices
     }
     
-    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    NSMutableDictionary *dict = [MirrorROIPluginFilterOC blankDataDictForRawPixelsDelta];
     CGFloat sd;
     CGFloat countOfPixelsF = [[NSNumber numberWithUnsignedInteger:countOfPixels] floatValue];
     [dict setObject:[NSNumber numberWithUnsignedInteger:countOfPixels] forKey:kDeltaNameCount];
@@ -2245,6 +2251,7 @@
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameActiveSEM];
 
     if (activeAndMirroredStatus == ActiveAndMirrored) {
+        //blank dict initialises these anyway
         [dict setObject:dataMflat forKey:kDeltaNameMirroredPixFlatAndMirroredInRows];
         [dict setObject:dataM2D forKey:kDeltaNameMirroredPixGrid];
         [dict setObject:[NSNumber numberWithFloat:sumOfM] forKey:kDeltaNameMirroredSum];
@@ -2278,39 +2285,55 @@
         [dict setObject:dataM_1Line forKey:kDeltaNameMirroredPix1Line];
         [dict setObject:dataS_1Line forKey:kDeltaNameSubtractedPix1Line];
         [dict setObject:dataD_1Line forKey:kDeltaNameDividedPix1Line];
-
-    } else {
-        [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixFlatAndMirroredInRows];
-        [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixGrid];
-        [dict setObject:@"" forKey:kDeltaNameMirroredSum];
-        [dict setObject:@"" forKey:kDeltaNameMirroredMean];
-        [dict setObject:@"" forKey:kDeltaNameMirroredMax];
-        [dict setObject:@"" forKey:kDeltaNameMirroredMin];
-        [dict setObject:@"" forKey:kDeltaNameMirroredSD];
-        [dict setObject:@"" forKey:kDeltaNameMirroredSEM];
-        
-        [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix];
-        [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix];
-        [dict setObject:@"" forKey:kDeltaNameSubtractedPixTotal];
-        [dict setObject:@"" forKey:kDeltaNameDividedPixTotal];
-        [dict setObject:@"" forKey:kDeltaNameSubtractedPixMin];
-        [dict setObject:@"" forKey:kDeltaNameSubtractedPixMax];
-        [dict setObject:@"" forKey:kDeltaNameDividedPixMin];
-        [dict setObject:@"" forKey:kDeltaNameDividedPixMax];
-        [dict setObject:@"" forKey:kDeltaNameSubtractedMean];
-        [dict setObject:@"" forKey:kDeltaNameDividedMean];
-        // SDEVs
-        [dict setObject:@"" forKey:kDeltaNameSubtractedSD];
-        [dict setObject:@"" forKey:kDeltaNameSubtractedSEM];
-        [dict setObject:@"" forKey:kDeltaNameDividedSD];
-        [dict setObject:@"" forKey:kDeltaNameDividedSEM];
-        
-        [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPix1Line];
-        [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix1Line];
-        [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix1Line];
-
     }
     
+    return dict;
+}
+
++(NSMutableDictionary *)blankDataDictForRawPixelsDelta {
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    //if active
+    [dict setObject:@"" forKey:kDeltaNameCount];
+    
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePixFlatAndNotMirrored];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePixGrid];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePix1Line];
+    [dict setObject:@"" forKey:kDeltaNameActiveSum];
+    [dict setObject:@"" forKey:kDeltaNameActiveMean];
+    [dict setObject:@"" forKey:kDeltaNameActiveMax];
+    [dict setObject:@"" forKey:kDeltaNameActiveMin];
+    [dict setObject:@"" forKey:kDeltaNameActiveSD];
+    [dict setObject:@"" forKey:kDeltaNameActiveSEM];
+
+    //if mirror
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixFlatAndMirroredInRows];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixGrid];
+    [dict setObject:@"" forKey:kDeltaNameMirroredSum];
+    [dict setObject:@"" forKey:kDeltaNameMirroredMean];
+    [dict setObject:@"" forKey:kDeltaNameMirroredMax];
+    [dict setObject:@"" forKey:kDeltaNameMirroredMin];
+    [dict setObject:@"" forKey:kDeltaNameMirroredSD];
+    [dict setObject:@"" forKey:kDeltaNameMirroredSEM];
+    
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix];
+    [dict setObject:@"" forKey:kDeltaNameSubtractedPixTotal];
+    [dict setObject:@"" forKey:kDeltaNameDividedPixTotal];
+    [dict setObject:@"" forKey:kDeltaNameSubtractedPixMin];
+    [dict setObject:@"" forKey:kDeltaNameSubtractedPixMax];
+    [dict setObject:@"" forKey:kDeltaNameDividedPixMin];
+    [dict setObject:@"" forKey:kDeltaNameDividedPixMax];
+    [dict setObject:@"" forKey:kDeltaNameSubtractedMean];
+    [dict setObject:@"" forKey:kDeltaNameDividedMean];
+    // SDEVs
+    [dict setObject:@"" forKey:kDeltaNameSubtractedSD];
+    [dict setObject:@"" forKey:kDeltaNameSubtractedSEM];
+    [dict setObject:@"" forKey:kDeltaNameDividedSD];
+    [dict setObject:@"" forKey:kDeltaNameDividedSEM];
+    
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPix1Line];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix1Line];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix1Line];
     return dict;
 }
 
@@ -2411,9 +2434,19 @@
     return nil;
 }
 +(NSString *)fileNameWithNoBadCharacters:(NSString *)original {
+    if (original == nil) {
+        original = @"Untitled";
+    }
     return [original stringByReplacingOccurrencesOfString:@"/" withString:@"-"];
 }
-
+-(NSString *)petSeriesNameWithNoBadCharacters:(BOOL)includePatientName {
+    NSString *patname = @"";
+    if (includePatientName) {
+        patname = [NSString stringWithFormat:@"%@_",[[self.viewerPET currentStudy] name]];
+    }
+    NSString *name = [NSString stringWithFormat:@"%@%@",patname,[[self.viewerPET currentSeries] name]];
+    return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:name];
+}
 #pragma mark - Plot Data
 -(void)loadStatsScene {
     
@@ -2920,7 +2953,7 @@
     return NSNotFound;
 }
 -(NSString *)jiggleROIfileName {
-    return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"🌸-%@",self.viewerPET.window.title]];
+    return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"🌸-%@",[self petSeriesNameWithNoBadCharacters:YES]]];
 }
 -(NSString *)jiggleROIsummaryStringWithActiveROIinSliceString {
     return [NSString stringWithFormat:@"%@\n\n%@",[self summaryStringForActiveRoiInCurrentSliceInViewer:self.viewerCT],[self jiggleROIArrayFinalSummaryString]];
