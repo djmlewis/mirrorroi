@@ -1559,7 +1559,7 @@
                     </button>
                 </subviews>
             </view>
-            <point key="canvasLocation" x="-20315" y="-3737"/>
+            <point key="canvasLocation" x="-20791" y="-3809"/>
         </window>
         <userDefaultsController representsSharedInstance="YES" id="fUA-5u-y3G"/>
         <arrayController preservesSelection="NO" selectsInsertedObjects="NO" avoidsEmptySelection="NO" id="7He-O6-hgQ" userLabel="sortKeysArrayController">
@@ -1587,6 +1587,7 @@
                         <bool key="NSHandlesContentAsCompoundValue" value="YES"/>
                     </dictionary>
                 </binding>
+                <binding destination="-2" name="sortDescriptors" keyPath="self.arraySortSelectorsBookmarks" id="VR9-Er-7hD"/>
             </connections>
         </arrayController>
     </objects>

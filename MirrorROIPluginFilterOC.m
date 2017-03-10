@@ -28,6 +28,7 @@
     self.dictBookmarks = [NSMutableDictionary dictionary];
     self.arrayJiggleROIvalues = [NSMutableArray array];
     self.arrayBookmarkedSites = [NSMutableArray array];
+    self.arraySortSelectorsBookmarks = [NSArray arrayWithObject: [[NSSortDescriptor alloc] initWithKey:nil ascending:YES]];
 }
 -(void)dealloc {
     //[self.skScene release];
@@ -1482,13 +1483,15 @@
 #pragma mark - anatomicalSite
 -(NSString *)anatomicalSiteName {
     return self.comboAnatomicalSite.stringValue;
-    //return [self.comboAnatomicalSite.stringValue stringByAppendingString:@" "];
 }
-
+-(void)setAnatomicalSiteName:(NSString *)name {
+    self.comboAnatomicalSite.stringValue = name;
+    [self.comboAnatomicalSite becomeFirstResponder];
+    [[self.comboAnatomicalSite currentEditor] setSelectedRange: NSMakeRange(0, name.length)];
+}
 -(NSString *)dividerForExportFileFromAnatomicalSite:(NSString *)anatomicalSite {
     return [NSString stringWithFormat:@"#   %@   ############################################",anatomicalSite];
 }
-
 -(BOOL)anatomicalSiteDefined {
     if (self.comboAnatomicalSite.stringValue.length > 0)
     {
@@ -1719,46 +1722,6 @@
         [self.dictBookmarks setObject:[self bookmarkDictForSite:anatSite] forKey:anatSite];
     }
 }
--(void)bookmarkedDataImport {
-    // Get the main window for the document.
-    NSWindow* window = self.windowControllerMain.window;
-    // Create and configure the panel.
-    NSOpenPanel* panel = [NSOpenPanel openPanel];
-    [panel setCanChooseDirectories:NO];
-    [panel setAllowsMultipleSelection:NO];
-    [panel setRequiredFileType:@"plist"];
-    [panel setMessage:@"Import '.plist' file with bookmarked data.\nWARNING ! This will overwrite  existing data with the same anatomical site name"];
-    
-    // Display the panel attached to the document's window.
-    [panel beginSheetModalForWindow:window completionHandler:^(NSInteger result){
-        if (result == NSFileHandlingPanelOKButton) {
-            NSURL *url = [[panel URLs] objectAtIndex:0];
-            if ([[url pathExtension] isEqualToString:@"plist"]) {
-                NSString *corrFn = [[url lastPathComponent] stringByDeletingPathExtension];
-                NSString *viewerN = [self petSeriesNameWithNoBadCharacters:YES];
-                if ([viewerN isEqualToString:corrFn] ||
-                    [MirrorROIPluginFilterOC proceedAfterAlert:@"The file name does not match the current PET series name - proceed with the import?"]) {
-                    NSMutableDictionary *replaceDict = [NSMutableDictionary dictionaryWithContentsOfURL:url];
-                    if (replaceDict.count>0) {
-                        for (NSString *key in replaceDict) {
-                            [self.dictBookmarks setObject:replaceDict[key] forKey:key];
-                            // arrayControllerBookmarks just lists the names of the bookmarks
-                            [self.arrayControllerBookmarks removeObject:key];//erase to replace
-                            [self.arrayControllerBookmarks addObject:key];
-                        }
-                    } else {
-                        [MirrorROIPluginFilterOC alertWithMessage:@"No bookmarks were found in the file" andTitle:@"Bookmarked Data Import" critical:YES];
-                    }
-                }
-            } else {
-                [MirrorROIPluginFilterOC alertWithMessage:@"The file is not a '.plist' file and so cannot be imported" andTitle:@"Bookmarked Data Import" critical:YES];
-            }
-        }
-    }];
-    
-    
-    
-}
 -(NSMutableDictionary *)bookmarkDictForSite:(NSString *)anatSite {
     //Do 3D calculation FIRST as this resets the pixels nicely
     NSMutableDictionary *data3D_A = [self dataDictFor3DROIdataForType:Active_ROI];
@@ -1832,14 +1795,62 @@
         [summaryRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [summaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeySummary]];
     }
-    return [NSString stringWithFormat:@"%@\n%@%@",[self participantDetailsString],[summaryRows componentsJoinedByString:@"\n"],[pixelGridRows componentsJoinedByString:@"\n"]];
+    NSString *finalString = [NSString stringWithFormat:@"%@\n%@%@",[self participantDetailsString],[summaryRows componentsJoinedByString:@"\n"],[pixelGridRows componentsJoinedByString:@"\n"]];
+    
+    return [MirrorROIPluginFilterOC removeDoubleLinesFromString:finalString];
+}
++(NSString *)removeDoubleLinesFromString:(NSString *)string {
+    NSString *clean = string;
+    NSRange loc = [clean rangeOfString:@"\n\n"];
+    while (loc.location != NSNotFound) {
+        clean = [clean stringByReplacingOccurrencesOfString:@"\n\n" withString:@"\n"];
+        loc = [clean rangeOfString:@"\n\n"];
+    }
+    return clean;
 }
 -(NSString *)bookmarkedDataFilename {
     NSString *fileTypeName = [self fileNamePrefixForExportType:BookmarkedData withAnatomicalSite:NO];
     NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,[self petSeriesNameWithNoBadCharacters:YES]];
     return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:fileName];
 }
-#pragma mark - Bookmarks Export
+#pragma mark - Bookmarks Import Export
+-(void)bookmarkedDataImport {
+    // Get the main window for the document.
+    NSWindow* window = self.windowControllerMain.window;
+    // Create and configure the panel.
+    NSOpenPanel* panel = [NSOpenPanel openPanel];
+    [panel setCanChooseDirectories:NO];
+    [panel setAllowsMultipleSelection:NO];
+    [panel setRequiredFileType:@"plist"];
+    [panel setMessage:@"Import '.plist' file with bookmarked data.\nWARNING ! This will overwrite  existing data with the same anatomical site name"];
+    
+    // Display the panel attached to the document's window.
+    [panel beginSheetModalForWindow:window completionHandler:^(NSInteger result){
+        if (result == NSFileHandlingPanelOKButton) {
+            NSURL *url = [[panel URLs] objectAtIndex:0];
+            if ([[url pathExtension] isEqualToString:@"plist"]) {
+                NSString *corrFn = [[url lastPathComponent] stringByDeletingPathExtension];
+                NSString *viewerN = [self petSeriesNameWithNoBadCharacters:YES];
+                if ([viewerN isEqualToString:corrFn] ||
+                    [MirrorROIPluginFilterOC proceedAfterAlert:@"The file name does not match the current PET series name - proceed with the import?"]) {
+                    NSMutableDictionary *replaceDict = [NSMutableDictionary dictionaryWithContentsOfURL:url];
+                    if (replaceDict.count>0) {
+                        for (NSString *key in replaceDict) {
+                            [self.dictBookmarks setObject:replaceDict[key] forKey:key];
+                            // arrayControllerBookmarks just lists the names of the bookmarks
+                            [self.arrayControllerBookmarks removeObject:key];//erase to replace
+                            [self.arrayControllerBookmarks addObject:key];
+                        }
+                    } else {
+                        [MirrorROIPluginFilterOC alertWithMessage:@"No bookmarks were found in the file" andTitle:@"Bookmarked Data Import" critical:YES];
+                    }
+                }
+            } else {
+                [MirrorROIPluginFilterOC alertWithMessage:@"The file is not a '.plist' file and so cannot be imported" andTitle:@"Bookmarked Data Import" critical:YES];
+            }
+        }
+    }];
+}
 - (void)exportBookmarkedData:(ExportDataHow)exportHow {
     NSURL *savedLocation = nil;
     switch (exportHow) {
@@ -1888,7 +1899,9 @@
 - (IBAction)amtRoiLoadFromBookmark:(NSButton *)sender {
     switch (sender.tag) {
         case 0:
-            [self amtRoiLoadFromSelectedBookmark];
+        {
+            [self setAnatomicalSiteName:[self amtRoiLoadFromSelectedBookmark]];
+        }
             break;
         case 1:
             [self amtRoiLoadFromAllBookmarks];
@@ -1898,12 +1911,19 @@
             break;
     }
 }
-- (void)amtRoiLoadFromSelectedBookmark {
+- (NSString *)amtRoiLoadFromSelectedBookmark {
+    NSMutableArray *names = [NSMutableArray arrayWithCapacity:self.arrayControllerBookmarks.selectionIndexes.count];
     [self.arrayControllerBookmarks.selectionIndexes enumerateIndexesUsingBlock:^(NSUInteger index, BOOL *stop) {
         if (index < self.arrayBookmarkedSites.count) {
-            [self amtRoiLoadFromBookmarkNamed:[self.arrayBookmarkedSites objectAtIndex:index]];
+            NSString *name = [self.arrayBookmarkedSites objectAtIndex:index];
+            [self amtRoiLoadFromBookmarkNamed:name];
+            [names addObject:name];
         }
     }];
+    if (names.count>0) {
+        return [names componentsJoinedByString:@" + "];
+    }
+    return @"";
 }
 - (void)amtRoiLoadFromAllBookmarks {
     for (NSString *key in self.arrayBookmarkedSites) {
@@ -1922,7 +1942,7 @@
     }
 }
 
-#pragma mark -  Export
+#pragma mark -  Data Export
 -(NSString *)fileNamePrefixForExportType:(ExportDataType)type withAnatomicalSite:(BOOL)withSite {
     NSString *typeString = @"";
     switch (type) {

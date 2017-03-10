@@ -200,7 +200,7 @@ typedef enum : NSInteger {
 @property (strong) NSMutableDictionary *dictBookmarks;
 @property (strong) NSMutableArray *arrayBookmarkedSites;
 @property (assign) IBOutlet NSArrayController *arrayControllerBookmarks;
-
+@property (strong) NSArray *arraySortSelectorsBookmarks;
 @property (strong) NSMutableArray *arrayJiggleROIvalues;
 
 - (long) filterImage:(NSString*) menuName;
