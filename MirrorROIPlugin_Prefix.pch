@@ -16,6 +16,7 @@
 #define kBookmarkKeySummary @"kBookmarkKeySummary"
 #define kBookmarkKeyAMTrois @"kBookmarkKeyAMTrois"
 #define kBookmarkKeyPixelsGrids @"kBookmarkKeyPixelsGrids"
+#define kBookmarkKeyPixelsGridsTransposed @"kBookmarkKeyPixelsGridsTransposed"
 
 
 #define kPETtextColour [NSColor colorWithCalibratedRed:0.098 green:0.098 blue:0.098 alpha:1.00]
@@ -28,8 +29,9 @@
 #define kColor_TransformIntercalated @"kColour_TransformIntercalated"
 #define kColor_Jiggle @"kColour_Jiggle"
 #define kGrowingRegionROInameDefault @"growingRegionROIName"
-#define kGrowingRegionROILowerThresholdDefault @"growingRegionLowerThreshold"
-#define kGrowingRegionROIUpperThresholdDefault @"growingRegionUpperThreshold"
+#define kGrowingRegionROILowerThresholdSingleDefault @"growingRegionLowerThreshold_Single"
+#define kGrowingRegionROILowerThresholdMirroredDefault @"growingRegionLowerThreshold_Mirrored"
+#define kGrowingRegionROIUpperThresholdDefault @"growingRegionUpperThreshold_SingleMirrored"
 #define kTransformROInameDefault @"kTransformROInameDefault"
 #define kMirroredROInameDefault @"kMirroredROInameDefault"
 #define kActiveROInameDefault @"kActiveROInameDefault"
@@ -98,6 +100,7 @@
 #define kDeltaNameDividedPix1Line @"⊞ Divided Pixels In 1 Line"
 #define kDeltaNameActivePix1Line @"⊞ Active Pixels In One Line"
 #define kDeltaNameMirroredPix1Line @"⊞ Mirrored Pixels In 1 Line"
+#define kDeltaNameAMSDPix1LineTransposedArray @"⊞ AMSD Pixels In One Line Transposed"
 
 
 #define kSpriteWidthMedian 3.0

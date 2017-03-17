@@ -112,9 +112,12 @@
     [defaults setObject:[NSMutableArray arrayWithArray:[MirrorROIPluginFilterOC arrayFromFileAtURL:[[NSBundle bundleForClass:[self class]] URLForResource:@"Placebos" withExtension:@"txt"]]] forKey:kDefaultArrayPlacebos];
     [defaults setObject:[NSMutableArray arrayWithArray:[MirrorROIPluginFilterOC arrayFromFileAtURL:[[NSBundle bundleForClass:[self class]] URLForResource:@"AnatomicalSites" withExtension:@"txt"]]] forKey:kDefaultArrayAnatomicalSites];
     
-    //override Osirix Defaults
+    //override or complement Osirix Defaults
     [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
     [[NSUserDefaults standardUserDefaults] setObject:NSLocalizedString(@"Growing Region", nil) forKey:@"growingRegionROIName"];
+    [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROILowerThresholdMirroredDefault];
+    [defaults setObject:[NSNumber numberWithFloat:2.0] forKey:kGrowingRegionROILowerThresholdSingleDefault];
+    [defaults setObject:[NSNumber numberWithFloat:1000.0] forKey:kGrowingRegionROIUpperThresholdDefault];
 
     //register the defaults
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
@@ -551,9 +554,21 @@
 }
 
 #pragma mark - Create Active
-- (IBAction)growRegionClicked:(id)sender {
+- (IBAction)growRegionClicked:(NSButton *)sender {
     if ([self anatomicalSiteDefined])
     {
+        switch (sender.tag) {
+            case GrowRegionMirrored:
+                [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROILowerThresholdMirroredDefault] forKey:@"growingRegionLowerThreshold"];
+                [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROIUpperThresholdDefault] forKey:@"growingRegionUpperThreshold"];
+                break;
+            case GrowRegionSingle:
+                [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROILowerThresholdSingleDefault] forKey:@"growingRegionLowerThreshold"];
+                [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROIUpperThresholdDefault] forKey:@"growingRegionUpperThreshold"];
+                break;
+            default:
+                break;
+        }
         [self.viewerPET.window makeKeyAndOrderFront:nil];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
@@ -1572,7 +1587,6 @@
 }
 
 #pragma mark - Key Images
-
 - (IBAction)keyImageTapped:(NSButton*)sender {
     [self setKeyImageInCurrentViews:sender.tag];
 }
@@ -1733,6 +1747,7 @@
     NSData *rois =[self archivedArrayOFAMTroisForSite:anatSite];
     if (rois != nil) dictForSite[kBookmarkKeyAMTrois] = rois;
     dictForSite[kBookmarkKeyPixelsGrids] = [self dataStringRawPixelsFromDict:dictRaw];
+    dictForSite[kBookmarkKeyPixelsGridsTransposed] = [self stringForDataArray:[dictRaw objectForKey:kDeltaNameAMSDPix1LineTransposedArray] forceTranspose:YES];
     dictForSite[kBookmarkKeySummary] =
     [NSString stringWithFormat:
      @"ROI\tMean\tSEM\t#Pixels\tSD\tMax\tMin\tTotal\tVolume\n"
@@ -1788,14 +1803,20 @@
 -(NSString *)bookMarkStringsForAllSitesConjoined {
     NSMutableArray *summaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
+    NSMutableArray *pixelGridTransposedRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSArray *keys = [self.dictBookmarks.allKeys sortedArrayUsingSelector:@selector(compare:)];
     for (NSString *key in keys) {
         [pixelGridRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [pixelGridRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyPixelsGrids]];
+        [pixelGridTransposedRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
+        [pixelGridTransposedRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyPixelsGridsTransposed]];
         [summaryRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [summaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeySummary]];
     }
-    NSString *finalString = [NSString stringWithFormat:@"%@\n%@%@",[self participantDetailsString],[summaryRows componentsJoinedByString:@"\n"],[pixelGridRows componentsJoinedByString:@"\n"]];
+    NSString *finalString = [NSString stringWithFormat:@"%@\n%@%@",[self participantDetailsString],
+                             [summaryRows componentsJoinedByString:@"\n"],
+                             //[pixelGridRows componentsJoinedByString:@"\n"],
+                             [pixelGridTransposedRows componentsJoinedByString:@"\n"]];
     
     return [MirrorROIPluginFilterOC removeDoubleLinesFromString:finalString];
 }
@@ -2270,6 +2291,12 @@
     [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameActiveSD];
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameActiveSEM];
 
+    //trasnpose the pixel grids
+    NSMutableArray *transposeArray = [NSMutableArray arrayWithCapacity:4];
+    NSMutableArray *tempA = [NSMutableArray arrayWithObjects:@"Active", nil];
+    [tempA addObjectsFromArray:dataA_1Line];
+    [transposeArray addObject:tempA];
+    
     if (activeAndMirroredStatus == ActiveAndMirrored) {
         //blank dict initialises these anyway
         [dict setObject:dataMflat forKey:kDeltaNameMirroredPixFlatAndMirroredInRows];
@@ -2305,8 +2332,20 @@
         [dict setObject:dataM_1Line forKey:kDeltaNameMirroredPix1Line];
         [dict setObject:dataS_1Line forKey:kDeltaNameSubtractedPix1Line];
         [dict setObject:dataD_1Line forKey:kDeltaNameDividedPix1Line];
+        
+        NSMutableArray *temp = [NSMutableArray arrayWithObjects:@"Mirrored", nil];
+        [temp addObjectsFromArray:dataM_1Line];
+        [transposeArray addObject:temp];
+        temp = [NSMutableArray arrayWithObjects:@"Subtracted", nil];
+        [temp addObjectsFromArray:dataS_1Line];
+        [transposeArray addObject:temp];
+        temp = [NSMutableArray arrayWithObjects:@"Divided", nil];
+        [temp addObjectsFromArray:dataD_1Line];
+        [transposeArray addObject:temp];
+
     }
-    
+    [dict setObject:transposeArray forKey:kDeltaNameAMSDPix1LineTransposedArray];
+
     return dict;
 }
 
@@ -2315,6 +2354,8 @@
     //if active
     [dict setObject:@"" forKey:kDeltaNameCount];
     
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameAMSDPix1LineTransposedArray];
+
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePixFlatAndNotMirrored];
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePixGrid];
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePix1Line];
@@ -2328,6 +2369,7 @@
     //if mirror
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixFlatAndMirroredInRows];
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixGrid];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPix1Line];
     [dict setObject:@"" forKey:kDeltaNameMirroredSum];
     [dict setObject:@"" forKey:kDeltaNameMirroredMean];
     [dict setObject:@"" forKey:kDeltaNameMirroredMax];
@@ -2336,24 +2378,23 @@
     [dict setObject:@"" forKey:kDeltaNameMirroredSEM];
     
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix];
-    [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix1Line];
     [dict setObject:@"" forKey:kDeltaNameSubtractedPixTotal];
-    [dict setObject:@"" forKey:kDeltaNameDividedPixTotal];
     [dict setObject:@"" forKey:kDeltaNameSubtractedPixMin];
     [dict setObject:@"" forKey:kDeltaNameSubtractedPixMax];
-    [dict setObject:@"" forKey:kDeltaNameDividedPixMin];
-    [dict setObject:@"" forKey:kDeltaNameDividedPixMax];
     [dict setObject:@"" forKey:kDeltaNameSubtractedMean];
-    [dict setObject:@"" forKey:kDeltaNameDividedMean];
-    // SDEVs
     [dict setObject:@"" forKey:kDeltaNameSubtractedSD];
     [dict setObject:@"" forKey:kDeltaNameSubtractedSEM];
+
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix1Line];
+    [dict setObject:@"" forKey:kDeltaNameDividedPixTotal];
+    [dict setObject:@"" forKey:kDeltaNameDividedPixMin];
+    [dict setObject:@"" forKey:kDeltaNameDividedPixMax];
+    [dict setObject:@"" forKey:kDeltaNameDividedMean];
     [dict setObject:@"" forKey:kDeltaNameDividedSD];
     [dict setObject:@"" forKey:kDeltaNameDividedSEM];
     
-    [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPix1Line];
-    [dict setObject:[NSMutableArray array] forKey:kDeltaNameSubtractedPix1Line];
-    [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix1Line];
     return dict;
 }
 

@@ -17,9 +17,14 @@ struct ROIValues {
 };
 
 typedef enum : NSInteger {
+    GrowRegionMirrored = 0,
+    GrowRegionSingle
+} GrowRegionHow;
+
+typedef enum : NSInteger {
     ExtendSingleLengthUp = 0,
     ExtendSingleLengthDown,
-    ExtendSingleLengthBoth,
+    ExtendSingleLengthBoth
 } ExtendSingleLengthHow;
 
 typedef enum : NSUInteger {
@@ -48,7 +53,7 @@ typedef enum : NSInteger {
     ActiveMirroredInSingleSlice = 0,
     ActiveMirroredIn3D = 1,
     ActiveOnlyInSingleSlice = 2,
-    ActiveOnlyIn3D = 3,
+    ActiveOnlyIn3D = 3
 } ActiveMirrorGenerateHow;
 
 typedef enum : NSUInteger {
@@ -99,6 +104,11 @@ typedef enum : NSInteger {
     ViewInWindow = 0,
     BookmarkString = 1
 } ExportDataHow;
+
+typedef enum : NSInteger {
+    ExportSummary = 0,
+    ExportPixelGridsTransposed = 1
+} ExportWhichData;
 
 typedef enum : NSInteger {
     BookmarkSubtract = -1,

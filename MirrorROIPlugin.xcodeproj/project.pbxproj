@@ -10,6 +10,7 @@
 		6362A9C21E69A94300469163 /* openfile.png in Resources */ = {isa = PBXBuildFile; fileRef = 6362A9C11E69A94300469163 /* openfile.png */; };
 		6362A9C51E69AAFF00469163 /* PET 20.png in Resources */ = {isa = PBXBuildFile; fileRef = 6362A9C31E69AAFF00469163 /* PET 20.png */; };
 		6362A9C61E69AAFF00469163 /* yingyang 20.png in Resources */ = {isa = PBXBuildFile; fileRef = 6362A9C41E69AAFF00469163 /* yingyang 20.png */; };
+		6364351E1E7ACA8200F91553 /* growRegionMirror.png in Resources */ = {isa = PBXBuildFile; fileRef = 6364351D1E7ACA8200F91553 /* growRegionMirror.png */; };
 		8420023212E829A200E1E9CE /* OsiriXAPI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8420023112E829A200E1E9CE /* OsiriXAPI.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		8D5B49B0048680CD000E48DA /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C167DFE841241C02AAC07 /* InfoPlist.strings */; };
 		8D5B49B4048680CD000E48DA /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */; };
@@ -76,6 +77,7 @@
 		6362A9C11E69A94300469163 /* openfile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = openfile.png; path = PNGs/openfile.png; sourceTree = "<group>"; };
 		6362A9C31E69AAFF00469163 /* PET 20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "PET 20.png"; path = "PNGs/PET 20.png"; sourceTree = "<group>"; };
 		6362A9C41E69AAFF00469163 /* yingyang 20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "yingyang 20.png"; path = "PNGs/yingyang 20.png"; sourceTree = "<group>"; };
+		6364351D1E7ACA8200F91553 /* growRegionMirror.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = growRegionMirror.png; path = PNGs/growRegionMirror.png; sourceTree = "<group>"; };
 		8420023112E829A200E1E9CE /* OsiriXAPI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = OsiriXAPI.framework; sourceTree = "<group>"; };
 		8D5B49B7048680CD000E48DA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E15CE351E45F95F0009E1A5 /* vaccines.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = vaccines.plist; path = arrays/vaccines.plist; sourceTree = "<group>"; };
@@ -272,6 +274,7 @@
 				8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */,
 				8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */,
 				8EB2BDF41DB80A7500D7B0CA /* growRegion.png */,
+				6364351D1E7ACA8200F91553 /* growRegionMirror.png */,
 				8E1D23C21DE6386800469190 /* increase.png */,
 				8E8AA1DA1E0693BB007621FB /* Jiggle small.png */,
 				8E172CFB1DDD03F100F33DE5 /* Jiggle.png */,
@@ -392,6 +395,7 @@
 				8EB2BDF51DB80A7500D7B0CA /* growRegion.png in Resources */,
 				8EE534AA1E4DE11E007DA1E1 /* Vaccines.txt in Resources */,
 				8E15CE3E1E4652400009E1A5 /* placebos.plist in Resources */,
+				6364351E1E7ACA8200F91553 /* growRegionMirror.png in Resources */,
 				C52843BE1DC250C600371742 /* adownward.png in Resources */,
 				8EE534AB1E4DE11E007DA1E1 /* Placebos.txt in Resources */,
 				8E15CE391E4628070009E1A5 /* treamentsites.plist in Resources */,
