@@ -107,7 +107,8 @@ typedef enum : NSInteger {
 
 typedef enum : NSInteger {
     ExportSummary = 0,
-    ExportPixelGridsTransposed = 1
+    ExportPixelGridsTransposed = 1,
+    ExportPixelGrids = 2
 } ExportWhichData;
 
 typedef enum : NSInteger {
@@ -169,8 +170,6 @@ typedef enum : NSInteger {
 @interface MirrorROIPluginFilterOC : PluginFilter {}
 
 @property (assign) IBOutlet NSImageView *imageViewTempy;
-
-
 
 @property (nonatomic, retain) NSWindowController *windowControllerMain;
 @property (nonatomic, retain) ViewerController *viewerCT;

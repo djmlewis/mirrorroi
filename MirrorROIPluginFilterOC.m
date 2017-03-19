@@ -154,7 +154,7 @@
 }
 
 #pragma mark - Array functions
--(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
++(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
     if (arrayOfData.count>0) {
         NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
         if (forceTranspose || [self userDefaultBoolForKey:kTransposeExportedDataDefault]) {
@@ -227,6 +227,7 @@
 
 -(IBAction)assignWindowClicked:(NSButton *)sender {
     [self assignViewerWindow:[ViewerController frontMostDisplayed2DViewer] forType:sender.tag];
+    [self adjustFusedSelectAccordingToWindows];
 }
 -(void)assignViewerWindow:(ViewerController *)viewController forType:(ViewerWindow_Type)type {
     [self clearTreatmentFields];
@@ -299,6 +300,14 @@
             notfoundPET = NO;
         }
         i++;
+    }
+    [self adjustFusedSelectAccordingToWindows];
+}
+-(void)adjustFusedSelectAccordingToWindows {
+    if (self.viewerCT != nil && self.viewerPET != nil) {
+        [[NSUserDefaults standardUserDefaults] setInteger:0 forKey:kSegmentFusedOrPETSegmentDefault];
+    } else if (self.viewerPET != nil) {
+        [[NSUserDefaults standardUserDefaults] setInteger:1 forKey:kSegmentFusedOrPETSegmentDefault];
     }
 }
 -(BOOL)valid2DViewer:(ViewerController *)active2Dviewer {
@@ -579,7 +588,7 @@
 
 #pragma mark - Create Transforms
 -(IBAction)addTransformROIs:(NSButton *)sender {
-    if ([self validSliceCountInCTandPETwindows])
+    if ([MirrorROIPluginFilterOC useFusedOrPetAloneWindow] == UsePETWindowAlone || [self validSliceCountInCTandPETwindows])
     {
         [self addBoundingTransformROIS];
     }
@@ -814,7 +823,7 @@
     }
 }
 -(void)copyTransformsAndMirrorActivesIn3D:(NSInteger)in3D {
-    if ([self copyTransformROIsFromCT2PETIn3D:in3D])
+    if ([MirrorROIPluginFilterOC useFusedOrPetAloneWindow] == UsePETWindowAlone || [self copyTransformROIsFromCT2PETIn3D:in3D])
     {
         [self mirrorActiveROIUsingLengthROIn3D:in3D];
         [self.viewerPET needsDisplayUpdate];
@@ -1532,8 +1541,8 @@
 -(NSString *)participantID {
     return [[self.viewerPET currentStudy] patientID];
 }
--(NSString *)correctedStringForNullString:(NSString *)string {
-    if (string == nil) {return @"-";}
++(NSString *)correctedStringForNullString:(NSString *)string {
+    if (string == nil) {return @"";}
     return string;
 }
 -(IBAction)clearTreatmentFieldsTapped:(id)sender {
@@ -1550,15 +1559,15 @@
 }
 -(void)populateTreatmentFieldsFromCommentsWithStudy:(DicomStudy *)selectedStudy {
     if (selectedStudy == nil) { selectedStudy = [[BrowserController currentBrowser] selectedStudy];}
-    self.labelDicomStudy.stringValue = selectedStudy.name;
+    self.labelDicomStudy.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:selectedStudy.name];
     NSArray *commentsArray = [[selectedStudy comment] componentsSeparatedByString:@"\t"];
     if (commentsArray.count >= 4) {
-        self.comboVaccines.stringValue = [commentsArray objectAtIndex:0];
-        self.textFieldVaccineDayOffset.stringValue = [commentsArray objectAtIndex:1];
-        self.comboTreatmentSite.stringValue = [commentsArray objectAtIndex:2];
-        self.comboPlaceboUsed.stringValue = [commentsArray objectAtIndex:3];
+        self.comboVaccines.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:0]];
+        self.textFieldVaccineDayOffset.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:1]];
+        self.comboTreatmentSite.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:2]];
+        self.comboPlaceboUsed.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:3]];
     }
-    self.textFieldComments2.stringValue = [selectedStudy comment2];
+    self.textFieldComments2.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[selectedStudy comment2]];
     if (self.viewerPET != nil && ![selectedStudy.name isEqualToString:[[self.viewerPET currentStudy] name]]) {
         [MirrorROIPluginFilterOC alertWithMessage:@"The DICOM study selected in the Browser does not match the study to which the assigned PET/CT Windows belong. The vaccine treatment assignments and Patient IDs may be incorrect." andTitle:@"Studies Do Not Match" critical:YES];
     }
@@ -1569,12 +1578,12 @@
         {
             DicomStudy *selectedStudy = [[BrowserController currentBrowser] selectedStudy];//[self.viewerPET currentStudy]
             [selectedStudy setComment:[NSString stringWithFormat:@"%@\t%@\t%@\t%@",
-                                        [self correctedStringForNullString:self.comboVaccines.stringValue],
-                                        [self correctedStringForNullString:self.textFieldVaccineDayOffset.stringValue],
-                                        [self correctedStringForNullString:self.comboTreatmentSite.stringValue],
-                                        [self correctedStringForNullString:self.comboPlaceboUsed.stringValue]
+                                        [MirrorROIPluginFilterOC correctedStringForNullString:self.comboVaccines.stringValue],
+                                        [MirrorROIPluginFilterOC correctedStringForNullString:self.textFieldVaccineDayOffset.stringValue],
+                                        [MirrorROIPluginFilterOC correctedStringForNullString:self.comboTreatmentSite.stringValue],
+                                        [MirrorROIPluginFilterOC correctedStringForNullString:self.comboPlaceboUsed.stringValue]
                                        ]];
-            [selectedStudy setComment2:[self correctedStringForNullString:self.textFieldComments2.stringValue]];
+            [selectedStudy setComment2:[MirrorROIPluginFilterOC correctedStringForNullString:self.textFieldComments2.stringValue]];
         }
             break;
         case ReadComments:
@@ -1747,7 +1756,7 @@
     NSData *rois =[self archivedArrayOFAMTroisForSite:anatSite];
     if (rois != nil) dictForSite[kBookmarkKeyAMTrois] = rois;
     dictForSite[kBookmarkKeyPixelsGrids] = [self dataStringRawPixelsFromDict:dictRaw];
-    dictForSite[kBookmarkKeyPixelsGridsTransposed] = [self stringForDataArray:[dictRaw objectForKey:kDeltaNameAMSDPix1LineTransposedArray] forceTranspose:YES];
+    dictForSite[kBookmarkKeyPixelsGridsNotYetTransposedArray] = [dictRaw objectForKey:kDeltaNameAMSDPix1LineTransposedArray];
     dictForSite[kBookmarkKeySummary] =
     [NSString stringWithFormat:
      @"ROI\tMean\tSEM\t#Pixels\tSD\tMax\tMin\tTotal\tVolume\n"
@@ -1800,7 +1809,8 @@
             calculatedRowsString
             ];
 }
--(NSString *)bookMarkStringsForAllSitesConjoined {
+-(NSMutableDictionary *)bookMarkStringsForAllSitesConjoined {
+    NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:3];
     NSMutableArray *summaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridTransposedRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
@@ -1808,17 +1818,20 @@
     for (NSString *key in keys) {
         [pixelGridRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [pixelGridRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyPixelsGrids]];
-        [pixelGridTransposedRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
-        [pixelGridTransposedRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyPixelsGridsTransposed]];
+        [pixelGridTransposedRows addObjectsFromArray:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyPixelsGridsNotYetTransposedArray]];
         [summaryRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [summaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeySummary]];
     }
-    NSString *finalString = [NSString stringWithFormat:@"%@\n%@%@",[self participantDetailsString],
-                             [summaryRows componentsJoinedByString:@"\n"],
-                             //[pixelGridRows componentsJoinedByString:@"\n"],
-                             [pixelGridTransposedRows componentsJoinedByString:@"\n"]];
-    
-    return [MirrorROIPluginFilterOC removeDoubleLinesFromString:finalString];
+    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[NSString stringWithFormat:@"%@\n%@",[self participantDetailsString],
+                                                                          [summaryRows componentsJoinedByString:@"\n"]]]
+             forKey:kConjoinedSummary] ;
+    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[NSString stringWithFormat:@"%@\n%@",[self participantDetailsString],
+                                                                          [pixelGridRows componentsJoinedByString:@"\n"]]]
+             forKey:kConjoinedPixelGrids] ;
+    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[MirrorROIPluginFilterOC stringForDataArray:pixelGridTransposedRows forceTranspose:YES]]
+             forKey:kConjoinedPixelGridsTransposed] ;
+
+    return dict;
 }
 +(NSString *)removeDoubleLinesFromString:(NSString *)string {
     NSString *clean = string;
@@ -1829,9 +1842,28 @@
     }
     return clean;
 }
--(NSString *)bookmarkedDataFilename {
-    NSString *fileTypeName = [self fileNamePrefixForExportType:BookmarkedData withAnatomicalSite:NO];
-    NSString *fileName = [NSString stringWithFormat:@"%@-%@",fileTypeName,[self petSeriesNameWithNoBadCharacters:YES]];
++(NSString *)bookmarkDataTypeString:(ExportWhichData)whichData {
+    switch (whichData) {
+        case ExportSummary:
+            return @"Summary";
+            break;
+        case ExportPixelGrids:
+            return @"Pixels";
+            break;
+        case ExportPixelGridsTransposed:
+            return @"PixelsTransposed";
+            break;
+        default:
+            return @"?";
+            break;
+    }
+}
+-(NSString *)bookmarkedDataFilename:(ExportWhichData)whichData {
+    NSString *fileName = [NSString stringWithFormat:@"%@-%@-%@",
+                          [self fileNamePrefixForExportType:BookmarkedData withAnatomicalSite:NO],
+                          [MirrorROIPluginFilterOC bookmarkDataTypeString:whichData],
+                          [self petSeriesNameWithNoBadCharacters:YES]
+                          ];
     return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:fileName];
 }
 #pragma mark - Bookmarks Import Export
@@ -1874,13 +1906,16 @@
 }
 - (void)exportBookmarkedData:(ExportDataHow)exportHow {
     NSURL *savedLocation = nil;
+    NSMutableDictionary *dict = [self bookMarkStringsForAllSitesConjoined];
     switch (exportHow) {
         case ExportAsFile:
         {
-            savedLocation = [self saveData:[self bookMarkStringsForAllSitesConjoined]
-                                  withName:[self bookmarkedDataFilename]];
+            savedLocation = [self saveData: [dict objectForKey:kConjoinedSummary]
+                                  withName:[self bookmarkedDataFilename:ExportSummary]];
             if (savedLocation != nil)
             {
+                [self saveData: [dict objectForKey:kConjoinedPixelGrids] withName:[self bookmarkedDataFilename:ExportPixelGrids]];
+                [self saveData: [dict objectForKey:kConjoinedPixelGridsTransposed] withName:[self bookmarkedDataFilename:ExportPixelGridsTransposed]];
                 [self exportBookmarkedDataDictToURL:savedLocation];
                 [self exportBookmarkedAMTroisToURL:savedLocation];
                 if ([self userDefaultBoolForKey:kAddReportWhenSaveBookmarkedDataDefault]) {
@@ -1890,8 +1925,12 @@
         }
             break;
         case ViewInWindow:
-            [MirrorROIPluginFilterOC showStringInWindow:[self bookMarkStringsForAllSitesConjoined]
-                                              withTitle:[self bookmarkedDataFilename]];
+            [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedSummary]
+                                              withTitle:[self bookmarkedDataFilename:ExportSummary]];
+            [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedPixelGrids]
+                                              withTitle:[self bookmarkedDataFilename:ExportPixelGrids]];
+            [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedPixelGridsTransposed]
+                                              withTitle:[self bookmarkedDataFilename:ExportPixelGridsTransposed]];
             break;
         default:
             break;
@@ -2293,7 +2332,7 @@
 
     //trasnpose the pixel grids
     NSMutableArray *transposeArray = [NSMutableArray arrayWithCapacity:4];
-    NSMutableArray *tempA = [NSMutableArray arrayWithObjects:@"Active", nil];
+    NSMutableArray *tempA = [NSMutableArray arrayWithObjects:[NSString stringWithFormat:@"%@-%@",[self anatomicalSiteName],@"Active"], nil];
     [tempA addObjectsFromArray:dataA_1Line];
     [transposeArray addObject:tempA];
     
@@ -2333,16 +2372,16 @@
         [dict setObject:dataS_1Line forKey:kDeltaNameSubtractedPix1Line];
         [dict setObject:dataD_1Line forKey:kDeltaNameDividedPix1Line];
         
-        NSMutableArray *temp = [NSMutableArray arrayWithObjects:@"Mirrored", nil];
-        [temp addObjectsFromArray:dataM_1Line];
-        [transposeArray addObject:temp];
-        temp = [NSMutableArray arrayWithObjects:@"Subtracted", nil];
-        [temp addObjectsFromArray:dataS_1Line];
-        [transposeArray addObject:temp];
-        temp = [NSMutableArray arrayWithObjects:@"Divided", nil];
+        NSMutableArray *temp = [NSMutableArray array];
+        temp = [NSMutableArray arrayWithObjects:[NSString stringWithFormat:@"%@-%@",[self anatomicalSiteName],@"Divided"], nil];
         [temp addObjectsFromArray:dataD_1Line];
         [transposeArray addObject:temp];
-
+        temp = [NSMutableArray arrayWithObjects:[NSString stringWithFormat:@"%@-%@",[self anatomicalSiteName],@"Subtracted"], nil];
+        [temp addObjectsFromArray:dataS_1Line];
+        [transposeArray addObject:temp];
+        temp = [NSMutableArray arrayWithObjects:[NSString stringWithFormat:@"%@-%@",[self anatomicalSiteName],@"Mirrored"], nil];
+        [temp addObjectsFromArray:dataM_1Line];
+        [transposeArray addObject:temp];
     }
     [dict setObject:transposeArray forKey:kDeltaNameAMSDPix1LineTransposedArray];
 

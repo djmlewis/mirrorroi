@@ -63,13 +63,13 @@
                     stats,
                     kDeltaNameActivePixFlatAndNotMirrored,
                     [[self arrayOfIndexesOfSlicesWithROIofType:Active_ROI] componentsJoinedByString:@"\t"],
-                    [self stringForDataArray:[dict objectForKey:kDeltaNameActivePixFlatAndNotMirrored] forceTranspose:NO],
+                    [MirrorROIPluginFilterOC stringForDataArray:[dict objectForKey:kDeltaNameActivePixFlatAndNotMirrored] forceTranspose:NO],
                     kDeltaNameMirroredPixFlatAndMirroredInRows,
-                    [self stringForDataArray:[dict objectForKey:kDeltaNameMirroredPixFlatAndMirroredInRows] forceTranspose:NO],
+                    [MirrorROIPluginFilterOC stringForDataArray:[dict objectForKey:kDeltaNameMirroredPixFlatAndMirroredInRows] forceTranspose:NO],
                     kDeltaNameSubtractedPix,
-                    [self stringForDataArray:[dict objectForKey:kDeltaNameSubtractedPix] forceTranspose:NO],
+                    [MirrorROIPluginFilterOC stringForDataArray:[dict objectForKey:kDeltaNameSubtractedPix] forceTranspose:NO],
                     kDeltaNameDividedPix,
-                    [self stringForDataArray:[dict objectForKey:kDeltaNameDividedPix] forceTranspose:NO],
+                    [MirrorROIPluginFilterOC stringForDataArray:[dict objectForKey:kDeltaNameDividedPix] forceTranspose:NO],
                     kDeltaNameActivePixGrid,
                     [self dataStringFor2DpixelDataForROIType:Active_ROI],
                     kDeltaNameMirroredPixGrid,
@@ -214,7 +214,7 @@
         }
     }
     if (arrayOfRows.count>0) {
-        return [self stringForDataArray:arrayOfRows forceTranspose:YES];
+        return [MirrorROIPluginFilterOC stringForDataArray:arrayOfRows forceTranspose:YES];
     }
     return nil;
 }
@@ -317,7 +317,7 @@
 -(NSString *)dataStringFromDataValuesArrayFromROIsOfType:(ROI_Type)type {
     NSMutableArray *arrayOfRows = [self dataValuesArrayFromROIsOfType:type addHeader:YES];
     if (arrayOfRows.count>0) {
-        return [self stringForDataArray:arrayOfRows forceTranspose:NO];
+        return [MirrorROIPluginFilterOC stringForDataArray:arrayOfRows forceTranspose:NO];
     }
     return nil;
 }
