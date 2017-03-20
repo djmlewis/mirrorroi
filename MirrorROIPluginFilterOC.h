@@ -18,7 +18,8 @@ struct ROIValues {
 
 typedef enum : NSInteger {
     GrowRegionMirrored = 0,
-    GrowRegionSingle
+    GrowRegionSingle = 1,
+    GrowRegionNAC = 2
 } GrowRegionHow;
 
 typedef enum : NSInteger {

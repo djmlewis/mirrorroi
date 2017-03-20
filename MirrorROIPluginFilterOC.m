@@ -118,6 +118,9 @@
     [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROILowerThresholdMirroredDefault];
     [defaults setObject:[NSNumber numberWithFloat:2.0] forKey:kGrowingRegionROILowerThresholdSingleDefault];
     [defaults setObject:[NSNumber numberWithFloat:1000.0] forKey:kGrowingRegionROIUpperThresholdDefault];
+    [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROIMultiplierDefault];
+    [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROIIterationsDefault];
+    [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROIPixelsDefault];
 
     //register the defaults
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
@@ -129,7 +132,8 @@
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_TransformIntercalated options:NSKeyValueObservingOptionNew context:nil];
     [[NSUserDefaults standardUserDefaults] addObserver:self forKeyPath:kColor_Jiggle options:NSKeyValueObservingOptionNew context:nil];
 }
--(BOOL)userDefaultBoolForKey:(NSString *)key {
+
++(BOOL)userDefaultBooleanForKey:(NSString *)key {
     return [[NSUserDefaults standardUserDefaults] boolForKey:key];
 }
 -(void)initNotfications {
@@ -157,7 +161,7 @@
 +(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
     if (arrayOfData.count>0) {
         NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
-        if (forceTranspose || [self userDefaultBoolForKey:kTransposeExportedDataDefault]) {
+        if (forceTranspose || [self userDefaultBooleanForKey:kTransposeExportedDataDefault]) {
             //find the max length of the rows = the number of rows we need when we switch
             NSUInteger maxRowLength = 0;
             for (NSUInteger r=0; r<arrayOfData.count; r++) {
@@ -568,12 +572,20 @@
     {
         switch (sender.tag) {
             case GrowRegionMirrored:
+                [[NSUserDefaults standardUserDefaults] setInteger:1 forKey:@"growingRegionAlgorithm"];
                 [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROILowerThresholdMirroredDefault] forKey:@"growingRegionLowerThreshold"];
                 [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROIUpperThresholdDefault] forKey:@"growingRegionUpperThreshold"];
                 break;
             case GrowRegionSingle:
-                [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROILowerThresholdSingleDefault] forKey:@"growingRegionLowerThreshold"];
+                [[NSUserDefaults standardUserDefaults] setInteger:1 forKey:@"growingRegionAlgorithm"];
+               [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROILowerThresholdSingleDefault] forKey:@"growingRegionLowerThreshold"];
                 [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROIUpperThresholdDefault] forKey:@"growingRegionUpperThreshold"];
+                break;
+            case GrowRegionNAC:
+                [[NSUserDefaults standardUserDefaults] setInteger:3 forKey:@"growingRegionAlgorithm"];
+                [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROIMultiplierDefault] forKey:@"growingRegionMultiplier"];
+                [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROIIterationsDefault] forKey:@"growingRegionIterations"];
+                [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROIPixelsDefault] forKey:@"growingRegionRadius"];
                 break;
             default:
                 break;
@@ -1538,6 +1550,17 @@
     DicomStudy *study = [self.viewerPET currentStudy];
     return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tActive Site\tPlacebo\tComments\n%@\t%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,study.comment2,[self petSeriesNameWithNoBadCharacters:NO]];
 }
+-(NSMutableArray *)participantDetailsArray {
+    DicomStudy *study = [self.viewerPET currentStudy];
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:5];
+    [array addObject:[[NSString stringWithFormat:@"%@",study.name] stringByReplacingOccurrencesOfString:@"\t" withString:@" "]];
+    [array addObject:[[NSString stringWithFormat:@"%@",study.patientID]stringByReplacingOccurrencesOfString:@"\t" withString:@" "]];
+    [array addObject:[[NSString stringWithFormat:@"%@",study.comment]stringByReplacingOccurrencesOfString:@"\t" withString:@" "]];
+    [array addObject:[[NSString stringWithFormat:@"%@",study.comment2]stringByReplacingOccurrencesOfString:@"\t" withString:@" "]];
+    [array addObject:[[NSString stringWithFormat:@"%@",[self petSeriesNameWithNoBadCharacters:NO]]stringByReplacingOccurrencesOfString:@"\t" withString:@" "]];
+    return array;
+}
+
 -(NSString *)participantID {
     return [[self.viewerPET currentStudy] patientID];
 }
@@ -1619,7 +1642,7 @@
                 if (![self.viewerCT isKeyImage:[self.viewerCT.imageView curImage]]) {
                     [self.viewerCT setKeyImage:nil];
                 }
-                if ([self userDefaultBoolForKey:kExportKeyImagesWhenSetting]) {
+                if ([self userDefaultBooleanForKey:kExportKeyImagesWhenSetting]) {
                     [self exportKeyImagesFromViewersTypes:CTandPET_Windows];
                 }
             }
@@ -1813,7 +1836,8 @@
     NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:3];
     NSMutableArray *summaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
-    NSMutableArray *pixelGridTransposedRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
+    NSMutableArray *pixelGridTransposedRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count+1];
+    [pixelGridTransposedRows addObject:[self participantDetailsArray]];
     NSArray *keys = [self.dictBookmarks.allKeys sortedArrayUsingSelector:@selector(compare:)];
     for (NSString *key in keys) {
         [pixelGridRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
@@ -1914,11 +1938,13 @@
                                   withName:[self bookmarkedDataFilename:ExportSummary]];
             if (savedLocation != nil)
             {
-                [self saveData: [dict objectForKey:kConjoinedPixelGrids] withName:[self bookmarkedDataFilename:ExportPixelGrids]];
-                [self saveData: [dict objectForKey:kConjoinedPixelGridsTransposed] withName:[self bookmarkedDataFilename:ExportPixelGridsTransposed]];
+                [[dict objectForKey:kConjoinedPixelGrids] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:ExportPixelGrids] isDirectory:NO] URLByAppendingPathExtension:@"plist"]
+                       atomically:YES];
+                [[dict objectForKey:kConjoinedPixelGridsTransposed] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:ExportPixelGridsTransposed] isDirectory:NO] URLByAppendingPathExtension:@"plist"]
+                       atomically:YES];
                 [self exportBookmarkedDataDictToURL:savedLocation];
                 [self exportBookmarkedAMTroisToURL:savedLocation];
-                if ([self userDefaultBoolForKey:kAddReportWhenSaveBookmarkedDataDefault]) {
+                if ([self userDefaultBooleanForKey:kAddReportWhenSaveBookmarkedDataDefault]) {
                     [self attachDatabaseReportBookmarksDataFileAtURL:savedLocation];
                 }
             }
@@ -2755,7 +2781,7 @@
         NSInteger index = [self indexOfJiggleForROI:roi];
         if (index != NSNotFound && index<[self jiggleROIValuesArrayCountInCurrentSlice]) {
             distanceString = [NSString stringWithFormat:@" ∆%li", (long)[[[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] distance] integerValue]];
-            if ([self userDefaultBoolForKey:kRankJiggleDefault])
+            if ([self userDefaultBooleanForKey:kRankJiggleDefault])
             {
                 rankString = [NSString stringWithFormat:@" #%li", (long)[[[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] rank] integerValue]];
             }
@@ -2924,7 +2950,7 @@
     ROI *roi2CloneCT = [self ROIfromSlice:currentSlice inViewer:self.viewerCT withName:[self roiNameForType:Active_ROI]];//take VALUES of the ACTIVE
     if (roi2ClonePET != nil && roi2CloneCT != nil) {
         //make the ROIS grid, dont add the zero ROI as its the already mirror unless specifically requested
-        BOOL excludeOriginal = ![self userDefaultBoolForKey:kIncludeOriginalInJiggleDefault];
+        BOOL excludeOriginal = ![self userDefaultBooleanForKey:kIncludeOriginalInJiggleDefault];
         int minBounds = -1*(int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels];
         int maxBounds = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels];
         for (int moveX = minBounds; moveX<=maxBounds; moveX++) {
@@ -2979,7 +3005,7 @@
     //get the sort descriptors
     NSArray *sortDescriptors = [self sortDescriptorsForJiggle];
     if (sortDescriptors.count>0) {
-        if ([self userDefaultBoolForKey:kRankJiggleDefault]) {
+        if ([self userDefaultBooleanForKey:kRankJiggleDefault]) {
             // zero the ranks
             for (ROIValues *rv in [self jiggleROIvaluesArrayForSlice:slice]) {
                 rv.rank = [NSNumber numberWithInteger:0];

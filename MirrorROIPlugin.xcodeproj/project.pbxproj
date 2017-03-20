@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		63257D021E7FFB40000FB757 /* growRegionNAC.png in Resources */ = {isa = PBXBuildFile; fileRef = 63257D011E7FFB40000FB757 /* growRegionNAC.png */; };
 		6362A9C21E69A94300469163 /* openfile.png in Resources */ = {isa = PBXBuildFile; fileRef = 6362A9C11E69A94300469163 /* openfile.png */; };
 		6362A9C51E69AAFF00469163 /* PET 20.png in Resources */ = {isa = PBXBuildFile; fileRef = 6362A9C31E69AAFF00469163 /* PET 20.png */; };
 		6362A9C61E69AAFF00469163 /* yingyang 20.png in Resources */ = {isa = PBXBuildFile; fileRef = 6362A9C41E69AAFF00469163 /* yingyang 20.png */; };
@@ -74,6 +75,7 @@
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		089C167FFE841241C02AAC07 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		1058C7ADFEA557BF11CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		63257D011E7FFB40000FB757 /* growRegionNAC.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = growRegionNAC.png; path = PNGs/growRegionNAC.png; sourceTree = "<group>"; };
 		6362A9C11E69A94300469163 /* openfile.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = openfile.png; path = PNGs/openfile.png; sourceTree = "<group>"; };
 		6362A9C31E69AAFF00469163 /* PET 20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "PET 20.png"; path = "PNGs/PET 20.png"; sourceTree = "<group>"; };
 		6362A9C41E69AAFF00469163 /* yingyang 20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "yingyang 20.png"; path = "PNGs/yingyang 20.png"; sourceTree = "<group>"; };
@@ -275,6 +277,7 @@
 				8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */,
 				8EB2BDF41DB80A7500D7B0CA /* growRegion.png */,
 				6364351D1E7ACA8200F91553 /* growRegionMirror.png */,
+				63257D011E7FFB40000FB757 /* growRegionNAC.png */,
 				8E1D23C21DE6386800469190 /* increase.png */,
 				8E8AA1DA1E0693BB007621FB /* Jiggle small.png */,
 				8E172CFB1DDD03F100F33DE5 /* Jiggle.png */,
@@ -415,6 +418,7 @@
 				6362A9C61E69AAFF00469163 /* yingyang 20.png in Resources */,
 				8EC532661E05A2A6006B74E5 /* Flip Vertical Filled-24.png in Resources */,
 				8E6F81391E420A97002E5631 /* keyImageSquare.png in Resources */,
+				63257D021E7FFB40000FB757 /* growRegionNAC.png in Resources */,
 				8EE534A91E4DE11E007DA1E1 /* AnatomicalSites.txt in Resources */,
 				8E28A9A61E708CF900CD2803 /* ROISelector.png in Resources */,
 				C52843C01DC250C600371742 /* aright.png in Resources */,

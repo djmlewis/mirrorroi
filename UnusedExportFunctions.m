@@ -118,7 +118,7 @@
     }
     switch (exportHow) {
         case ExportAsFile:
-            if ([self userDefaultBoolForKey:kCombinePixelsWithStatsInFileDefault] == YES)
+            if ([self userDefaultBooleanForKey:kCombinePixelsWithStatsInFileDefault] == YES)
             {
                 if (dataStringA.length>0 && dataStringM.length>0) {
                     [self saveData:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM] withName:[NSString stringWithFormat:@"%@-%@",fileTypeName,self.viewerPET.window.title]];
@@ -136,7 +136,7 @@
             break;
         case ViewInWindow:
         {
-            if ([self userDefaultBoolForKey:kCombinePixelsWithStatsInFileDefault] == YES)
+            if ([self userDefaultBooleanForKey:kCombinePixelsWithStatsInFileDefault] == YES)
             {
                 if (dataStringA.length>0 && dataStringM.length>0) {
                     [MirrorROIPluginFilterOC showStringInWindow:[self combinedAandMstringsForExportROIdata_A:dataStringA M:dataStringM]
