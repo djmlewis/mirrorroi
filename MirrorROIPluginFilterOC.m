@@ -1870,26 +1870,10 @@
     }
     return clean;
 }
-+(NSString *)bookmarkDataTypeString:(ExportWhichData)whichData {
-    switch (whichData) {
-        case ExportSummary:
-            return @"Summary";
-            break;
-        case ExportPixelGrids:
-            return @"Pixels";
-            break;
-        case ExportPixelGridsTransposed:
-            return @"PixelsTransposed";
-            break;
-        default:
-            return @"?";
-            break;
-    }
-}
--(NSString *)bookmarkedDataFilename:(ExportWhichData)whichData {
-    NSString *fileName = [NSString stringWithFormat:@"%@-%@-%@",
-                          [self fileNamePrefixForExportType:BookmarkedData withAnatomicalSite:NO],
-                          [MirrorROIPluginFilterOC bookmarkDataTypeString:whichData],
+
+-(NSString *)bookmarkedDataFilename:(ExportDataType)whichData {
+    NSString *fileName = [NSString stringWithFormat:@"%@-%@",
+                          [self fileNamePrefixForExportType:whichData withAnatomicalSite:NO],
                           [self petSeriesNameWithNoBadCharacters:YES]
                           ];
     return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:fileName];
@@ -1939,12 +1923,12 @@
         case ExportAsFile:
         {
             savedLocation = [self saveData: [dict objectForKey:kConjoinedSummary]
-                                  withName:[self bookmarkedDataFilename:ExportSummary]];
+                                  withName:[self bookmarkedDataFilename:BookmarkedDataSummary]];
             if (savedLocation != nil)
             {
-                [[dict objectForKey:kConjoinedPixelGrids] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:ExportPixelGrids] isDirectory:NO] URLByAppendingPathExtension:@"plist"]
+                [[dict objectForKey:kConjoinedPixelGrids] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGrids] isDirectory:NO] URLByAppendingPathExtension:@"txt"]
                        atomically:YES];
-                [[dict objectForKey:kConjoinedPixelGridsTransposed] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:ExportPixelGridsTransposed] isDirectory:NO] URLByAppendingPathExtension:@"plist"]
+                [[dict objectForKey:kConjoinedPixelGridsTransposed] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGridsTransposed] isDirectory:NO] URLByAppendingPathExtension:@"txt"]
                        atomically:YES];
                 [self exportBookmarkedDataDictToURL:savedLocation];
                 [self exportBookmarkedAMTroisToURL:savedLocation];
@@ -1956,11 +1940,11 @@
             break;
         case ViewInWindow:
             [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedSummary]
-                                              withTitle:[self bookmarkedDataFilename:ExportSummary]];
+                                              withTitle:[self bookmarkedDataFilename:BookmarkedDataSummary]];
             [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedPixelGrids]
-                                              withTitle:[self bookmarkedDataFilename:ExportPixelGrids]];
+                                              withTitle:[self bookmarkedDataFilename:BookmarkedDataPixelGrids]];
             [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedPixelGridsTransposed]
-                                              withTitle:[self bookmarkedDataFilename:ExportPixelGridsTransposed]];
+                                              withTitle:[self bookmarkedDataFilename:BookmarkedDataPixelGridsTransposed]];
             break;
         default:
             break;
@@ -2060,8 +2044,14 @@
         case PETRois:
             typeString =  @"_PETROIs";
             break;
-        case BookmarkedData:
-            typeString =  @"Analyses";
+        case BookmarkedDataSummary:
+            typeString =  @"∑";
+            break;
+        case BookmarkedDataPixelGrids:
+            typeString =  @"⊞";
+            break;
+        case BookmarkedDataPixelGridsTransposed:
+            typeString =  @"∭";
             break;
         default:
             typeString =  @"?";

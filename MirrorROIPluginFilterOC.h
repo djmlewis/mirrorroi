@@ -97,7 +97,9 @@ typedef enum : NSInteger {
     RoiPixelsFlat,
     PixelsGridAllData,
     PixelsGridSummary,
-    BookmarkedData
+    BookmarkedDataSummary,
+    BookmarkedDataPixelGrids,
+    BookmarkedDataPixelGridsTransposed
 } ExportDataType;
 
 typedef enum : NSInteger {
@@ -106,11 +108,11 @@ typedef enum : NSInteger {
     BookmarkString = 1
 } ExportDataHow;
 
-typedef enum : NSInteger {
-    ExportSummary = 0,
-    ExportPixelGridsTransposed = 1,
-    ExportPixelGrids = 2
-} ExportWhichData;
+//typedef enum : NSInteger {
+//    ExportSummary = 0,
+//    ExportPixelGridsTransposed = 1,
+//    ExportPixelGrids = 2
+//} ExportWhichData;
 
 typedef enum : NSInteger {
     BookmarkSubtract = -1,
