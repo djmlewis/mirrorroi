@@ -161,7 +161,7 @@
 +(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
     if (arrayOfData.count>0) {
         NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
-        if (forceTranspose || [self userDefaultBooleanForKey:kTransposeExportedDataDefault]) {
+        if (forceTranspose || [MirrorROIPluginFilterOC userDefaultBooleanForKey:kTransposeExportedDataDefault]) {
             //find the max length of the rows = the number of rows we need when we switch
             NSUInteger maxRowLength = 0;
             for (NSUInteger r=0; r<arrayOfData.count; r++) {
@@ -1576,24 +1576,28 @@
     self.comboVaccines.stringValue = @"";
     self.comboTreatmentSite.stringValue = @"";
     self.textFieldVaccineDayOffset.stringValue = @"";
-    self.textFieldComments2.stringValue = @"";
+    self.textViewComments2.string = @"";
     self.comboPlaceboUsed.stringValue = @"";
 
 }
 -(void)populateTreatmentFieldsFromCommentsWithStudy:(DicomStudy *)selectedStudy {
-    if (selectedStudy == nil) { selectedStudy = [[BrowserController currentBrowser] selectedStudy];}
-    self.labelDicomStudy.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:selectedStudy.name];
-    NSArray *commentsArray = [[selectedStudy comment] componentsSeparatedByString:@"\t"];
-    if (commentsArray.count >= 4) {
-        self.comboVaccines.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:0]];
-        self.textFieldVaccineDayOffset.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:1]];
-        self.comboTreatmentSite.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:2]];
-        self.comboPlaceboUsed.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:3]];
-    }
-    self.textFieldComments2.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[selectedStudy comment2]];
-    if (self.viewerPET != nil && ![selectedStudy.name isEqualToString:[[self.viewerPET currentStudy] name]]) {
-        [MirrorROIPluginFilterOC alertWithMessage:@"The DICOM study selected in the Browser does not match the study to which the assigned PET/CT Windows belong. The vaccine treatment assignments and Patient IDs may be incorrect." andTitle:@"Studies Do Not Match" critical:YES];
-    }
+    //if (self.windowControllerMain.window.visible) {
+        if (selectedStudy == nil) { selectedStudy = [[BrowserController currentBrowser] selectedStudy];}
+        if (selectedStudy == nil || (self.viewerPET != nil && ![selectedStudy.name isEqualToString:[[self.viewerPET currentStudy] name]])) {
+            self.textFieldWarningPatientDetails.stringValue = @"⚠️";
+        } else {
+            self.textFieldWarningPatientDetails.stringValue = @"";
+            self.labelDicomStudy.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:selectedStudy.name];
+            NSArray *commentsArray = [[selectedStudy comment] componentsSeparatedByString:@"\t"];
+            if (commentsArray.count >= 4) {
+                self.comboVaccines.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:0]];
+                self.textFieldVaccineDayOffset.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:1]];
+                self.comboTreatmentSite.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:2]];
+                self.comboPlaceboUsed.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:3]];
+            }
+            self.textViewComments2.string = [MirrorROIPluginFilterOC correctedStringForNullString:[selectedStudy comment2]];
+        }
+//    }
 }
 -(IBAction)readWriteCommentsFromFieldsTapped:(NSButton *)sender {
     switch (sender.tag) {
@@ -1606,7 +1610,7 @@
                                         [MirrorROIPluginFilterOC correctedStringForNullString:self.comboTreatmentSite.stringValue],
                                         [MirrorROIPluginFilterOC correctedStringForNullString:self.comboPlaceboUsed.stringValue]
                                        ]];
-            [selectedStudy setComment2:[MirrorROIPluginFilterOC correctedStringForNullString:self.textFieldComments2.stringValue]];
+            [selectedStudy setComment2:[MirrorROIPluginFilterOC correctedStringForNullString:self.textViewComments2.string]];
         }
             break;
         case ReadComments:
@@ -1642,7 +1646,7 @@
                 if (![self.viewerCT isKeyImage:[self.viewerCT.imageView curImage]]) {
                     [self.viewerCT setKeyImage:nil];
                 }
-                if ([self userDefaultBooleanForKey:kExportKeyImagesWhenSetting]) {
+                if ([MirrorROIPluginFilterOC userDefaultBooleanForKey:kExportKeyImagesWhenSetting]) {
                     [self exportKeyImagesFromViewersTypes:CTandPET_Windows];
                 }
             }
@@ -1944,7 +1948,7 @@
                        atomically:YES];
                 [self exportBookmarkedDataDictToURL:savedLocation];
                 [self exportBookmarkedAMTroisToURL:savedLocation];
-                if ([self userDefaultBooleanForKey:kAddReportWhenSaveBookmarkedDataDefault]) {
+                if ([MirrorROIPluginFilterOC userDefaultBooleanForKey:kAddReportWhenSaveBookmarkedDataDefault]) {
                     [self attachDatabaseReportBookmarksDataFileAtURL:savedLocation];
                 }
             }
@@ -2781,7 +2785,7 @@
         NSInteger index = [self indexOfJiggleForROI:roi];
         if (index != NSNotFound && index<[self jiggleROIValuesArrayCountInCurrentSlice]) {
             distanceString = [NSString stringWithFormat:@" ∆%li", (long)[[[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] distance] integerValue]];
-            if ([self userDefaultBooleanForKey:kRankJiggleDefault])
+            if ([MirrorROIPluginFilterOC userDefaultBooleanForKey:kRankJiggleDefault])
             {
                 rankString = [NSString stringWithFormat:@" #%li", (long)[[[[self jiggleROIValuesArrayForCurrentSlice] objectAtIndex:index] rank] integerValue]];
             }
@@ -2950,7 +2954,7 @@
     ROI *roi2CloneCT = [self ROIfromSlice:currentSlice inViewer:self.viewerCT withName:[self roiNameForType:Active_ROI]];//take VALUES of the ACTIVE
     if (roi2ClonePET != nil && roi2CloneCT != nil) {
         //make the ROIS grid, dont add the zero ROI as its the already mirror unless specifically requested
-        BOOL excludeOriginal = ![self userDefaultBooleanForKey:kIncludeOriginalInJiggleDefault];
+        BOOL excludeOriginal = ![MirrorROIPluginFilterOC userDefaultBooleanForKey:kIncludeOriginalInJiggleDefault];
         int minBounds = -1*(int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels];
         int maxBounds = (int)[[NSUserDefaults standardUserDefaults] integerForKey:kJiggleBoundsPixels];
         for (int moveX = minBounds; moveX<=maxBounds; moveX++) {
@@ -3005,7 +3009,7 @@
     //get the sort descriptors
     NSArray *sortDescriptors = [self sortDescriptorsForJiggle];
     if (sortDescriptors.count>0) {
-        if ([self userDefaultBooleanForKey:kRankJiggleDefault]) {
+        if ([MirrorROIPluginFilterOC userDefaultBooleanForKey:kRankJiggleDefault]) {
             // zero the ranks
             for (ROIValues *rv in [self jiggleROIvaluesArrayForSlice:slice]) {
                 rv.rank = [NSNumber numberWithInteger:0];

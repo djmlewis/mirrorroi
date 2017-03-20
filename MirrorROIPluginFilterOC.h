@@ -197,7 +197,8 @@ typedef enum : NSInteger {
 @property (assign) IBOutlet NSComboBox *comboVaccines;
 @property (assign) IBOutlet NSComboBox *comboPlaceboUsed;
 @property (assign) IBOutlet NSTextField *textFieldVaccineDayOffset;
-@property (assign) IBOutlet NSTextField *textFieldComments2;
+@property (assign) IBOutlet NSTextField *textFieldWarningPatientDetails;
+@property (assign) IBOutlet NSTextView *textViewComments2;
 
 @property (assign) IBOutlet NSColorWell *colorWellActive;
 @property (assign) IBOutlet NSColorWell *colorWellMirrored;
