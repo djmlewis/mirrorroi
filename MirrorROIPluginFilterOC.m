@@ -115,7 +115,7 @@
     //override or complement Osirix Defaults
     [[NSUserDefaults standardUserDefaults] setBool: YES forKey: @"ROITEXTIFSELECTED"];
     [[NSUserDefaults standardUserDefaults] setObject:NSLocalizedString(@"Growing Region", nil) forKey:@"growingRegionROIName"];
-    [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROILowerThresholdMirroredDefault];
+    [defaults setObject:[NSNumber numberWithFloat:0.9] forKey:kGrowingRegionROILowerThresholdMirroredDefault];
     [defaults setObject:[NSNumber numberWithFloat:2.0] forKey:kGrowingRegionROILowerThresholdSingleDefault];
     [defaults setObject:[NSNumber numberWithFloat:1000.0] forKey:kGrowingRegionROIUpperThresholdDefault];
     [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROIMultiplierDefault];
@@ -236,6 +236,8 @@
 -(void)assignViewerWindow:(ViewerController *)viewController forType:(ViewerWindow_Type)type {
     [self clearTreatmentFields];
     [self trashAllBookmarks];
+    [self setAnatomicalSiteName:@""];
+    
     if (type == CT_Window || type == CTandPET_Windows)
     {
         self.viewerCT = viewController;
@@ -1578,7 +1580,7 @@
     self.textFieldVaccineDayOffset.stringValue = @"";
     self.textViewComments2.string = @"";
     self.comboPlaceboUsed.stringValue = @"";
-
+    
 }
 -(void)populateTreatmentFieldsFromCommentsWithStudy:(DicomStudy *)selectedStudy {
     //if (self.windowControllerMain.window.visible) {
