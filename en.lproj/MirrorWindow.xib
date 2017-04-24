@@ -756,7 +756,7 @@
                                                                 </connections>
                                                             </button>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" tag="4" translatesAutoresizingMaskIntoConstraints="NO" id="kko-4C-gVf">
-                                                                <rect key="frame" x="52" y="11" width="14" height="14"/>
+                                                                <rect key="frame" x="74" y="11" width="14" height="14"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSFolder" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="UJa-0g-Yb8">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -777,19 +777,8 @@
                                                                     <action selector="addSubtractTrashExportViewBookmarks:" target="-2" id="BFW-nQ-dvL"/>
                                                                 </connections>
                                                             </button>
-                                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="C1I-pQ-zpZ">
-                                                                <rect key="frame" x="185" y="9" width="18" height="18"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="Flip Vertical Filled-24" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Z1n-ya-aSH">
-                                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                                    <font key="font" metaFont="system"/>
-                                                                </buttonCell>
-                                                                <connections>
-                                                                    <action selector="amtRoiLoadFromBookmark:" target="-2" id="1bA-a9-UWU"/>
-                                                                </connections>
-                                                            </button>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" tag="5" translatesAutoresizingMaskIntoConstraints="NO" id="jYQ-eL-Ob0">
-                                                                <rect key="frame" x="85" y="9" width="18" height="18"/>
+                                                                <rect key="frame" x="48" y="9" width="18" height="18"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="smallSquare" title="∈" bezelStyle="smallSquare" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Wgz-lT-WlU">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -799,19 +788,8 @@
                                                                     <action selector="addSubtractTrashExportViewBookmarks:" target="-2" id="T1P-Cb-mVd"/>
                                                                 </connections>
                                                             </button>
-                                                            <button verticalHuggingPriority="750" fixedFrame="YES" tag="5" translatesAutoresizingMaskIntoConstraints="NO" id="UmV-j6-tri">
-                                                                <rect key="frame" x="105" y="9" width="18" height="18"/>
-                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                                                                <buttonCell key="cell" type="smallSquare" title="∈" bezelStyle="smallSquare" image="NSMultipleDocuments" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Gun-oA-KlE">
-                                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                                                                    <font key="font" metaFont="system" size="16"/>
-                                                                </buttonCell>
-                                                                <connections>
-                                                                    <action selector="merge1LineSummariesInFolder:" target="-2" id="Pc1-mh-Cbq"/>
-                                                                </connections>
-                                                            </button>
                                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="e0q-sC-mB2">
-                                                                <rect key="frame" x="144" y="9" width="18" height="18"/>
+                                                                <rect key="frame" x="117" y="9" width="18" height="18"/>
                                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                                                 <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="NSTrashFull" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="EN6-bO-Pwr">
                                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -819,6 +797,17 @@
                                                                 </buttonCell>
                                                                 <connections>
                                                                     <action selector="addSubtractTrashExportViewBookmarks:" target="-2" id="Hzp-6y-SRF"/>
+                                                                </connections>
+                                                            </button>
+                                                            <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="C1I-pQ-zpZ">
+                                                                <rect key="frame" x="162" y="9" width="18" height="18"/>
+                                                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                                                                <buttonCell key="cell" type="smallSquare" bezelStyle="smallSquare" image="Flip Vertical Filled-24" imagePosition="overlaps" alignment="center" lineBreakMode="truncatingTail" state="on" imageScaling="proportionallyDown" inset="2" id="Z1n-ya-aSH">
+                                                                    <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                                                    <font key="font" metaFont="system"/>
+                                                                </buttonCell>
+                                                                <connections>
+                                                                    <action selector="amtRoiLoadFromBookmark:" target="-2" id="1bA-a9-UWU"/>
                                                                 </connections>
                                                             </button>
                                                         </subviews>
@@ -1795,11 +1784,6 @@ E&amp;OE</string>
         </arrayController>
         <arrayController automaticallyRearrangesObjects="YES" id="JxZ-LG-7Ml" userLabel="bookmarksArrayController">
             <connections>
-                <binding destination="-2" name="contentArray" keyPath="self.arrayBookmarkedSites" id="efN-4o-aIw">
-                    <dictionary key="options">
-                        <bool key="NSHandlesContentAsCompoundValue" value="YES"/>
-                    </dictionary>
-                </binding>
                 <binding destination="-2" name="sortDescriptors" keyPath="self.arraySortSelectorsBookmarks" id="VR9-Er-7hD"/>
             </connections>
         </arrayController>
@@ -1819,7 +1803,6 @@ E&amp;OE</string>
         <image name="NE" width="50" height="50"/>
         <image name="NSAddTemplate" width="11" height="11"/>
         <image name="NSFolder" width="32" height="32"/>
-        <image name="NSMultipleDocuments" width="32" height="32"/>
         <image name="NSQuickLookTemplate" width="19" height="12"/>
         <image name="NSRefreshFreestandingTemplate" width="14" height="14"/>
         <image name="NSRemoveTemplate" width="11" height="11"/>

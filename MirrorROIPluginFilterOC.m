@@ -27,7 +27,7 @@
     [self initNotfications];
     self.dictBookmarks = [NSMutableDictionary dictionary];
     self.arrayJiggleROIvalues = [NSMutableArray array];
-    self.arrayBookmarkedSites = [NSMutableArray array];
+    //self.arrayBookmarkedSites = [NSMutableArray array];
     self.arraySortSelectorsBookmarks = [NSArray arrayWithObject: [[NSSortDescriptor alloc] initWithKey:nil ascending:YES]];
 }
 -(void)dealloc {
@@ -1611,6 +1611,14 @@
         }
 //    }
 }
++(NSString *)dayOffsetWithLeadingZerosFromString:(NSString *)string {
+    if (string == nil) return @"";
+    if ([string hasPrefix:@"0"]) return string;
+    if ([string floatValue] <10) {
+        string = [@"0" stringByAppendingString:string];
+    }
+    return string;
+}
 -(IBAction)readWriteCommentsFromFieldsTapped:(NSButton *)sender {
     switch (sender.tag) {
         case WriteComments:
@@ -1618,7 +1626,7 @@
             DicomStudy *selectedStudy = [[BrowserController currentBrowser] selectedStudy];//[self.viewerPET currentStudy]
             [selectedStudy setComment:[NSString stringWithFormat:@"%@\t%@\t%@\t%@",
                                         [MirrorROIPluginFilterOC correctedStringForNullString:self.comboVaccines.stringValue],
-                                        [MirrorROIPluginFilterOC correctedStringForNullString:self.textFieldVaccineDayOffset.stringValue],
+                                        [MirrorROIPluginFilterOC dayOffsetWithLeadingZerosFromString:self.textFieldVaccineDayOffset.stringValue],
                                         [MirrorROIPluginFilterOC correctedStringForNullString:self.comboTreatmentSite.stringValue],
                                         [MirrorROIPluginFilterOC correctedStringForNullString:self.comboPlaceboUsed.stringValue]
                                        ]];
@@ -1770,9 +1778,10 @@
 -(void)trashAllBookmarks {
     //easier to use this method to clear the array
     if ([self.arrayControllerBookmarks.arrangedObjects count] > 0 && [MirrorROIPluginFilterOC proceedAfterAlert:@"Delete all bookmarked data? This cannot be undone"]) {
-        [self willChangeValueForKey:@"arrayBookmarkedSites"];
-        [self.arrayBookmarkedSites removeAllObjects];
-        [self didChangeValueForKey:@"arrayBookmarkedSites"];
+//        [self willChangeValueForKey:@"arrayBookmarkedSites"];
+//        [self.arrayBookmarkedSites removeAllObjects];
+//        [self didChangeValueForKey:@"arrayBookmarkedSites"];
+        [self.arrayControllerBookmarks setContent:[NSMutableArray array]];
         [self.dictBookmarks removeAllObjects];
     }
 }
@@ -1795,10 +1804,6 @@
     NSMutableDictionary *dictRaw = [self dataDictForRawPixelsDelta];
     
     NSMutableDictionary *dictForSite = [NSMutableDictionary dictionaryWithCapacity:3];
-    //chuck in the whole data dicts
-    dictForSite[kBookmarkKeyDataDict_3DA] = data3D_A;
-    dictForSite[kBookmarkKeyDataDict_3DM] = data3D_M;
-    dictForSite[kBookmarkKeyDataDict_Raw] = dictRaw;
     
     NSData *rois =[self archivedArrayOFAMTroisForSite:anatSite];
     if (rois != nil) dictForSite[kBookmarkKeyAMTrois] = rois;
@@ -1816,8 +1821,54 @@
      [self participantID],anatSite, dictRaw[kDeltaNameActiveMean],dictRaw[kDeltaNameActiveSEM],dictRaw[kDeltaNameCount],dictRaw[kDeltaNameActiveSD],dictRaw[kDeltaNameActiveMax],dictRaw[kDeltaNameActiveMin],dictRaw[kDeltaNameActiveSum],data3D_A[@"volume"],
      [self dataStringForMirroredSubtractedDividedDataFromRawDict:dictRaw dict3D_M:data3D_M forSite:anatSite]
      ];
+    
+    //chuck in the whole 3Ddata dicts as they are just strings EXCEPT for rois which cannot be archived
+    NSMutableDictionary *dict3DAcleaned = [NSMutableDictionary dictionaryWithCapacity:data3D_A.count-1];
+    for (NSString *key in data3D_A.allKeys) {
+        if (![key isEqualToString:@"rois"]) {
+            dict3DAcleaned[key] = data3D_A[key];
+        }
+    }
+    dictForSite[kBookmarkKeyDataDict_3DA] = dict3DAcleaned;
+    NSMutableDictionary *dict3DMcleaned = [NSMutableDictionary dictionaryWithCapacity:data3D_M.count-1];
+    for (NSString *key in data3D_A.allKeys) {
+        if (![key isEqualToString:@"rois"]) {
+            dict3DMcleaned[key] = data3D_M[key];
+        }
+    }
+    dictForSite[kBookmarkKeyDataDict_3DM] = dict3DMcleaned;
+    //extract the numbers from dictRaw into a new dict. dictRaw shoud be safe as has been initialised but it cannot be just included as it has non-archivable content
+    dictForSite[kBookmarkKeyDataDict_Raw] = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                             dictRaw[kDeltaNameCount],kDeltaNameCount,
+                                             dictRaw[kDeltaNameActiveMean],kDeltaNameActiveMean,
+                                             dictRaw[kDeltaNameActiveSD],kDeltaNameActiveSD,
+                                             dictRaw[kDeltaNameActiveSEM],kDeltaNameActiveSEM,
+                                             dictRaw[kDeltaNameActiveMax],kDeltaNameActiveMax,
+                                             dictRaw[kDeltaNameActiveMin],kDeltaNameActiveMin,
+                                             dictRaw[kDeltaNameActiveSum],kDeltaNameActiveSum,
+                                             dictRaw[kDeltaNameMirroredMean],kDeltaNameMirroredMean,
+                                             dictRaw[kDeltaNameMirroredSD],kDeltaNameMirroredSD,
+                                             dictRaw[kDeltaNameMirroredSEM],kDeltaNameMirroredSEM,
+                                             dictRaw[kDeltaNameMirroredMax],kDeltaNameMirroredMax,
+                                             dictRaw[kDeltaNameMirroredMin],kDeltaNameMirroredMin,
+                                             dictRaw[kDeltaNameMirroredSum],kDeltaNameMirroredSum,
+                                             dictRaw[kDeltaNameDividedMean],kDeltaNameDividedMean,
+                                             dictRaw[kDeltaNameDividedSD],kDeltaNameDividedSD,
+                                             dictRaw[kDeltaNameDividedSEM],kDeltaNameDividedSEM,
+                                             dictRaw[kDeltaNameDividedPixMin],kDeltaNameDividedPixMin,
+                                             dictRaw[kDeltaNameDividedPixMax],kDeltaNameDividedPixMax,
+                                             dictRaw[kDeltaNameDividedPixTotal],kDeltaNameDividedPixTotal,
+                                             dictRaw[kDeltaNameSubtractedMean],kDeltaNameSubtractedMean,
+                                             dictRaw[kDeltaNameSubtractedSD],kDeltaNameSubtractedSD,
+                                             dictRaw[kDeltaNameSubtractedSEM],kDeltaNameSubtractedSEM,
+                                             dictRaw[kDeltaNameSubtractedPixMin],kDeltaNameSubtractedPixMin,
+                                             dictRaw[kDeltaNameSubtractedPixMax],kDeltaNameSubtractedPixMax,
+                                             dictRaw[kDeltaNameSubtractedPixTotal],kDeltaNameSubtractedPixTotal,
+                                             nil];
+
     return dictForSite;
 }
+
 -(NSString *)dataStringForMirroredSubtractedDividedDataFromRawDict:(NSMutableDictionary *)dictRaw dict3D_M:(NSMutableDictionary *)data3D_M forSite:(NSString *)anatSite {
     //kDeltaNameDividedMean is a number or ""
     if ([[dictRaw[kDeltaNameDividedMean] description] length]>0) {
@@ -2019,19 +2070,7 @@
     }
 }
 - (IBAction)amtRoiLoadFromBookmark:(NSButton *)sender {
-    switch (sender.tag) {
-        case 0:
-        {
-            [self setAnatomicalSiteName:[self amtRoiLoadFromSelectedBookmark]];
-        }
-            break;
-        case 1:
-            [self amtRoiLoadFromAllBookmarks];
-            break;
-            
-        default:
-            break;
-    }
+    [self setAnatomicalSiteName:[self amtRoiLoadFromSelectedBookmark]];
 }
 - (NSString *)amtRoiLoadFromSelectedBookmark {
     NSMutableArray *names = [NSMutableArray arrayWithCapacity:self.arrayControllerBookmarks.selectionIndexes.count];
@@ -2050,13 +2089,6 @@
         return [names componentsJoinedByString:@" + "];
     }
     return @"";
-}
-- (BOOL)amtRoiLoadFromAllBookmarks {
-    BOOL loadedOK = YES;
-    for (NSString *key in self.arrayBookmarkedSites) {
-        loadedOK = loadedOK && [self amtRoiLoadedOKfromBookmarkNamed:key];
-    }
-    return loadedOK;
 }
 - (BOOL)amtRoiLoadedOKfromBookmarkNamed:(NSString *)name {
     NSData *roisPerMovies = [self.dictBookmarks[name] objectForKey:kBookmarkKeyAMTrois];

@@ -215,7 +215,7 @@ typedef enum : NSInteger {
 @property (retain) SKScene *skScene;
 
 @property (strong) NSMutableDictionary *dictBookmarks;
-@property (strong) NSMutableArray *arrayBookmarkedSites;
+//@property (strong) NSMutableArray *arrayBookmarkedSites;
 @property (assign) IBOutlet NSArrayController *arrayControllerBookmarks;
 @property (strong) NSArray *arraySortSelectorsBookmarks;
 @property (strong) NSMutableArray *arrayJiggleROIvalues;
