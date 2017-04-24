@@ -66,6 +66,8 @@
 #pragma mark - Initialisations
 -(void)initDefaults {
     NSMutableDictionary *defaults = [NSMutableDictionary dictionary];
+    [defaults setObject:NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0] forKey:kUserDefault_1LineSummaryOpenDirectory];
+
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor yellowColor]] forKey:kColor_Active];
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor blueColor]] forKey:kColor_Mirrored];
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor greenColor]] forKey:kColor_TransformPlaced];
@@ -1552,6 +1554,14 @@
     DicomStudy *study = [self.viewerPET currentStudy];
     return [NSString stringWithFormat:@"%@\t%@\nVaccine\tScan Day\tActive Site\tPlacebo\tComments\n%@\t%@\nSeries Analysed: %@",study.name,study.patientID,study.comment,study.comment2,[self petSeriesNameWithNoBadCharacters:NO]];
 }
+-(NSString *)participantNameVaccineDay1Line {
+    DicomStudy *study = [self.viewerPET currentStudy];
+    NSArray *commentsArray = [[study comment] componentsSeparatedByString:@"\t"];
+    return [NSString stringWithFormat:@"%@\t%@\t%@",
+            [MirrorROIPluginFilterOC correctedStringForNullString:study.name],
+            [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:0]],
+            [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:1]]];
+}
 -(NSMutableArray *)participantDetailsArray {
     DicomStudy *study = [self.viewerPET currentStudy];
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:5];
@@ -1734,6 +1744,9 @@
         case BookmarkExport:
             [self exportBookmarkedData:ExportAsFile];
             break;
+        case Bookmark1LineExport:
+            [self exportBookmarkedData:ExportAs1LineFile];
+            break;
         case BookmarkQuickLook:
             [self exportBookmarkedData:ViewInWindow];
             break;
@@ -1745,10 +1758,10 @@
     }
 }
 -(void)subtractBookmarkDataForSelectedSite {
-    if (self.arrayBookmarkedSites.count > 0 && [MirrorROIPluginFilterOC proceedAfterAlert:@"Delete selected bookmarked data? This cannot be undone"]) {
+    if ([self.arrayControllerBookmarks.arrangedObjects count] > 0 && [MirrorROIPluginFilterOC proceedAfterAlert:@"Delete selected bookmarked data? This cannot be undone"]) {
         [self.arrayControllerBookmarks.selectionIndexes enumerateIndexesUsingBlock:^(NSUInteger index, BOOL *stop) {
-            if (index < self.arrayBookmarkedSites.count) {
-                [self.dictBookmarks removeObjectForKey:[self.arrayBookmarkedSites objectAtIndex:index]];
+            if (index < [self.arrayControllerBookmarks.arrangedObjects count]) {
+                [self.dictBookmarks removeObjectForKey:[self.arrayControllerBookmarks.arrangedObjects objectAtIndex:index]];
             }
         }];
         [self.arrayControllerBookmarks removeObjectsAtArrangedObjectIndexes:self.arrayControllerBookmarks.selectionIndexes];
@@ -1756,7 +1769,7 @@
 }
 -(void)trashAllBookmarks {
     //easier to use this method to clear the array
-    if (self.arrayBookmarkedSites.count > 0 && [MirrorROIPluginFilterOC proceedAfterAlert:@"Delete all bookmarked data? This cannot be undone"]) {
+    if ([self.arrayControllerBookmarks.arrangedObjects count] > 0 && [MirrorROIPluginFilterOC proceedAfterAlert:@"Delete all bookmarked data? This cannot be undone"]) {
         [self willChangeValueForKey:@"arrayBookmarkedSites"];
         [self.arrayBookmarkedSites removeAllObjects];
         [self didChangeValueForKey:@"arrayBookmarkedSites"];
@@ -1782,10 +1795,16 @@
     NSMutableDictionary *dictRaw = [self dataDictForRawPixelsDelta];
     
     NSMutableDictionary *dictForSite = [NSMutableDictionary dictionaryWithCapacity:3];
+    //chuck in the whole data dicts
+    dictForSite[kBookmarkKeyDataDict_3DA] = data3D_A;
+    dictForSite[kBookmarkKeyDataDict_3DM] = data3D_M;
+    dictForSite[kBookmarkKeyDataDict_Raw] = dictRaw;
+    
     NSData *rois =[self archivedArrayOFAMTroisForSite:anatSite];
     if (rois != nil) dictForSite[kBookmarkKeyAMTrois] = rois;
     dictForSite[kBookmarkKeyPixelsGrids] = [self dataStringRawPixelsFromDict:dictRaw];
     dictForSite[kBookmarkKeyPixelsGridsNotYetTransposedArray] = [dictRaw objectForKey:kDeltaNameAMSDPix1LineTransposedArray];
+    dictForSite[kBookmarkKey1LineSummary] = [self dataStringFor1LineSummaryFromRawDict:dictRaw dict3D:data3D_A forSite:anatSite];
     dictForSite[kBookmarkKeySummary] =
     [NSString stringWithFormat:
      @"ROI\tMean\tSEM\t#Pixels\tSD\tMax\tMin\tTotal\tVolume\n"
@@ -1817,6 +1836,26 @@
     }
     return @"";
 }
+-(NSString *)dataStringFor1LineSummaryFromRawDict:(NSMutableDictionary *)dictRaw dict3D:(NSMutableDictionary *)dict3D forSite:(NSString *)anatSite {
+    //kDeltaNameDividedMean is a number or ""
+    return [NSString stringWithFormat:
+            @"# Name\tVaccine\tDay\tSITE\tACTIVE_SUV\tACTIVE_SUVCOUNT\tMIRROR_SUV\tMIRROR_SUVCOUNT\tSUBTRACTED_SUV\tSUBTRACTED_SUVCOUNT\tDIVIDED_SUV\tDIVIDED_SUVCOUNT\tVOLUME\tCOUNT\n"
+            "%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
+            ,
+            [self participantNameVaccineDay1Line],
+            anatSite,
+            dictRaw[kDeltaNameActiveMean],
+            dictRaw[kDeltaNameActiveSum],
+            dictRaw[kDeltaNameMirroredMean],
+            dictRaw[kDeltaNameMirroredSum],
+            dictRaw[kDeltaNameSubtractedMean],
+            dictRaw[kDeltaNameSubtractedPixTotal],
+            dictRaw[kDeltaNameDividedMean],
+            dictRaw[kDeltaNameDividedPixTotal],
+            dict3D[@"volume"],
+            dictRaw[kDeltaNameCount]
+            ];
+}
 -(NSString *)dataStringRawPixelsFromDict:(NSMutableDictionary *)dict {
     NSString *calculatedRowsString = @"";
     //kDeltaNameDividedPix1Line is an array of values
@@ -1841,6 +1880,7 @@
 -(NSMutableDictionary *)bookMarkStringsForAllSitesConjoined {
     NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:3];
     NSMutableArray *summaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
+    NSMutableArray *onelineSummaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridTransposedRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count+1];
     [pixelGridTransposedRows addObject:[self participantDetailsArray]];
@@ -1851,16 +1891,13 @@
         [pixelGridTransposedRows addObjectsFromArray:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyPixelsGridsNotYetTransposedArray]];
         [summaryRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [summaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeySummary]];
+        [onelineSummaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKey1LineSummary]];
     }
-    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[NSString stringWithFormat:@"%@\n%@",[self participantDetailsString],
-                                                                          [summaryRows componentsJoinedByString:@"\n"]]]
-             forKey:kConjoinedSummary] ;
-    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[NSString stringWithFormat:@"%@\n%@",[self participantDetailsString],
-                                                                          [pixelGridRows componentsJoinedByString:@"\n"]]]
-             forKey:kConjoinedPixelGrids] ;
-    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[MirrorROIPluginFilterOC stringForDataArray:pixelGridTransposedRows forceTranspose:YES]]
-             forKey:kConjoinedPixelGridsTransposed] ;
-
+    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[onelineSummaryRows componentsJoinedByString:@"\n"]] forKey:kConjoined1LineSummary] ;
+    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[NSString stringWithFormat:@"%@\n%@",[self participantDetailsString], [summaryRows componentsJoinedByString:@"\n"]]] forKey:kConjoinedSummary] ;
+    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[NSString stringWithFormat:@"%@\n%@",[self participantDetailsString], [pixelGridRows componentsJoinedByString:@"\n"]]] forKey:kConjoinedPixelGrids] ;
+    [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[MirrorROIPluginFilterOC stringForDataArray:pixelGridTransposedRows forceTranspose:YES]] forKey:kConjoinedPixelGridsTransposed] ;
+    
     return dict;
 }
 +(NSString *)removeDoubleLinesFromString:(NSString *)string {
@@ -1928,10 +1965,12 @@
                                   withName:[self bookmarkedDataFilename:BookmarkedDataSummary]];
             if (savedLocation != nil)
             {
+                [[dict objectForKey:kConjoined1LineSummary] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedData1LineSummary] isDirectory:NO] URLByAppendingPathExtension:@"txt"]
+                                                            atomically:YES];
                 [[dict objectForKey:kConjoinedPixelGrids] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGrids] isDirectory:NO] URLByAppendingPathExtension:@"txt"]
-                       atomically:YES];
+                                                          atomically:YES];
                 [[dict objectForKey:kConjoinedPixelGridsTransposed] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGridsTransposed] isDirectory:NO] URLByAppendingPathExtension:@"txt"]
-                       atomically:YES];
+                                                                    atomically:YES];
                 [self exportBookmarkedDataDictToURL:savedLocation];
                 [self exportBookmarkedAMTroisToURL:savedLocation];
                 if ([MirrorROIPluginFilterOC userDefaultBooleanForKey:kAddReportWhenSaveBookmarkedDataDefault]) {
@@ -1940,9 +1979,16 @@
             }
         }
             break;
+        case ExportAs1LineFile:
+        {
+            [self export1LineSummary];
+        }
+            break;
         case ViewInWindow:
             [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedSummary]
                                               withTitle:[self bookmarkedDataFilename:BookmarkedDataSummary]];
+            [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoined1LineSummary]
+                                              withTitle:[self bookmarkedDataFilename:BookmarkedData1LineSummary]];
             [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedPixelGrids]
                                               withTitle:[self bookmarkedDataFilename:BookmarkedDataPixelGrids]];
             [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedPixelGridsTransposed]
@@ -1990,10 +2036,14 @@
 - (NSString *)amtRoiLoadFromSelectedBookmark {
     NSMutableArray *names = [NSMutableArray arrayWithCapacity:self.arrayControllerBookmarks.selectionIndexes.count];
     [self.arrayControllerBookmarks.selectionIndexes enumerateIndexesUsingBlock:^(NSUInteger index, BOOL *stop) {
-        if (index < self.arrayBookmarkedSites.count) {
-            NSString *name = [self.arrayBookmarkedSites objectAtIndex:index];
-            [self amtRoiLoadFromBookmarkNamed:name];
-            [names addObject:name];
+        if (index < [self.arrayControllerBookmarks.arrangedObjects count]) {
+            NSString *name = [self.arrayControllerBookmarks.arrangedObjects objectAtIndex:index];
+            if ([self amtRoiLoadedOKfromBookmarkNamed:name]) {
+                [names addObject:name];
+            }
+            else {
+                [MirrorROIPluginFilterOC alertWithMessage:name andTitle:@"Unable To Load ROI for this anatomical site" critical:NO];
+            }
         }
     }];
     if (names.count>0) {
@@ -2001,12 +2051,14 @@
     }
     return @"";
 }
-- (void)amtRoiLoadFromAllBookmarks {
+- (BOOL)amtRoiLoadFromAllBookmarks {
+    BOOL loadedOK = YES;
     for (NSString *key in self.arrayBookmarkedSites) {
-        [self amtRoiLoadFromBookmarkNamed:key];
+        loadedOK = loadedOK && [self amtRoiLoadedOKfromBookmarkNamed:key];
     }
+    return loadedOK;
 }
-- (void)amtRoiLoadFromBookmarkNamed:(NSString *)name {
+- (BOOL)amtRoiLoadedOKfromBookmarkNamed:(NSString *)name {
     NSData *roisPerMovies = [self.dictBookmarks[name] objectForKey:kBookmarkKeyAMTrois];
     if (roisPerMovies != nil) {
         NSURL *temporaryDirectory = [[[NSURL fileURLWithPath:NSHomeDirectory()] URLByAppendingPathComponent:@"tempROIexport"] URLByAppendingPathExtension:@"rois_series"];
@@ -2014,6 +2066,121 @@
         if ([[NSFileManager defaultManager] fileExistsAtPath:temporaryDirectory.path]) {
             [self.viewerPET roiLoadFromSeries: temporaryDirectory.path];
             [[NSFileManager defaultManager] removeItemAtURL:temporaryDirectory error:NULL];
+            return YES;
+        }
+    }
+    return NO;
+}
+#pragma mark -  Export Import the ROIs as Osirix
+-(NSData *)archivedArrayOFAMTroisForSite:(NSString *)site {
+    BOOL roisFound = NO;
+    NSMutableArray *roisPerMovies = [NSMutableArray  array];
+    NSMutableArray  *roisPerSeries = [NSMutableArray  array];
+    for( int x = 0; x < self.viewerPET.pixList.count; x++)
+    {
+        NSMutableArray  *roisPerImages = [NSMutableArray  array];
+        for( int i = 0; i < [[self.viewerPET.roiList objectAtIndex: x] count]; i++)
+        {
+            ROI	*curROI = [[self.viewerPET.roiList objectAtIndex: x] objectAtIndex: i];
+            if ([curROI.name isEqualToString:[self roiNameForType:Mirrored_ROI]] || [curROI.name isEqualToString:[self roiNameForType:Active_ROI]]) {
+                [roisPerImages addObject: curROI];
+                roisFound = YES;
+            }
+        }
+        [roisPerSeries addObject: roisPerImages];
+    }
+    if (roisFound) {
+        //we only support 1 movie
+        [roisPerMovies addObject:roisPerSeries];
+        return [NSArchiver archivedDataWithRootObject:roisPerMovies];
+    }
+    return nil;
+}
+-(void)doExportAMTroi {
+    NSData *roisPerMovies = [self archivedArrayOFAMTroisForSite:[self anatomicalSiteName]];
+    if(roisPerMovies != nil)
+    {
+        NSSavePanel *savePanel = [NSSavePanel savePanel];
+        savePanel.allowedFileTypes = [NSArray arrayWithObject:@"rois_series"];
+        savePanel.nameFieldStringValue = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self anatomicalSiteName],[self petSeriesNameWithNoBadCharacters:YES]]];
+        if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
+            [roisPerMovies writeToURL:savePanel.URL atomically:YES];
+        }
+    }
+    else
+    {
+        [MirrorROIPluginFilterOC alertWithMessage:@"No ROI found to export" andTitle:@"ROI Export" critical:NO];
+    }
+    
+}
+- (IBAction) importROIFromFiles: (id) sender {
+    
+    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
+    [oPanel setAllowsMultipleSelection:NO];
+    [oPanel setCanChooseDirectories:NO];
+    oPanel.allowedFileTypes = [NSArray arrayWithObjects:@"rois_series", nil];
+    
+    if ([oPanel runModal] == NSOKButton)
+    {
+        [self.viewerPET roiLoadFromSeries: [[oPanel filenames] lastObject]];
+    }
+}
+
+#pragma mark -  1LineSummary Export
+-(NSURL *)url1LineSummarySaveDirectory {
+    NSString *path = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefault_1LineSummarySaveDirectory] ?: NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
+    return [NSURL fileURLWithPath:path];
+//    NSURL *dirURL = [NSURL fileURLWithPath:path];
+//    NSArray *directories = dirURL ? [NSArray arrayWithObject:dirURL] : NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+//    return directories.firstObject;
+}
+-(void)export1LineSummary {
+    NSArray *selectedSites = self.arrayControllerBookmarks.selectedObjects;
+    if (selectedSites.count == 0) {
+        selectedSites = nil;//nil signals all sites
+    }
+    NSString *stringsConjoined = [self bookmarkStringsFor1LineSummariesConjoinedForSites:selectedSites];
+    [self saveData: stringsConjoined withName:[self bookmarkedDataFilename:BookmarkedData1LineSummary]];
+}
+-(NSString *)bookmarkStringsFor1LineSummariesConjoinedForSites:(NSArray *)sites {
+    NSMutableArray *onelineSummaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
+    NSArray *keys = [self.dictBookmarks.allKeys sortedArrayUsingSelector:@selector(compare:)];
+    for (NSString *key in keys) {
+        if (sites == nil || [sites containsObject:key]) {
+            [onelineSummaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKey1LineSummary]];
+        }
+    }    
+    return [onelineSummaryRows componentsJoinedByString:@"\n"];
+}
+
+- (IBAction)merge1LineSummariesInFolder:(NSButton *)sender {
+    NSOpenPanel *panel = [NSOpenPanel openPanel];
+    panel.canChooseFiles = NO;
+    panel.canChooseDirectories = YES;
+    NSURL *dirURL = [self url1LineSummarySaveDirectory];
+    panel.directoryURL = dirURL;
+    NSInteger result = [panel runModal];
+    if (result == NSFileHandlingPanelOKButton) {
+        [[NSUserDefaults standardUserDefaults] setObject:dirURL.path forKey:kUserDefault_1LineSummarySaveDirectory];
+        NSMutableArray *linesOfData = [NSMutableArray array];
+        for (NSURL *fileURL in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[panel.URLs.firstObject path] error:nil]) {
+            if ([[fileURL lastPathComponent] hasPrefix:@"∈"]) {
+                NSString *contents = [NSString stringWithContentsOfURL:fileURL usedEncoding:nil error:nil];
+                for (NSString *line in [contents componentsSeparatedByString:@"\n"]) {
+                    if (![line hasPrefix:@"#"]) {
+                        [linesOfData addObject:line];
+                    }
+                }
+            }
+        }
+        if (linesOfData.count>0) {
+            NSString *allData = [linesOfData componentsJoinedByString:@"\n"];
+            NSSavePanel *savePanel = [NSSavePanel savePanel];
+            savePanel.directoryURL = dirURL;
+            savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
+            if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
+                [allData writeToURL:savePanel.URL atomically:YES];
+            }
         }
     }
 }
@@ -2048,6 +2215,12 @@
             break;
         case BookmarkedDataSummary:
             typeString =  @"∑";
+            break;
+        case BookmarkedData1LineSummary:
+            typeString =  @"∈";
+            break;
+        case BookmarkedDataSelected1LineSummariesConjoined:
+            typeString =  @"∉";
             break;
         case BookmarkedDataPixelGrids:
             typeString =  @"⊞";
@@ -2103,6 +2276,8 @@
         [self.viewerPET computeVolume:roi points:nil generateMissingROIs:NO generatedROIs:nil computeData:dataDict error:&error];
         if (error == nil) {
             return dataDict;
+        } else {
+            [MirrorROIPluginFilterOC alertWithMessage:error andTitle:@"Error computing 3D ROI" critical:NO];
         }
     }
     return [MirrorROIPluginFilterOC blank3DdataDict];
@@ -2124,60 +2299,6 @@
     return @"";
 }
 
-#pragma mark -  Export Import the ROIs as Osirix
--(NSData *)archivedArrayOFAMTroisForSite:(NSString *)site {
-    BOOL roisFound = NO;
-    NSMutableArray *roisPerMovies = [NSMutableArray  array];
-    NSMutableArray  *roisPerSeries = [NSMutableArray  array];
-    for( int x = 0; x < self.viewerPET.pixList.count; x++)
-    {
-        NSMutableArray  *roisPerImages = [NSMutableArray  array];
-        for( int i = 0; i < [[self.viewerPET.roiList objectAtIndex: x] count]; i++)
-        {
-            ROI	*curROI = [[self.viewerPET.roiList objectAtIndex: x] objectAtIndex: i];
-            if ([curROI.name isEqualToString:[self roiNameForType:Mirrored_ROI]] || [curROI.name isEqualToString:[self roiNameForType:Active_ROI]]) {
-                [roisPerImages addObject: curROI];
-                roisFound = YES;
-            }
-        }
-        [roisPerSeries addObject: roisPerImages];
-    }
-    if (roisFound) {
-        //we only support 1 movie
-        [roisPerMovies addObject:roisPerSeries];
-        return [NSArchiver archivedDataWithRootObject:roisPerMovies];
-    }
-    return nil;
-}
--(void)doExportAMTroi {
-    NSData *roisPerMovies = [self archivedArrayOFAMTroisForSite:[self anatomicalSiteName]];
-    if(roisPerMovies != nil)
-    {
-        NSSavePanel *savePanel = [NSSavePanel savePanel];
-        savePanel.allowedFileTypes = [NSArray arrayWithObject:@"rois_series"];
-        savePanel.nameFieldStringValue = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self anatomicalSiteName],[self petSeriesNameWithNoBadCharacters:YES]]];
-        if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
-            [roisPerMovies writeToURL:savePanel.URL atomically:YES];
-        }
-    }
-    else
-    {
-        [MirrorROIPluginFilterOC alertWithMessage:@"No ROI found to export" andTitle:@"ROI Export" critical:NO];
-    }
-    
-}
-- (IBAction) importROIFromFiles: (id) sender {
-    
-    NSOpenPanel *oPanel = [NSOpenPanel openPanel];
-    [oPanel setAllowsMultipleSelection:NO];
-    [oPanel setCanChooseDirectories:NO];
-    oPanel.allowedFileTypes = [NSArray arrayWithObjects:@"rois_series", nil];
-    
-    if ([oPanel runModal] == NSOKButton)
-    {
-            [self.viewerPET roiLoadFromSeries: [[oPanel filenames] lastObject]];
-    }
-}
 #pragma mark -  Calculate delta from raw pixels
 -(PixelDataStatus)active:(NSMutableArray *)active matchesMirrored:(NSMutableArray *)mirrored {
     //check number of slices
@@ -2543,6 +2664,10 @@
 #pragma mark - File Save
 -(NSURL *)saveData:(NSString *)dataString withName:(NSString *)name {
     NSSavePanel *savePanel = [NSSavePanel savePanel];
+    BOOL onelineSummary = [name hasPrefix:@"∈"];
+    if (onelineSummary) {
+        savePanel.directoryURL = [self url1LineSummarySaveDirectory];
+    }
     savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
     savePanel.nameFieldStringValue = name;
     if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
@@ -2550,6 +2675,9 @@
         [dataString writeToURL:savePanel.URL atomically:YES encoding:NSUnicodeStringEncoding error:&error];
         if (error.code == 0)
         {
+            if (onelineSummary) {
+                [[NSUserDefaults standardUserDefaults] setObject:savePanel.directoryURL.path forKey:kUserDefault_1LineSummarySaveDirectory];
+            }
             return savePanel.URL;
         }
     }

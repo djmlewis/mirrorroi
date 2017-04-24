@@ -12,13 +12,22 @@
 
 #define kAllSlices -1
 
+#define kUserDefault_1LineSummarySaveDirectory @"kUserDefault_1LineSummarySaveDirectory"
+#define kUserDefault_1LineSummaryOpenDirectory @"kUserDefault_1LineSummaryOpenDirectory"
+
 #define kBookmarkStringKey @"kBookmarkStringKey"
 #define kBookmarkKeySummary @"kBookmarkKeySummary"
+#define kBookmarkKey1LineSummary @"kBookmarkKey1LineSummary"
 #define kBookmarkKeyAMTrois @"kBookmarkKeyAMTrois"
 #define kBookmarkKeyPixelsGrids @"kBookmarkKeyPixelsGrids"
 #define kBookmarkKeyPixelsGridsNotYetTransposedArray @"kBookmarkKeyPixelsGridsNotYetTransposedArray"
 
+#define kBookmarkKeyDataDict_3DA @"kBookmarkKeyDataDict_3DA"
+#define kBookmarkKeyDataDict_3DM @"kBookmarkKeyDataDict_3DM"
+#define kBookmarkKeyDataDict_Raw @"kBookmarkKeyDataDict_Raw"
+
 #define kConjoinedSummary @"kConjoinedSummary"
+#define kConjoined1LineSummary @"kConjoined1LineSummary"
 #define kConjoinedPixelGrids @"kConjoinedPixelGrids"
 #define kConjoinedPixelGridsTransposed @"kConjoinedPixelGridsTransposed"
 
