@@ -255,13 +255,6 @@
 		8EDB8BDB1DAE5826007C14A9 /* PNGs */ = {
 			isa = PBXGroup;
 			children = (
-				8E28A9A51E708CF900CD2803 /* ROISelector.png */,
-				8EBF00FD1E6EA4E400796545 /* Flip Vertical Filled MULTI-50.png */,
-				8E6EA9551E6EA352009501EB /* Tiling2x1.png */,
-				6362A9C31E69AAFF00469163 /* PET 20.png */,
-				6362A9C41E69AAFF00469163 /* yingyang 20.png */,
-				6362A9C11E69A94300469163 /* openfile.png */,
-				8ED6E2711E50C759006F68B5 /* icon64.png */,
 				8E6571B71E4FB1E500E0E223 /* addrects.png */,
 				C52843BB1DC250C600371742 /* adownward.png */,
 				C52843BC1DC250C600371742 /* aleft.png */,
@@ -273,11 +266,13 @@
 				8E1D23C11DE6386800469190 /* decrease.png */,
 				8EF2964F1DC4D2FB00CC638E /* end.png */,
 				8EF2964B1DC4D17200CC638E /* Erase Filled-50.png */,
+				8EBF00FD1E6EA4E400796545 /* Flip Vertical Filled MULTI-50.png */,
 				8EC532651E05A2A6006B74E5 /* Flip Vertical Filled-24.png */,
 				8EDB8BDD1DAE5EE9007C14A9 /* Flip Vertical Filled-50.png */,
 				8EB2BDF41DB80A7500D7B0CA /* growRegion.png */,
 				6364351D1E7ACA8200F91553 /* growRegionMirror.png */,
 				63257D011E7FFB40000FB757 /* growRegionNAC.png */,
+				8ED6E2711E50C759006F68B5 /* icon64.png */,
 				8E1D23C21DE6386800469190 /* increase.png */,
 				8E8AA1DA1E0693BB007621FB /* Jiggle small.png */,
 				8E172CFB1DDD03F100F33DE5 /* Jiggle.png */,
@@ -290,9 +285,14 @@
 				8E3F944C1DDB491F0085A162 /* Marker-50.png */,
 				8ED845F61DC6295D008399F1 /* NE.png */,
 				8ED845F71DC6295D008399F1 /* NW.png */,
+				6362A9C11E69A94300469163 /* openfile.png */,
+				6362A9C31E69AAFF00469163 /* PET 20.png */,
+				8E28A9A51E708CF900CD2803 /* ROISelector.png */,
 				8ED845F51DC6295D008399F1 /* SE.png */,
 				8EF296501DC4D2FB00CC638E /* start.png */,
 				8ED845F41DC6295D008399F1 /* SW.png */,
+				8E6EA9551E6EA352009501EB /* Tiling2x1.png */,
+				6362A9C41E69AAFF00469163 /* yingyang 20.png */,
 			);
 			name = PNGs;
 			sourceTree = "<group>";

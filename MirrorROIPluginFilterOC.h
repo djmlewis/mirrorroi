@@ -101,7 +101,8 @@ typedef enum : NSInteger {
     BookmarkedDataPixelGrids,
     BookmarkedDataPixelGridsTransposed,
     BookmarkedData1LineSummary,
-    BookmarkedDataSelected1LineSummariesConjoined
+    BookmarkedDataSelected1LineSummariesConjoined,
+    PixelsAMvertical
 } ExportDataType;
 
 typedef enum : NSInteger {
@@ -168,6 +169,12 @@ typedef enum : NSInteger {
     Combo_Placebo_Save = 24
 } ComboBoxIdentifier;
 
+typedef enum : NSUInteger {
+    ComboArray_Vaccine = 0,
+    ComboArray_Day = 1,
+    ComboArray_TreatmentSite = 2,
+    ComboArray_PlaceboUsed = 3
+}CommentsArrayItems;
 
 typedef enum : NSInteger {
     JumpUndefined,JumpFirst,JumpDecrease,JumpIncrease,JumpLast

@@ -51,7 +51,7 @@
     [self loadStatsScene];
     [self smartAssignCTPETwindows];
     [self clearJiggleROIsAndValuesAndResetDisplayed];
-
+    
     BOOL completedOK = YES;
     
     if(completedOK) return 0; // No Errors
@@ -67,7 +67,7 @@
 -(void)initDefaults {
     NSMutableDictionary *defaults = [NSMutableDictionary dictionary];
     [defaults setObject:NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0] forKey:kUserDefault_1LineSummaryOpenDirectory];
-
+    
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor yellowColor]] forKey:kColor_Active];
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor blueColor]] forKey:kColor_Mirrored];
     [defaults setValue:[NSArchiver archivedDataWithRootObject:[NSColor greenColor]] forKey:kColor_TransformPlaced];
@@ -123,7 +123,7 @@
     [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROIMultiplierDefault];
     [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROIIterationsDefault];
     [defaults setObject:[NSNumber numberWithFloat:1.0] forKey:kGrowingRegionROIPixelsDefault];
-
+    
     //register the defaults
     [[NSUserDefaults standardUserDefaults] registerDefaults:defaults];
     
@@ -150,7 +150,7 @@
         [self smartAssignCTPETwindows];
     }
     else if ([notification.name isEqualToString:OsirixDCMUpdateCurrentImageNotification] &&
-        notification.object == self.viewerCT.imageView) {
+             notification.object == self.viewerCT.imageView) {
         [self resetJiggleControlsAndRefresh];
     }
     else if ([notification.name isEqualToString:OsirixNewStudySelectedNotification]) {
@@ -160,6 +160,10 @@
 }
 
 #pragma mark - Array functions
++(NSString *)stringForVerticalDataArray:(NSMutableArray *)arrayOfData withName:(NSString *)name {
+    [arrayOfData insertObject:name atIndex:0];
+    return [arrayOfData componentsJoinedByString:@"\n"];
+}
 +(NSString *)stringForDataArray:(NSMutableArray *)arrayOfData forceTranspose:(BOOL)forceTranspose {
     if (arrayOfData.count>0) {
         NSMutableArray *arrayOfRowStrings = [NSMutableArray arrayWithCapacity:arrayOfData.count];
@@ -261,7 +265,7 @@
             self.labelPET.stringValue = viewController.window.title;
             self.labelPET.toolTip = viewController.window.title;
             [self populateTreatmentFieldsFromCommentsWithStudy:[self.viewerPET currentStudy]];
-       }
+        }
         else
         {
             self.labelPET.stringValue = @"Not Assigned";
@@ -270,7 +274,7 @@
     }
     [self showHideControlsIfViewersValid];
     [MirrorROIPluginFilterOC deselectROIforViewer:viewController];
-
+    
 }
 +(void)deselectROIforViewer:(ViewerController *)viewController {
     if (viewController != nil) {
@@ -337,8 +341,8 @@
 }
 -(BOOL)validSliceCountInCTandPETwindows {
     if (([[self.viewerCT pixList] count] == [[self.viewerPET pixList] count])
-    && ([[self.viewerCT roiList] count] == [[self.viewerCT pixList] count])
-    && ([[self.viewerPET roiList] count] == [[self.viewerPET pixList] count]))
+        && ([[self.viewerCT roiList] count] == [[self.viewerCT pixList] count])
+        && ([[self.viewerPET roiList] count] == [[self.viewerPET pixList] count]))
     {
         return YES;
     }
@@ -414,7 +418,7 @@
             [self importComboArrayFileAtURL:[[panel URLs] objectAtIndex:0] forComboBox:comboBox];
         }
     }];
-
+    
 }
 -(void)saveArrayFileForCombo:(ComboBoxIdentifier)comboBox {
     NSArray *array = [self arrayForComboBox:comboBox];
@@ -582,7 +586,7 @@
                 break;
             case GrowRegionSingle:
                 [[NSUserDefaults standardUserDefaults] setInteger:1 forKey:@"growingRegionAlgorithm"];
-               [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROILowerThresholdSingleDefault] forKey:@"growingRegionLowerThreshold"];
+                [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROILowerThresholdSingleDefault] forKey:@"growingRegionLowerThreshold"];
                 [[NSUserDefaults standardUserDefaults] setFloat:[[NSUserDefaults standardUserDefaults] floatForKey:kGrowingRegionROIUpperThresholdDefault] forKey:@"growingRegionUpperThreshold"];
                 break;
             case GrowRegionNAC:
@@ -597,7 +601,7 @@
         [self.viewerPET.window makeKeyAndOrderFront:nil];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wundeclared-selector"
-    [[NSApplication sharedApplication] sendAction:@selector(segmentationTest:) to:self.viewerPET from:self.viewerPET];
+        [[NSApplication sharedApplication] sendAction:@selector(segmentationTest:) to:self.viewerPET from:self.viewerPET];
 #pragma clang diagnostic pop
     }
 }
@@ -668,7 +672,7 @@
     [self.viewerPET.imageView setIndexWithReset:index :YES];
     [self.viewerPET adjustSlider];
     [self.viewerPET needsDisplayUpdate];
-
+    
     [self.viewerCT.imageView setIndexWithReset:index :YES];
     [self.viewerCT adjustSlider];
     [self.viewerCT needsDisplayUpdate];
@@ -701,7 +705,7 @@
 }
 -(void)completeLengthROIseries {
     ViewerController *viewerToAdd = [self viewerForTransformsAccordingToFusedOrPetAloneWindowSetting];
-
+    
     if ([self valid2DViewer:viewerToAdd])
     {
         NSMutableArray  *allROIsList = [viewerToAdd roiList];
@@ -732,10 +736,10 @@
                 for (int i=0; i<indicesOfDCMPixWithMeasureROI.count-1; i++)
                 {
                     [self completeLengthROIseriesForViewerController:viewerToAdd
-                    betweenROI1:[measureROIs objectAtIndex:i]
-                    andROI2:[measureROIs objectAtIndex:i+1]
-                    fromSlice1:[[indicesOfDCMPixWithMeasureROI objectAtIndex:i] unsignedIntegerValue]
-                    toSlice2:[[indicesOfDCMPixWithMeasureROI objectAtIndex:i+1] unsignedIntegerValue]];
+                                                         betweenROI1:[measureROIs objectAtIndex:i]
+                                                             andROI2:[measureROIs objectAtIndex:i+1]
+                                                          fromSlice1:[[indicesOfDCMPixWithMeasureROI objectAtIndex:i] unsignedIntegerValue]
+                                                            toSlice2:[[indicesOfDCMPixWithMeasureROI objectAtIndex:i+1] unsignedIntegerValue]];
                 }
                 break;
         }
@@ -770,7 +774,7 @@
         [[[newROI points] objectAtIndex:0] move:XincrementCurrent1 :YincrementCurrent1];
         [[[newROI points] objectAtIndex:1] move:XincrementCurrent2 :YincrementCurrent2];
         [self addROI2Pix:newROI atSlice:nextIndex inViewer:active2Dwindow hidden:NO];
-
+        
         XincrementCurrent1 += Xincrement1;
         XincrementCurrent2 += Xincrement2;
         YincrementCurrent1 += Yincrement1;
@@ -866,7 +870,7 @@
             startSlice = [[self.viewerPET imageView] curImage];
             endSlice = startSlice+1;
             [self deleteROIsInSlice:startSlice inViewerController:self.viewerPET withName:transformname];
-       }
+        }
         
         for (NSUInteger pixIndex = startSlice; pixIndex<endSlice; pixIndex++) {
             for (ROI *roi in [[self.viewerCT roiList] objectAtIndex:pixIndex]) {
@@ -920,7 +924,7 @@
         [self deleteROIsInSlice:startSlice inViewerController:self.viewerCT withName:[self roiNameForType:Mirrored_ROI]];
         [self clearJiggleROIsAndValuesFromSlice:startSlice];
     }
-
+    
     for (NSUInteger slice=startSlice; slice<endSlice; slice++) {
         NSMutableArray *roisInThisSlice = [roisInAllSlices objectAtIndex:slice];
         ROI *roi2Clone = [MirrorROIPluginFilterOC roiFromList:roisInThisSlice WithName:[self roiNameForType:GrowingRegion]];
@@ -938,15 +942,15 @@
                     
                     if ([MirrorROIPluginFilterOC isValidDeltaPoint:deltaXY]) {
                         ROI *createdROI  = [[ROI alloc]
-                                      initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
-                                      textWidth:roi2Clone.textureWidth
-                                      textHeight:roi2Clone.textureHeight
-                                      textName:[self roiNameForType:Mirrored_ROI]
-                                      positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
-                                      positionY:roi2Clone.textureUpLeftCornerY-deltaXY.y // must be minus to correctly invert the negatives
-                                      spacingX:roi2Clone.pixelSpacingX
-                                      spacingY:roi2Clone.pixelSpacingY
-                                      imageOrigin:roi2Clone.imageOrigin];
+                                            initWithTexture:[MirrorROIPluginFilterOC flippedBufferHorizontalFromROI:roi2Clone]
+                                            textWidth:roi2Clone.textureWidth
+                                            textHeight:roi2Clone.textureHeight
+                                            textName:[self roiNameForType:Mirrored_ROI]
+                                            positionX:roi2Clone.textureUpLeftCornerX+deltaXY.x
+                                            positionY:roi2Clone.textureUpLeftCornerY-deltaXY.y // must be minus to correctly invert the negatives
+                                            spacingX:roi2Clone.pixelSpacingX
+                                            spacingY:roi2Clone.pixelSpacingY
+                                            imageOrigin:roi2Clone.imageOrigin];
                         [MirrorROIPluginFilterOC  setROIcolour:createdROI forType:Mirrored_ROI];
                         [self addROI2Pix:createdROI atSlice:slice inViewer:self.viewerPET hidden:NO];
                         
@@ -992,15 +996,15 @@
             ipsi = contra;
             contra = ipsiCopy;
         }
-
+        
         //magic adds +1 to the delta to fudge edges. But + / - depends o
         /*
          X must be mirrored, so left edge [ must move thus (mirroring is along X axis and within the edges, so left edge stays where it is.
          roi         ipsi            contra    mirrored
          [ABCD]                               [DCBA][dcba]
-               -------                  ------
+         -------                  ------
          –––––--------I---------------C-------------
-             offset      translation      offset
+         offset      translation      offset
          |<--------------- delta ----------------->|
          
          delta = 2*offset+translation-width
@@ -1016,7 +1020,7 @@
          Y is not mirrored and must only move by the translation to keep the floor of the texture aligned with the anchor translation.
          */
         deltaPoint.y = floorf(ipsi.y-contra.y);
-
+        
     }
     return deltaPoint;
 }
@@ -1137,7 +1141,7 @@
                                spacingY:roi2Clone.pixelSpacingY
                                imageOrigin:roi2Clone.imageOrigin];
             [createdROI setNSColor:roi2Clone.NSColor globally:NO];
-
+            
             [roisInThisSlice removeObjectAtIndex:i];
             [self addROI2Pix:createdROI atSlice:activeSlice inViewer:self.viewerPET hidden:NO];
             //move the polygon
@@ -1204,7 +1208,7 @@
 -(void)addROI2Pix:(ROI *)roi2add atSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
     //override HIDDEN as it makes things locked
     //hidden = NO;
-
+    
     if (slice <[[viewer pixList] count] && slice <[[viewer roiList] count])
     {
         //Correct the origin only if the orientation is the same
@@ -1224,7 +1228,7 @@
 -(void)replaceROIInPix:(ROI *)roi2add atIndex:(NSUInteger)index inSlice:(NSUInteger)slice inViewer:(ViewerController *)viewer hidden:(BOOL)hidden {
     //override HIDDEN as it makes things locked
     hidden = NO;
-
+    
     if (slice <[[viewer pixList] count] && slice <[[viewer roiList] count]
         && index<[[[viewer roiList] objectAtIndex:slice] count])
     {
@@ -1285,7 +1289,7 @@
             break;
         case GrowingRegion:
         case Active_ROI:
-           [self deleteROIsFromViewerController:self.viewerPET withName:[self roiNameForType:sender.tag]];
+            [self deleteROIsFromViewerController:self.viewerPET withName:[self roiNameForType:sender.tag]];
             break;
         case Jiggle_ROI:
             [self clearJiggleROIsAndValuesAndResetDisplayed];
@@ -1384,10 +1388,10 @@
         }
         
         [ROI deleteROIs: roisToDelete];
-
+        
         if (active2Dwindow == self.viewerCT) {[self clearJiggleROIsAndValuesAndResetDisplayed];}
         [active2Dwindow needsDisplayUpdate];
-   }
+    }
 }
 - (void)renameROIsInSlice:(NSUInteger)slice inViewerController:(ViewerController *)active2Dwindow containingName:(NSString *)name withNewName:(NSString *)newName{
     if (active2Dwindow && slice<active2Dwindow.roiList.count)
@@ -1542,7 +1546,7 @@
         [MirrorROIPluginFilterOC alertWithMessage:@"No anatomical site is entered - please enter a description and try again." andTitle:@"Anatomical Site Undefined" critical:YES];
         return NO;
     }
-
+    
 }
 
 #pragma mark - Database Comments & Reports
@@ -1559,8 +1563,17 @@
     NSArray *commentsArray = [[study comment] componentsSeparatedByString:@"\t"];
     return [NSString stringWithFormat:@"%@\t%@\t%@",
             [MirrorROIPluginFilterOC correctedStringForNullString:study.name],
-            [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:0]],
-            [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:1]]];
+            [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_Vaccine]],
+            [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_Day]]];
+}
+-(NSMutableArray *)participantNameVaccineArray {
+    NSMutableArray *array = [NSMutableArray array];
+    DicomStudy *study = [self.viewerPET currentStudy];
+    NSArray *commentsArray = [[study comment] componentsSeparatedByString:@"\t"];
+    [array addObject:[NSArray arrayWithObjects:@"# Name",[MirrorROIPluginFilterOC correctedStringForNullString:study.name], nil]];
+    [array addObject:[NSArray arrayWithObjects:@"Vaccine",[MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_Vaccine]], nil]];
+    [array addObject:[NSArray arrayWithObjects:@"Day",[MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_Day]], nil]];
+    return array;
 }
 -(NSMutableArray *)participantDetailsArray {
     DicomStudy *study = [self.viewerPET currentStudy];
@@ -1594,22 +1607,22 @@
 }
 -(void)populateTreatmentFieldsFromCommentsWithStudy:(DicomStudy *)selectedStudy {
     //if (self.windowControllerMain.window.visible) {
-        if (selectedStudy == nil) { selectedStudy = [[BrowserController currentBrowser] selectedStudy];}
-        if (selectedStudy == nil || (self.viewerPET != nil && ![selectedStudy.name isEqualToString:[[self.viewerPET currentStudy] name]])) {
-            self.textFieldWarningPatientDetails.stringValue = @"⚠️";
-        } else {
-            self.textFieldWarningPatientDetails.stringValue = @"";
-            self.labelDicomStudy.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:selectedStudy.name];
-            NSArray *commentsArray = [[selectedStudy comment] componentsSeparatedByString:@"\t"];
-            if (commentsArray.count >= 4) {
-                self.comboVaccines.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:0]];
-                self.textFieldVaccineDayOffset.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:1]];
-                self.comboTreatmentSite.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:2]];
-                self.comboPlaceboUsed.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:3]];
-            }
-            self.textViewComments2.string = [MirrorROIPluginFilterOC correctedStringForNullString:[selectedStudy comment2]];
+    if (selectedStudy == nil) { selectedStudy = [[BrowserController currentBrowser] selectedStudy];}
+    if (selectedStudy == nil || (self.viewerPET != nil && ![selectedStudy.name isEqualToString:[[self.viewerPET currentStudy] name]])) {
+        self.textFieldWarningPatientDetails.stringValue = @"⚠️";
+    } else {
+        self.textFieldWarningPatientDetails.stringValue = @"";
+        self.labelDicomStudy.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:selectedStudy.name];
+        NSArray *commentsArray = [[selectedStudy comment] componentsSeparatedByString:@"\t"];
+        if (commentsArray.count >= 4) {
+            self.comboVaccines.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_Vaccine]];
+            self.textFieldVaccineDayOffset.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_Day]];
+            self.comboTreatmentSite.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_TreatmentSite]];
+            self.comboPlaceboUsed.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_PlaceboUsed]];
         }
-//    }
+        self.textViewComments2.string = [MirrorROIPluginFilterOC correctedStringForNullString:[selectedStudy comment2]];
+    }
+    //    }
 }
 +(NSString *)dayOffsetWithLeadingZerosFromString:(NSString *)string {
     if (string == nil) return @"";
@@ -1625,10 +1638,10 @@
         {
             DicomStudy *selectedStudy = [[BrowserController currentBrowser] selectedStudy];//[self.viewerPET currentStudy]
             [selectedStudy setComment:[NSString stringWithFormat:@"%@\t%@\t%@\t%@",
-                                        [MirrorROIPluginFilterOC correctedStringForNullString:self.comboVaccines.stringValue],
-                                        [MirrorROIPluginFilterOC dayOffsetWithLeadingZerosFromString:self.textFieldVaccineDayOffset.stringValue],
-                                        [MirrorROIPluginFilterOC correctedStringForNullString:self.comboTreatmentSite.stringValue],
-                                        [MirrorROIPluginFilterOC correctedStringForNullString:self.comboPlaceboUsed.stringValue]
+                                       [MirrorROIPluginFilterOC correctedStringForNullString:self.comboVaccines.stringValue],
+                                       [MirrorROIPluginFilterOC dayOffsetWithLeadingZerosFromString:self.textFieldVaccineDayOffset.stringValue],
+                                       [MirrorROIPluginFilterOC correctedStringForNullString:self.comboTreatmentSite.stringValue],
+                                       [MirrorROIPluginFilterOC correctedStringForNullString:self.comboPlaceboUsed.stringValue]
                                        ]];
             [selectedStudy setComment2:[MirrorROIPluginFilterOC correctedStringForNullString:self.textViewComments2.string]];
         }
@@ -1724,7 +1737,7 @@
         [panel setCanChooseFiles:NO];
         [panel setAllowsMultipleSelection:NO];
         [panel setMessage:@"Select location to save Key Image files"];
-
+        
         if ([panel runModal] == NSFileHandlingPanelOKButton) {
             NSURL *dirUrl = [panel.URLs objectAtIndex:0];
             for (NSMutableDictionary* filenameImageDict in arrayOfFileNamesAndImages) {
@@ -1778,9 +1791,9 @@
 -(void)trashAllBookmarks {
     //easier to use this method to clear the array
     if ([self.arrayControllerBookmarks.arrangedObjects count] > 0 && [MirrorROIPluginFilterOC proceedAfterAlert:@"Delete all bookmarked data? This cannot be undone"]) {
-//        [self willChangeValueForKey:@"arrayBookmarkedSites"];
-//        [self.arrayBookmarkedSites removeAllObjects];
-//        [self didChangeValueForKey:@"arrayBookmarkedSites"];
+        //        [self willChangeValueForKey:@"arrayBookmarkedSites"];
+        //        [self.arrayBookmarkedSites removeAllObjects];
+        //        [self didChangeValueForKey:@"arrayBookmarkedSites"];
         [self.arrayControllerBookmarks setContent:[NSMutableArray array]];
         [self.dictBookmarks removeAllObjects];
     }
@@ -1836,6 +1849,9 @@
             dict3DMcleaned[key] = data3D_M[key];
         }
     }
+    //add the two columns of data for A and M pixels for convenience
+    dictForSite[kPixelsAMvertical] = [self dataDictForROIpixelsFromDictA:data3D_A andDictM:data3D_M forSite:anatSite];
+    
     dictForSite[kBookmarkKeyDataDict_3DM] = dict3DMcleaned;
     //extract the numbers from dictRaw into a new dict. dictRaw shoud be safe as has been initialised but it cannot be just included as it has non-archivable content
     dictForSite[kBookmarkKeyDataDict_Raw] = [NSMutableDictionary dictionaryWithObjectsAndKeys:
@@ -1865,7 +1881,7 @@
                                              dictRaw[kDeltaNameSubtractedPixMax],kDeltaNameSubtractedPixMax,
                                              dictRaw[kDeltaNameSubtractedPixTotal],kDeltaNameSubtractedPixTotal,
                                              nil];
-
+    
     return dictForSite;
 }
 
@@ -1887,10 +1903,28 @@
     }
     return @"";
 }
+-(NSMutableDictionary *)dataDictForROIpixelsFromDictA:(NSMutableDictionary *)dictA andDictM:(NSMutableDictionary *)dictM forSite:(NSString *)site{
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
+    dict[@"site"] = site;
+    NSMutableArray *array = [NSMutableArray arrayWithArray:[self participantNameVaccineArray]];
+    [array addObject:[NSArray arrayWithObjects:@"Site",site, nil]];
+    if ([dictA[@"pixels"] count]>0) {
+        NSMutableArray *a = dictA[@"pixels"];
+        [a insertObject:dictA[@"roiname"] atIndex:0];
+        [array addObject:a];
+    }
+    if ([dictM[@"pixels"] count]>0) {
+        NSMutableArray *m = dictM[@"pixels"];
+        [m insertObject:dictM[@"roiname"] atIndex:0];
+        [array addObject:m];
+    }
+    dict[@"data"] = [MirrorROIPluginFilterOC stringForDataArray:array forceTranspose:YES];
+    return dict;
+}
 -(NSString *)dataStringFor1LineSummaryFromRawDict:(NSMutableDictionary *)dictRaw dict3D:(NSMutableDictionary *)dict3D forSite:(NSString *)anatSite {
     //kDeltaNameDividedMean is a number or ""
     return [NSString stringWithFormat:
-            @"# Name\tVaccine\tDay\tSITE\tACTIVE_SUV\tACTIVE_SUVCOUNT\tMIRROR_SUV\tMIRROR_SUVCOUNT\tSUBTRACTED_SUV\tSUBTRACTED_SUVCOUNT\tDIVIDED_SUV\tDIVIDED_SUVCOUNT\tVOLUME\tCOUNT\n"
+            k1LineSummaryHeaders
             "%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\t%@\n"
             ,
             [self participantNameVaccineDay1Line],
@@ -1929,8 +1963,9 @@
             ];
 }
 -(NSMutableDictionary *)bookMarkStringsForAllSitesConjoined {
-    NSMutableDictionary *dict = [NSMutableDictionary dictionaryWithCapacity:3];
+    NSMutableDictionary *dict = [NSMutableDictionary dictionary];
     NSMutableArray *summaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
+    NSMutableArray *pixelsAMvertical = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *onelineSummaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridTransposedRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count+1];
@@ -1943,7 +1978,9 @@
         [summaryRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [summaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeySummary]];
         [onelineSummaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKey1LineSummary]];
+        [pixelsAMvertical addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kPixelsAMvertical] ?: [NSMutableDictionary dictionary]];
     }
+    [dict setObject:pixelsAMvertical forKey:kPixelsAMverticalAllSites] ;
     [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[onelineSummaryRows componentsJoinedByString:@"\n"]] forKey:kConjoined1LineSummary] ;
     [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[NSString stringWithFormat:@"%@\n%@",[self participantDetailsString], [summaryRows componentsJoinedByString:@"\n"]]] forKey:kConjoinedSummary] ;
     [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[NSString stringWithFormat:@"%@\n%@",[self participantDetailsString], [pixelGridRows componentsJoinedByString:@"\n"]]] forKey:kConjoinedPixelGrids] ;
@@ -1960,7 +1997,6 @@
     }
     return clean;
 }
-
 -(NSString *)bookmarkedDataFilename:(ExportDataType)whichData {
     NSString *fileName = [NSString stringWithFormat:@"%@-%@",
                           [self fileNamePrefixForExportType:whichData withAnatomicalSite:NO],
@@ -2016,12 +2052,18 @@
                                   withName:[self bookmarkedDataFilename:BookmarkedDataSummary]];
             if (savedLocation != nil)
             {
-                [[dict objectForKey:kConjoined1LineSummary] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedData1LineSummary] isDirectory:NO] URLByAppendingPathExtension:@"txt"]
-                                                            atomically:YES];
-                [[dict objectForKey:kConjoinedPixelGrids] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGrids] isDirectory:NO] URLByAppendingPathExtension:@"txt"]
-                                                          atomically:YES];
-                [[dict objectForKey:kConjoinedPixelGridsTransposed] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGridsTransposed] isDirectory:NO] URLByAppendingPathExtension:@"txt"]
-                                                                    atomically:YES];
+                NSMutableArray *arrayOfpixelsAMVertical = [dict objectForKey:kPixelsAMverticalAllSites];
+                //this is an array of dicts by name
+                for (NSMutableDictionary *dict in arrayOfpixelsAMVertical) {
+                    NSString *site = dict[@"site"];
+                    NSString *datastring = dict[@"data"];
+                    NSString *filename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self fileNamePrefixForExportType:PixelsAMvertical withAnatomicalSite:NO],site]];
+                    [datastring writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:filename isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
+                }
+
+                [[dict objectForKey:kConjoined1LineSummary] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedData1LineSummary] isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
+                [[dict objectForKey:kConjoinedPixelGrids] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGrids] isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
+                [[dict objectForKey:kConjoinedPixelGridsTransposed] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGridsTransposed] isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
                 [self exportBookmarkedDataDictToURL:savedLocation];
                 [self exportBookmarkedAMTroisToURL:savedLocation];
                 if ([MirrorROIPluginFilterOC userDefaultBooleanForKey:kAddReportWhenSaveBookmarkedDataDefault]) {
@@ -2044,6 +2086,15 @@
                                               withTitle:[self bookmarkedDataFilename:BookmarkedDataPixelGrids]];
             [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedPixelGridsTransposed]
                                               withTitle:[self bookmarkedDataFilename:BookmarkedDataPixelGridsTransposed]];
+            NSMutableArray *arrayOfpixelsAMVertical = [dict objectForKey:kPixelsAMverticalAllSites];
+            //this is an array of dicts by name
+            for (NSMutableDictionary *dict in arrayOfpixelsAMVertical) {
+                NSString *site = dict[@"site"];
+                NSString *datastring = dict[@"data"];
+                NSString *filename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self fileNamePrefixForExportType:PixelsAMvertical withAnatomicalSite:NO],site]];
+                [MirrorROIPluginFilterOC showStringInWindow:datastring withTitle:filename];
+            }
+
             break;
         default:
             break;
@@ -2162,9 +2213,9 @@
 -(NSURL *)url1LineSummarySaveDirectory {
     NSString *path = [[NSUserDefaults standardUserDefaults] objectForKey:kUserDefault_1LineSummarySaveDirectory] ?: NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)[0];
     return [NSURL fileURLWithPath:path];
-//    NSURL *dirURL = [NSURL fileURLWithPath:path];
-//    NSArray *directories = dirURL ? [NSArray arrayWithObject:dirURL] : NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
-//    return directories.firstObject;
+    //    NSURL *dirURL = [NSURL fileURLWithPath:path];
+    //    NSArray *directories = dirURL ? [NSArray arrayWithObject:dirURL] : NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    //    return directories.firstObject;
 }
 -(void)export1LineSummary {
     NSArray *selectedSites = self.arrayControllerBookmarks.selectedObjects;
@@ -2181,40 +2232,8 @@
         if (sites == nil || [sites containsObject:key]) {
             [onelineSummaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKey1LineSummary]];
         }
-    }    
-    return [onelineSummaryRows componentsJoinedByString:@"\n"];
-}
-
-- (IBAction)merge1LineSummariesInFolder:(NSButton *)sender {
-    NSOpenPanel *panel = [NSOpenPanel openPanel];
-    panel.canChooseFiles = NO;
-    panel.canChooseDirectories = YES;
-    NSURL *dirURL = [self url1LineSummarySaveDirectory];
-    panel.directoryURL = dirURL;
-    NSInteger result = [panel runModal];
-    if (result == NSFileHandlingPanelOKButton) {
-        [[NSUserDefaults standardUserDefaults] setObject:dirURL.path forKey:kUserDefault_1LineSummarySaveDirectory];
-        NSMutableArray *linesOfData = [NSMutableArray array];
-        for (NSURL *fileURL in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[panel.URLs.firstObject path] error:nil]) {
-            if ([[fileURL lastPathComponent] hasPrefix:@"∈"]) {
-                NSString *contents = [NSString stringWithContentsOfURL:fileURL usedEncoding:nil error:nil];
-                for (NSString *line in [contents componentsSeparatedByString:@"\n"]) {
-                    if (![line hasPrefix:@"#"]) {
-                        [linesOfData addObject:line];
-                    }
-                }
-            }
-        }
-        if (linesOfData.count>0) {
-            NSString *allData = [linesOfData componentsJoinedByString:@"\n"];
-            NSSavePanel *savePanel = [NSSavePanel savePanel];
-            savePanel.directoryURL = dirURL;
-            savePanel.allowedFileTypes = [NSArray arrayWithObject:@"txt"];
-            if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
-                [allData writeToURL:savePanel.URL atomically:YES];
-            }
-        }
     }
+    return [onelineSummaryRows componentsJoinedByString:@"\n"];
 }
 
 #pragma mark -  Data Export
@@ -2253,6 +2272,9 @@
             break;
         case BookmarkedDataSelected1LineSummariesConjoined:
             typeString =  @"∉";
+            break;
+        case PixelsAMvertical:
+            typeString =  @"☯";
             break;
         case BookmarkedDataPixelGrids:
             typeString =  @"⊞";
@@ -2295,7 +2317,7 @@
 #pragma mark -  ROI does calculations
 +(NSMutableDictionary *)blank3DdataDict {
     NSMutableDictionary *blank= [NSMutableDictionary dictionaryWithCapacity:6];
-    [blank setDictionary:@{@"mean":@"",@"dev":@"",@"max":@"",@"min":@"",@"total":@"",@"volume":@""}];
+    [blank setDictionary:@{@"mean":@"",@"dev":@"",@"max":@"",@"min":@"",@"total":@"",@"volume":@"",@"pixels":@"",@"count":@"",@"roiname":@""}];
     return blank;
 }
 -(NSMutableDictionary *)dataDictFor3DROIdataForType:(ROI_Type)type {
@@ -2303,10 +2325,22 @@
     NSString *roiname = [self roiNameForType:type];
     ROI *roi = [self ROIfromFirstMatchedSliceInViewer:self.viewerPET withName:roiname];
     if (roi != nil) {
-        NSMutableDictionary *dataDict = [NSMutableDictionary dictionary];
+        NSMutableDictionary *dataDict = [MirrorROIPluginFilterOC blank3DdataDict];
         NSString *error = nil;
         [self.viewerPET computeVolume:roi points:nil generateMissingROIs:NO generatedROIs:nil computeData:dataDict error:&error];
         if (error == nil) {
+            dataDict[@"roiname"] = roiname;
+            //roi.dataValues = array of numbers - one per slice - merge from all rois
+            NSMutableArray *mergedPix = [NSMutableArray array];
+            for (NSMutableArray *roisinslice in self.viewerPET.roiList) {
+                for (ROI *roi in roisinslice) {
+                    if ([roi.name isEqualToString:roiname]) {
+                        [mergedPix addObjectsFromArray:roi.dataValues];
+                    }
+                }
+            }
+            dataDict[@"pixels"] = mergedPix;
+            dataDict[@"count"] = [NSNumber numberWithUnsignedInteger: mergedPix.count];
             return dataDict;
         } else {
             [MirrorROIPluginFilterOC alertWithMessage:error andTitle:@"Error computing 3D ROI" critical:NO];
@@ -2504,7 +2538,7 @@
     sd = [MirrorROIPluginFilterOC stDevForArrayOfRows:dataAflat withMean:sumOfA/countOfPixelsF andCountF:countOfPixelsF startingAtRow:0];
     [dict setObject:[NSNumber numberWithFloat:sd] forKey:kDeltaNameActiveSD];
     [dict setObject:[NSNumber numberWithFloat:sd/sqrtf(countOfPixelsF)] forKey:kDeltaNameActiveSEM];
-
+    
     //trasnpose the pixel grids
     NSMutableArray *transposeArray = [NSMutableArray arrayWithCapacity:4];
     NSMutableArray *tempA = [NSMutableArray arrayWithObjects:[NSString stringWithFormat:@"%@-%@",[self anatomicalSiteName],@"Active"], nil];
@@ -2559,7 +2593,7 @@
         [transposeArray addObject:temp];
     }
     [dict setObject:transposeArray forKey:kDeltaNameAMSDPix1LineTransposedArray];
-
+    
     return dict;
 }
 
@@ -2569,7 +2603,7 @@
     [dict setObject:@"" forKey:kDeltaNameCount];
     
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameAMSDPix1LineTransposedArray];
-
+    
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePixFlatAndNotMirrored];
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePixGrid];
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePix1Line];
@@ -2579,7 +2613,7 @@
     [dict setObject:@"" forKey:kDeltaNameActiveMin];
     [dict setObject:@"" forKey:kDeltaNameActiveSD];
     [dict setObject:@"" forKey:kDeltaNameActiveSEM];
-
+    
     //if mirror
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixFlatAndMirroredInRows];
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameMirroredPixGrid];
@@ -2599,7 +2633,7 @@
     [dict setObject:@"" forKey:kDeltaNameSubtractedMean];
     [dict setObject:@"" forKey:kDeltaNameSubtractedSD];
     [dict setObject:@"" forKey:kDeltaNameSubtractedSEM];
-
+    
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix];
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameDividedPix1Line];
     [dict setObject:@"" forKey:kDeltaNameDividedPixTotal];
@@ -2746,7 +2780,7 @@
     [self hideNodeNamed:kSpriteName_Active hidden:YES];
     [self hideNodeNamed:kSpriteName_Mirror hidden:YES];
     [self hideNodeNamed:kSpriteName_Jiggle hidden:YES];
-
+    
 }
 -(void)addStatsMarkersWithName:(NSString *)name position:(CGFloat)position{
     CGFloat posY = self.skView.frame.size.height*position*kHeightFraction;
@@ -2761,7 +2795,7 @@
     rangeA.name = [name stringByAppendingString:kSpriteName_Range];
     [self.skScene addChild:rangeA];
     rangeA.position = CGPointMake(0.0, posY);
-
+    
     SKSpriteNode *midrange = [SKSpriteNode spriteNodeWithColor:[NSColor darkGrayColor] size:CGSizeMake(kSpriteWidthMidRange, kSpriteHeightMidRange)];
     midrange.name = [name stringByAppendingString:kSpriteName_MidRange];
     [rangeA addChild:midrange];
@@ -2786,8 +2820,8 @@
     statsA.fontColor = [NSColor blackColor];
     [self.skScene addChild:statsA];
     statsA.position = CGPointMake(CGRectGetMidX(self.skView.bounds),posYT);
-
-
+    
+    
 }
 -(void)colourNode:(SKSpriteNode *)node forName:(NSString *)name {
     if (node != nil) {
@@ -3075,7 +3109,7 @@
     self.buttonJiggleBetter.hidden = hide;
     self.buttonJiggleSetNew.hidden = hide;
     self.textJiggleRank.hidden = hide;
-
+    
 }
 - (IBAction)generateJiggleROIsTapped:(NSButton *)sender {
     if ([self valid2DViewer:self.viewerCT])
@@ -3155,7 +3189,7 @@
             [[(ROIValues *)[[self jiggleROIvaluesArrayForSlice:slice] objectAtIndex:index] roi] setName:kJiggleSelectedROIName];
         }
     }
-
+    
 }
 -(void)sortJiggleROIsInSlice:(NSUInteger)slice {
     //get the sort descriptors
@@ -3176,10 +3210,10 @@
                 NSInteger rank = 0;
                 NSString *currentSortKey = [[sortDescriptors objectAtIndex:sortIndex] key];
                 //the index 0 object can be skipped as we just increment its rank by 0, and we cannot compare with the one before. A 1 size array just does not change...
-               for (NSInteger index=1; index<[self jiggleROIvaluesArrayCountForSlice:slice]; index++) {
+                for (NSInteger index=1; index<[self jiggleROIvaluesArrayCountForSlice:slice]; index++) {
                     NSNumber *prevvalue = [(ROIValues *)[[self jiggleROIvaluesArrayForSlice:slice] objectAtIndex:index-1] valueForKey:currentSortKey];
                     NSNumber *currentvalue = [(ROIValues *)[[self jiggleROIvaluesArrayForSlice:slice] objectAtIndex:index] valueForKey:currentSortKey];
-                   //if the value has changed we must change rank, otherwise stay on the rank
+                    //if the value has changed we must change rank, otherwise stay on the rank
                     if (![prevvalue isEqualToNumber:currentvalue]) {
                         rank = index;
                     }
@@ -3208,7 +3242,7 @@
             }
         }
     }
-//    NSArray *array = @[[[NSSortDescriptor alloc] initWithKey:@"distance" ascending:YES],[[NSSortDescriptor alloc] initWithKey:@"meanfloor" ascending:YES]];
+    //    NSArray *array = @[[[NSSortDescriptor alloc] initWithKey:@"distance" ascending:YES],[[NSSortDescriptor alloc] initWithKey:@"meanfloor" ascending:YES]];
     //NSLog(@"%@",sorters);
     return sorters;
 }

@@ -30,6 +30,8 @@
 #define kConjoined1LineSummary @"kConjoined1LineSummary"
 #define kConjoinedPixelGrids @"kConjoinedPixelGrids"
 #define kConjoinedPixelGridsTransposed @"kConjoinedPixelGridsTransposed"
+#define kPixelsAMvertical @"kPixelsAMvertical"
+#define kPixelsAMverticalAllSites @"kPixelsAMverticalAllSites"
 
 #define kPETtextColour [NSColor colorWithCalibratedRed:0.098 green:0.098 blue:0.098 alpha:1.00]
 #define kCTtextColour [NSColor colorWithCalibratedRed:0.902 green:0.902 blue:0.902 alpha:1.00]
@@ -117,6 +119,7 @@
 #define kDeltaNameMirroredPix1Line @"⊞ Mirrored Pixels In 1 Line"
 #define kDeltaNameAMSDPix1LineTransposedArray @"⊞ AMSD Pixels In One Line Transposed"
 
+#define k1LineSummaryHeaders @"# Name\tVaccine\tDay\tSITE\tACTIVE_SUV\tACTIVE_SUV_SUM\tMIRROR_SUV\tMIRROR_SUV_SUM\tSUBTRACTED_SUV\tSUBTRACTED_SUV_SUM\tDIVIDED_SUV\tDIVIDED_SUV_SUM\tVOLUME\tPIXEL_COUNT\n"
 
 #define kSpriteWidthMedian 3.0
 #define kSpriteHeightMedian 29.0
