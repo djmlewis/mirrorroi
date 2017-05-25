@@ -1619,6 +1619,8 @@
             self.textFieldVaccineDayOffset.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_Day]];
             self.comboTreatmentSite.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_TreatmentSite]];
             self.comboPlaceboUsed.stringValue = [MirrorROIPluginFilterOC correctedStringForNullString:[commentsArray objectAtIndex:ComboArray_PlaceboUsed]];
+        } else {
+            [self clearTreatmentFields];
         }
         self.textViewComments2.string = [MirrorROIPluginFilterOC correctedStringForNullString:[selectedStudy comment2]];
     }
@@ -1710,7 +1712,7 @@
     [self saveImageFilesFromArray:arrayKeyImagesData];
 }
 -(NSString *)imageFileNameForIndex:(int)index andViewer:(ViewerController *)viewer {
-    return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%04li.png",viewer.window.title,(long)index]];
+    return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@-%04li.png",viewer.window.title,(long)index]];
 }
 -(NSMutableArray *)arrayKeyImagesFromViewer:(ViewerController *)viewer {
     NSMutableArray *arrayKeyImagesData = [NSMutableArray array];
@@ -1908,12 +1910,15 @@
     dict[@"site"] = site;
     NSMutableArray *array = [NSMutableArray arrayWithArray:[self participantNameVaccineArray]];
     [array addObject:[NSArray arrayWithObjects:@"Site",site, nil]];
-    if ([dictA[@"pixels"] count]>0) {
+    [array addObject:[NSArray arrayWithObjects:@"VOLUME",dictA[@"volume"], nil]];
+    //if ([dictA[@"pixels"] count]>0)
+    {
         NSMutableArray *a = dictA[@"pixels"];
         [a insertObject:dictA[@"roiname"] atIndex:0];
         [array addObject:a];
     }
-    if ([dictM[@"pixels"] count]>0) {
+    //if ([dictM[@"pixels"] count]>0)
+    {
         NSMutableArray *m = dictM[@"pixels"];
         [m insertObject:dictM[@"roiname"] atIndex:0];
         [array addObject:m];
@@ -2055,10 +2060,8 @@
                 NSMutableArray *arrayOfpixelsAMVertical = [dict objectForKey:kPixelsAMverticalAllSites];
                 //this is an array of dicts by name
                 for (NSMutableDictionary *dict in arrayOfpixelsAMVertical) {
-                    NSString *site = dict[@"site"];
-                    NSString *datastring = dict[@"data"];
-                    NSString *filename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self fileNamePrefixForExportType:PixelsAMvertical withAnatomicalSite:NO],site]];
-                    [datastring writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:filename isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
+                    NSString *filename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@%@-%@",[self fileNamePrefixForExportType:PixelsAMvertical withAnatomicalSite:NO],dict[@"site"],[self petSeriesNameWithNoBadCharacters:YES]]];
+                    [dict[@"data"] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:filename isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
                 }
 
                 [[dict objectForKey:kConjoined1LineSummary] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedData1LineSummary] isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
@@ -2091,7 +2094,7 @@
             for (NSMutableDictionary *dict in arrayOfpixelsAMVertical) {
                 NSString *site = dict[@"site"];
                 NSString *datastring = dict[@"data"];
-                NSString *filename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self fileNamePrefixForExportType:PixelsAMvertical withAnatomicalSite:NO],site]];
+                NSString *filename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@-%@",[self fileNamePrefixForExportType:PixelsAMvertical withAnatomicalSite:NO],site]];
                 [MirrorROIPluginFilterOC showStringInWindow:datastring withTitle:filename];
             }
 
@@ -2114,7 +2117,7 @@
         //iterate thru the bookmarks extracting the rois and saving by name
         for (NSString *key in self.dictBookmarks) {
             NSData *arrayofrois = [self.dictBookmarks[key] objectForKey:kBookmarkKeyAMTrois];
-            NSString *sitefilename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",key,[self petSeriesNameWithNoBadCharacters:YES]]];
+            NSString *sitefilename = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@-%@",key,[self petSeriesNameWithNoBadCharacters:YES]]];
             url = [[[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:sitefilename isDirectory:NO] URLByAppendingPathExtension:@"rois_series"];
             [arrayofrois writeToURL:url atomically:YES];
         }
@@ -2185,7 +2188,7 @@
     {
         NSSavePanel *savePanel = [NSSavePanel savePanel];
         savePanel.allowedFileTypes = [NSArray arrayWithObject:@"rois_series"];
-        savePanel.nameFieldStringValue = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@_%@",[self anatomicalSiteName],[self petSeriesNameWithNoBadCharacters:YES]]];
+        savePanel.nameFieldStringValue = [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:[NSString stringWithFormat:@"%@-%@",[self anatomicalSiteName],[self petSeriesNameWithNoBadCharacters:YES]]];
         if ([savePanel runModal] == NSFileHandlingPanelOKButton) {
             [roisPerMovies writeToURL:savePanel.URL atomically:YES];
         }
@@ -2241,28 +2244,28 @@
     NSString *typeString = @"";
     switch (type) {
         case RoiData:
-            typeString =  @"_RoiData";
+            typeString =  @"-RoiData";
             break;
         case RoiPixelsFlat:
-            typeString =  @"_ROIPixelsFlatData";
+            typeString =  @"-ROIPixelsFlatData";
             break;
         case PixelsGridSummary:
-            typeString =  @"_PixelsGridSummaryData";
+            typeString =  @"-PixelsGridSummaryData";
             break;
         case PixelsGridAllData:
-            typeString =  @"_PixelsGridAllData";
+            typeString =  @"-PixelsGridAllData";
             break;
         case RoiSummary:
-            typeString =  @"_ROISummaryData";
+            typeString =  @"-ROISummaryData";
             break;
         case RoiThreeD:
-            typeString =  @"_ROI3DData";
+            typeString =  @"-ROI3DData";
             break;
         case AllROIdata:
-            typeString =  @"_ROIAllData";
+            typeString =  @"-ROIAllData";
             break;
         case PETRois:
-            typeString =  @"_PETROIs";
+            typeString =  @"-PETROIs";
             break;
         case BookmarkedDataSummary:
             typeString =  @"∑";
@@ -2317,36 +2320,34 @@
 #pragma mark -  ROI does calculations
 +(NSMutableDictionary *)blank3DdataDict {
     NSMutableDictionary *blank= [NSMutableDictionary dictionaryWithCapacity:6];
-    [blank setDictionary:@{@"mean":@"",@"dev":@"",@"max":@"",@"min":@"",@"total":@"",@"volume":@"",@"pixels":@"",@"count":@"",@"roiname":@""}];
+    [blank setDictionary:@{@"mean":@"",@"dev":@"",@"max":@"",@"min":@"",@"total":@"0",@"volume":@"0",@"pixels":[NSMutableArray array],@"count":@"0",@"roiname":@""}];
     return blank;
 }
 -(NSMutableDictionary *)dataDictFor3DROIdataForType:(ROI_Type)type {
+    NSMutableDictionary *dataDict = [MirrorROIPluginFilterOC blank3DdataDict];
     [self.viewerPET roiSelectDeselectAll: nil];
     NSString *roiname = [self roiNameForType:type];
     ROI *roi = [self ROIfromFirstMatchedSliceInViewer:self.viewerPET withName:roiname];
     if (roi != nil) {
-        NSMutableDictionary *dataDict = [MirrorROIPluginFilterOC blank3DdataDict];
         NSString *error = nil;
         [self.viewerPET computeVolume:roi points:nil generateMissingROIs:NO generatedROIs:nil computeData:dataDict error:&error];
-        if (error == nil) {
-            dataDict[@"roiname"] = roiname;
-            //roi.dataValues = array of numbers - one per slice - merge from all rois
-            NSMutableArray *mergedPix = [NSMutableArray array];
-            for (NSMutableArray *roisinslice in self.viewerPET.roiList) {
-                for (ROI *roi in roisinslice) {
-                    if ([roi.name isEqualToString:roiname]) {
-                        [mergedPix addObjectsFromArray:roi.dataValues];
-                    }
+        dataDict[@"roiname"] = roiname;
+        //roi.dataValues = array of numbers - one per slice - merge from all rois
+        NSMutableArray *mergedPix = [NSMutableArray array];
+        for (NSMutableArray *roisinslice in self.viewerPET.roiList) {
+            for (ROI *roi in roisinslice) {
+                if ([roi.name isEqualToString:roiname]) {
+                    [mergedPix addObjectsFromArray:roi.dataValues];
                 }
             }
-            dataDict[@"pixels"] = mergedPix;
-            dataDict[@"count"] = [NSNumber numberWithUnsignedInteger: mergedPix.count];
-            return dataDict;
-        } else {
+        }
+        dataDict[@"pixels"] = mergedPix;
+        dataDict[@"count"] = [NSNumber numberWithUnsignedInteger: mergedPix.count];
+        if (error != nil) {
             [MirrorROIPluginFilterOC alertWithMessage:error andTitle:@"Error computing 3D ROI" critical:NO];
         }
     }
-    return [MirrorROIPluginFilterOC blank3DdataDict];
+    return dataDict;
 }
 -(NSString *)dataStringFor3DROIdataFromDict:(NSMutableDictionary *)dataDict {
     if (dataDict != nil && dataDict.count>0) {
