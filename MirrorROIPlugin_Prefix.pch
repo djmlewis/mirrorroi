@@ -20,6 +20,7 @@
 #define kBookmarkKey1LineSummary @"kBookmarkKey1LineSummary"
 #define kBookmarkKeyAMTrois @"kBookmarkKeyAMTrois"
 #define kBookmarkKeyPixelsGrids @"kBookmarkKeyPixelsGrids"
+#define kBookmarkKeyXYZTaggedPixelsGrids @"kBookmarkKeyXYZTaggedPixelsGrids"
 #define kBookmarkKeyPixelsGridsNotYetTransposedArray @"kBookmarkKeyPixelsGridsNotYetTransposedArray"
 
 #define kBookmarkKeyDataDict_3DA @"kBookmarkKeyDataDict_3DA"
@@ -29,6 +30,7 @@
 #define kConjoinedSummary @"kConjoinedSummary"
 #define kConjoined1LineSummary @"kConjoined1LineSummary"
 #define kConjoinedPixelGrids @"kConjoinedPixelGrids"
+#define kConjoinedXYZTaggedPixelGrids @"kConjoinedXYZTaggedPixelGrids"
 #define kConjoinedPixelGridsTransposed @"kConjoinedPixelGridsTransposed"
 #define kPixelsAMvertical @"kPixelsAMvertical"
 #define kPixelsAMverticalAllSites @"kPixelsAMverticalAllSites"
@@ -100,6 +102,7 @@
 #define kDeltaNameCount @"19Count Of Pixels"
 
 #define kDeltaNameGridDataTag @"⊞"
+#define kDeltaNameXYZTaggedRawPixelDataTag @"⊞ XYZ Tagged Raw Pixel Data"
 #define kDeltaNameSubtractedPix @"⊞ Subtracted Pixels"
 #define kDeltaNameDividedPix @"⊞ Divided Pixels"
 #define kDeltaNameSubtractedPixTotal @"⊞ Subtracted Pixels Total"

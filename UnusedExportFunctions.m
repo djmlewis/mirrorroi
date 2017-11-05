@@ -48,7 +48,7 @@
 }
 
 -(NSString *)rawPixelsDelta_assembleFinalDataString:(ExportDataType)type {
-    NSMutableDictionary *dict = [self dataDictForRawPixelsDelta];
+    NSMutableDictionary *dict = [self dataDictForRawPixelsDeltaForSite];
     NSString *stats = @"";
     NSArray *keys = [dict.allKeys sortedArrayUsingSelector:@selector(compare:)];
     for (int k=0;k<keys.count;k++) {

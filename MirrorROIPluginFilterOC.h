@@ -102,7 +102,8 @@ typedef enum : NSInteger {
     BookmarkedDataPixelGridsTransposed,
     BookmarkedData1LineSummary,
     BookmarkedDataSelected1LineSummariesConjoined,
-    PixelsAMvertical
+    PixelsAMvertical,
+    BookmarkKeyXYZTaggedPixelsGrids
 } ExportDataType;
 
 typedef enum : NSInteger {

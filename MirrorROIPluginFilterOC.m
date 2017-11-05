@@ -680,6 +680,7 @@
 }
 -(void)addLengthROIWithStart:(NSPoint)startPoint andEnd:(NSPoint)endPoint toViewerController:(ViewerController *)active2Dwindow atIndex:(NSUInteger)index withType:(ROI_Type)type {
     ROI *newR = [active2Dwindow newROI:tMesure];
+    [newR setThickness:6.0];
     newR.name = [self roiNameForType:type];
     [MirrorROIPluginFilterOC  setROIcolour:newR forType:type];
     [newR.points addObject:[active2Dwindow newPoint:startPoint.x :startPoint.y]];
@@ -1473,7 +1474,7 @@
             return [[NSUserDefaults standardUserDefaults] objectForKey:kTransformROInameDefault];
             break;
         case MirroredAndActive_ROI:
-            return [NSString stringWithFormat:@"%@_%@",[self roiNameForType:Active_ROI],[self roiNameForType:Mirrored_ROI]];
+            return [NSString stringWithFormat:@"%@-%@",[self roiNameForType:Active_ROI],[self roiNameForType:Mirrored_ROI]];
             break;
         default:
             return @"";
@@ -1816,13 +1817,14 @@
     NSMutableDictionary *data3D_A = [self dataDictFor3DROIdataForType:Active_ROI];
     NSMutableDictionary *data3D_M = [self dataDictFor3DROIdataForType:Mirrored_ROI];
     //now get raw pixels
-    NSMutableDictionary *dictRaw = [self dataDictForRawPixelsDelta];
+    NSMutableDictionary *dictRaw = [self dataDictForRawPixelsDeltaForSite:anatSite];
     
     NSMutableDictionary *dictForSite = [NSMutableDictionary dictionaryWithCapacity:3];
     
     NSData *rois =[self archivedArrayOFAMTroisForSite:anatSite];
     if (rois != nil) dictForSite[kBookmarkKeyAMTrois] = rois;
     dictForSite[kBookmarkKeyPixelsGrids] = [self dataStringRawPixelsFromDict:dictRaw];
+    dictForSite[kBookmarkKeyXYZTaggedPixelsGrids] = [self dataStringfromTaggedXYZPixelsArrays:[dictRaw objectForKey:kDeltaNameXYZTaggedRawPixelDataTag]];
     dictForSite[kBookmarkKeyPixelsGridsNotYetTransposedArray] = [dictRaw objectForKey:kDeltaNameAMSDPix1LineTransposedArray];
     dictForSite[kBookmarkKey1LineSummary] = [self dataStringFor1LineSummaryFromRawDict:dictRaw dict3D:data3D_A forSite:anatSite];
     dictForSite[kBookmarkKeySummary] =
@@ -1885,6 +1887,24 @@
                                              nil];
     
     return dictForSite;
+}
+
+-(NSString *) dataStringfromTaggedXYZPixelsArrays:(NSMutableArray *)taggedPixelsArray {
+    NSMutableArray *lines = [NSMutableArray array];
+    for (NSMutableArray *slice in taggedPixelsArray) {
+        // each slice has hopefully only one roi otherwise we are in stum
+        for (NSMutableArray *roi in slice) {
+            // each roi has an array of tagged pixels
+            for (NSMutableArray *pixels in roi) {
+                // each pixel has a value and then XYZ as floats in a 4 element array
+                for (NSMutableArray *pixel in pixels) {
+                    [lines addObject: [pixel componentsJoinedByString:@"\t"]];
+                }
+            }
+        }
+    }
+    
+    return [lines componentsJoinedByString:@"\n"]; //@"\n\ndataStringfromTaggedXYZPixelsArrays\n\n";
 }
 
 -(NSString *)dataStringForMirroredSubtractedDividedDataFromRawDict:(NSMutableDictionary *)dictRaw dict3D_M:(NSMutableDictionary *)data3D_M forSite:(NSString *)anatSite {
@@ -1973,18 +1993,27 @@
     NSMutableArray *pixelsAMvertical = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *onelineSummaryRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
     NSMutableArray *pixelGridRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count];
+    NSMutableArray *pixelGridXYZTaggedRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count+1];
+    [pixelGridXYZTaggedRows addObject:@"SITE\tX\tY\tZ\tVALUE"];
     NSMutableArray *pixelGridTransposedRows = [NSMutableArray arrayWithCapacity:self.dictBookmarks.count+1];
     [pixelGridTransposedRows addObject:[self participantDetailsArray]];
     NSArray *keys = [self.dictBookmarks.allKeys sortedArrayUsingSelector:@selector(compare:)];
     for (NSString *key in keys) {
         [pixelGridRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [pixelGridRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyPixelsGrids]];
+
+        [pixelGridXYZTaggedRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyXYZTaggedPixelsGrids]];
+ 
         [pixelGridTransposedRows addObjectsFromArray:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeyPixelsGridsNotYetTransposedArray]];
+ 
         [summaryRows addObject:[self dividerForExportFileFromAnatomicalSite:key]];
         [summaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKeySummary]];
+ 
         [onelineSummaryRows addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kBookmarkKey1LineSummary]];
+        
         [pixelsAMvertical addObject:[[self.dictBookmarks objectForKey:key] objectForKey:kPixelsAMvertical] ?: [NSMutableDictionary dictionary]];
     }
+    [dict setObject:[pixelGridXYZTaggedRows componentsJoinedByString:@"\n"] forKey:kConjoinedXYZTaggedPixelGrids] ;
     [dict setObject:pixelsAMvertical forKey:kPixelsAMverticalAllSites] ;
     [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[onelineSummaryRows componentsJoinedByString:@"\n"]] forKey:kConjoined1LineSummary] ;
     [dict setObject:[MirrorROIPluginFilterOC removeDoubleLinesFromString:[NSString stringWithFormat:@"%@\n%@",[self participantDetailsString], [summaryRows componentsJoinedByString:@"\n"]]] forKey:kConjoinedSummary] ;
@@ -2064,6 +2093,8 @@
                     [dict[@"data"] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:filename isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
                 }
 
+                [[dict objectForKey:kConjoinedXYZTaggedPixelGrids] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkKeyXYZTaggedPixelsGrids] isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
+                
                 [[dict objectForKey:kConjoined1LineSummary] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedData1LineSummary] isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
                 [[dict objectForKey:kConjoinedPixelGrids] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGrids] isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
                 [[dict objectForKey:kConjoinedPixelGridsTransposed] writeToURL:[[[savedLocation URLByDeletingLastPathComponent] URLByAppendingPathComponent:[self bookmarkedDataFilename:BookmarkedDataPixelGridsTransposed] isDirectory:NO] URLByAppendingPathExtension:@"txt"] atomically:YES];
@@ -2089,6 +2120,8 @@
                                               withTitle:[self bookmarkedDataFilename:BookmarkedDataPixelGrids]];
             [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedPixelGridsTransposed]
                                               withTitle:[self bookmarkedDataFilename:BookmarkedDataPixelGridsTransposed]];
+            [MirrorROIPluginFilterOC showStringInWindow:[dict objectForKey:kConjoinedXYZTaggedPixelGrids]
+                                              withTitle:[self bookmarkedDataFilename:BookmarkKeyXYZTaggedPixelsGrids]];
             NSMutableArray *arrayOfpixelsAMVertical = [dict objectForKey:kPixelsAMverticalAllSites];
             //this is an array of dicts by name
             for (NSMutableDictionary *dict in arrayOfpixelsAMVertical) {
@@ -2285,6 +2318,9 @@
         case BookmarkedDataPixelGridsTransposed:
             typeString =  @"∭";
             break;
+        case BookmarkKeyXYZTaggedPixelsGrids:
+            typeString =  @"ℨ";
+            break;
         default:
             typeString =  @"?";
             break;
@@ -2386,7 +2422,7 @@
     }
     return NoActive;
 }
--(NSMutableDictionary *)dataDictForRawPixelsDelta {
+-(NSMutableDictionary *)dataDictForRawPixelsDeltaForSite:(NSString *)site {
     NSMutableArray *dataAflat = [NSMutableArray array];
     NSMutableArray *dataMflat = [NSMutableArray array];
     NSMutableArray *dataA_1Line = [NSMutableArray array];
@@ -2394,6 +2430,9 @@
     NSMutableArray *dataD_1Line = [NSMutableArray array];
     NSMutableArray *dataS_1Line = [NSMutableArray array];
     
+    /* Get XYZ tagged raw pixel values */
+    NSMutableArray *dataXYZTagged_A = [self makeArrayBySliceOf2DarraysWithXYZTaggedPixelsFromROIsInSliceOfType:Active_ROI forSite:site];
+
     NSMutableArray *dataA2D = [self makeArrayBySliceOf2DarraysWithPixelsFromROIsInSliceOfType:Active_ROI];
     NSMutableArray *dataM2D = [self makeArrayBySliceOf2DarraysWithPixelsFromROIsInSliceOfType:Mirrored_ROI];
     /* makeArrayBySliceOf2DarraysWithPixelsFromROIsInSliceOfType
@@ -2531,6 +2570,7 @@
     [dict setObject:[NSNumber numberWithUnsignedInteger:countOfPixels] forKey:kDeltaNameCount];
     [dict setObject:dataAflat forKey:kDeltaNameActivePixFlatAndNotMirrored];
     [dict setObject:dataA2D forKey:kDeltaNameActivePixGrid];
+    [dict setObject:dataXYZTagged_A forKey:kDeltaNameXYZTaggedRawPixelDataTag];
     [dict setObject:dataA_1Line forKey:kDeltaNameActivePix1Line];
     [dict setObject:[NSNumber numberWithFloat:sumOfA] forKey:kDeltaNameActiveSum];
     [dict setObject:[NSNumber numberWithFloat:sumOfA/countOfPixelsF] forKey:kDeltaNameActiveMean];
@@ -2607,6 +2647,7 @@
     
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePixFlatAndNotMirrored];
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePixGrid];
+    [dict setObject:[NSMutableArray array] forKey:kDeltaNameXYZTaggedRawPixelDataTag];
     [dict setObject:[NSMutableArray array] forKey:kDeltaNameActivePix1Line];
     [dict setObject:@"" forKey:kDeltaNameActiveSum];
     [dict setObject:@"" forKey:kDeltaNameActiveMean];
@@ -2700,6 +2741,71 @@
     }
     return arrayOfPixelsRows;
 }
+-(NSMutableArray *)makeArrayBySliceOf2DarraysWithXYZTaggedPixelsFromROIsInSliceOfType:(ROI_Type)type forSite:(NSString *)site {
+    //we step thru each pixImage, check the ROIs for ones that match, and build an array that has the XYZ tagged 2Dgrids from each ROI as objects. This array we add to an umbrella array for the series
+    NSString *roiname = [self roiNameForType:type];
+    NSMutableArray *arrayOfSlices = [NSMutableArray array];
+    for (int pix = 0; pix<self.viewerPET.roiList.count; pix++) {
+        NSMutableArray *arrayOfROIsInSlice = [NSMutableArray array];;
+        for (ROI *roi in [self.viewerPET.roiList objectAtIndex:pix]) {
+            if ([roi.name isEqualToString:roiname]) {
+                NSMutableArray *roiData = [self rawPixelsDelta_extractPixelsInXYZTaggedOrderedRowsFromROI:roi forSite:site];
+                if (roiData.count > 0) {
+                    [arrayOfROIsInSlice addObject:roiData];
+                }
+            }
+        }//end of rois in slice
+        if (arrayOfROIsInSlice.count > 0) {
+            [arrayOfSlices addObject:arrayOfROIsInSlice];
+        }
+    }//end of slices
+    return arrayOfSlices;
+}
+-(NSMutableArray *)rawPixelsDelta_extractPixelsInXYZTaggedOrderedRowsFromROI:(ROI *)roi forSite:(NSString *)site{
+    NSMutableArray *arrayOfPixelsRows = [NSMutableArray array];
+    if (roi.pix != nil) {
+        long height = roi.pix.pheight, width = roi.pix.pwidth;
+        
+        float *computedfImage = [roi.pix computefImage];
+        long textWidth = roi.textureWidth, textHeight = roi.textureHeight;
+        long textureUpLeftCornerX = roi.textureUpLeftCornerX, textureUpLeftCornerY = roi.textureUpLeftCornerY;
+        unsigned char *buf = roi.textureBuffer;
+        NSNumber *zz = [NSNumber numberWithFloat:roi.pix.originZ];
+        
+        for( long y = 0; y < textHeight; y++)
+        {
+            NSMutableArray *rowPixels = [NSMutableArray array];
+            for( long x = 0; x < textWidth; x++)
+            {
+                if( buf [ x + y * textWidth] != 0)
+                {
+                    long xx = (x + textureUpLeftCornerX);
+                    long yy = (y + textureUpLeftCornerY);
+                    
+                    if( xx >= 0 && xx < width && yy >= 0 && yy < height)
+                    {
+                        {
+                            float pixval = computedfImage[ (yy * width) + xx];
+                            NSArray *pixelTaggedArray = [NSArray arrayWithObjects:
+                                                         site,
+                                                         [NSNumber numberWithFloat:[[NSNumber numberWithLong:xx] floatValue]],
+                                                         [NSNumber numberWithFloat:[[NSNumber numberWithLong:yy] floatValue]],
+                                                         zz,
+                                                         [NSNumber numberWithFloat:pixval],
+                                                         nil];
+                            [rowPixels addObject:pixelTaggedArray];
+                        }
+                    }
+                }
+            }
+            if (rowPixels.count > 0) {
+                [arrayOfPixelsRows addObject:rowPixels];
+            }
+        }
+    }
+    return arrayOfPixelsRows;
+}
+
 -(NSMutableDictionary *)dictOfrawPixelsDelta_make2DarrayWithPixelsFromROIsForType:(ROI_Type)type{
     NSString *roiname = [self roiNameForType:type];
     NSMutableDictionary *dictOfROIgrids = [NSMutableDictionary dictionary];
@@ -2709,7 +2815,7 @@
             if ([roi.name isEqualToString:roiname]) {
                 NSMutableArray *roiData = [self rawPixelsDelta_extractPixelsInOrderedRowsFromROI:roi];
                 if (!foundROI) {
-                    [dictOfROIgrids setObject:roiData forKey:[NSString stringWithFormat:@"_%03li",(long)pix]];
+                    [dictOfROIgrids setObject:roiData forKey:[NSString stringWithFormat:@"-%03li",(long)pix]];
                 }
                 foundROI = YES;
             }
@@ -2759,7 +2865,7 @@
 -(NSString *)petSeriesNameWithNoBadCharacters:(BOOL)includePatientName {
     NSString *patname = @"";
     if (includePatientName) {
-        patname = [NSString stringWithFormat:@"%@_",[[self.viewerPET currentStudy] name]];
+        patname = [NSString stringWithFormat:@"%@-",[[self.viewerPET currentStudy] name]];
     }
     NSString *name = [NSString stringWithFormat:@"%@%@",patname,[[self.viewerPET currentSeries] name]];
     return [MirrorROIPluginFilterOC fileNameWithNoBadCharacters:name];
